@@ -1,0 +1,11 @@
+{
+  "port" : 7001,
+
+  "dbLiveSettings" : {
+    "host"     : "localhost",
+    "user"     : "root",
+    "password" : "12345",
+    "database" : "vevsa_live",
+    "connectionLimit" : 15
+  }
+}
