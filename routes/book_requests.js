@@ -5,8 +5,10 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var async     = require('async');
 
-exports.raiseBooksRequest      = raiseBooksRequest;
-exports.getBookRequests        = getBookRequests;
+exports.raiseBooksRequest         = raiseBooksRequest;
+exports.getBookRequests           = getBookRequests;
+exports.putBookRequestResponse    = putBookRequestResponse;
+exports.getMinimumPriceResponse   = getMinimumPriceResponse;
 
 function raiseBooksRequest(req, res) {
   var reqParams     = req.body;
@@ -114,3 +116,129 @@ function getBookRequests(req, res) {
     });
   });
 }
+
+function putBookRequestResponse(req, res) {
+  var reqParams      = req.body;
+  var vendorId       = reqParams.vendor_id;
+  var requestId      = reqParams.req_id;
+  var books          = reqParams.books;
+  var overallPrice   = reqParams.overall_price;
+
+  var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
+  connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
+    if(dupErr) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(dupRes.length > 0) {
+      return res.send({
+        "log": "A response already exists corresponding to this request id",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id, overall_price) VALUES(?, ?, ?) ";
+    connection.query(reqQuery, [vendorId, requestId, overallPrice], function(reqErr, insRes) {
+      if(reqErr) {
+        res.send(constants.databaseErrorResponse);
+      }
+      var responseId = insRes.insertId;
+      var asyncTasks = [];
+      for(var i = 0; i < books.length; i++) {
+        asyncTasks.push(insertBookResponse.bind(null, responseId, vendorId, books[i].book_id, books[i].price));
+      }
+      async.series(asyncTasks, function(error, result) {
+        if(error) {
+          return res.send({
+            "log" :error,
+            "flag":constants.responseFlags.ACTION_FAILED
+          });
+        }
+        return res.send({
+          "log" : "Successfully logged book request response",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+      });
+    });
+  });
+}
+
+function insertBookResponse(response_id, vendor_id, book_id, book_price, callback) {
+  var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price) VALUES (?, ?, ?, ?)";
+  connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price], function(err, result) {
+    if(err) {
+      return callback("There was some error in logging vendor response", null);
+    }
+    callback(null, "successfully logged request response");
+  });
+}
+
+function getMinimumBookResponse(request_id, callback) {
+  var minQuery = "SELECT response.*, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, vendors.vendor_address "+ 
+                 "FROM tb_books_response as response "+
+                 "JOIN tb_vendors as vendors ON vendors.vendor_id = response.vendor_id "+
+                 "WHERE request_id = ? "+
+                 "ORDER BY overall_price LIMIT 1";
+  var tt = connection.query(minQuery, [request_id], function(minErr, minResponse) {
+    if(minErr) {
+      return callback("There was some error in getting minimum request", null);
+    }
+    if(minResponse.length == 0) {
+      return callback(null, null);
+    }
+    callback(null, minResponse[0]);
+  });
+}
+
+function getVendorResponseDetails(response_id, callback) {
+  var resQuery = "SELECT distribution.book_id, distribution.price, books.book_name, books.book_stream, books.book_semester, books.type "+
+                 "FROM `tb_books_overall_distribution` as distribution "+
+                 "JOIN tb_books_response as response ON response.response_id = distribution.response_id "+
+                 "JOIN tb_books as books ON books.book_id = distribution.book_id "+
+                 "WHERE distribution.response_id = ? ";
+  connection.query(resQuery, [response_id], function(resErr, responseDetails) {
+    if(resErr) {
+      return callback("There was some error in getting response details", null);
+    }
+    callback(null, responseDetails);
+  });
+}
+
+function getMinimumPriceResponse(req, res) {
+  var request_id    = req.body.request_id;
+  getMinimumBookResponse(request_id, function(minErr, minResponse) {
+    if(minErr) {
+      return res.send({
+        "log" : minErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(minResponse == null) {
+      return res.send({
+        "log" : "No responses could be found for this request id",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    var responseData            = {};
+    responseData.response_id    = minResponse.response_id;
+    responseData.vendor_name    = minResponse.vendor_name;
+    responseData.vendor_address = minResponse.vendor_address;
+    responseData.vendor_phone   = minResponse.vendor_phone;
+    responseData.logged_on      = minResponse.logged_on;
+
+    getVendorResponseDetails(responseData.response_id, function(resErr, vendorResponse) {
+      if(resErr) {
+        return res.send({
+          "log" : resErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      responseData.books = vendorResponse;
+      res.send({
+        "log" :"Successfully fetched response",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": responseData
+      });
+    });
+  });
+}
+
+    

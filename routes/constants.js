@@ -10,3 +10,9 @@ function define(obj, name, value) {
 exports.responseFlags = {};
 define(exports.responseFlags, "ACTION_FAILED",       144);
 define(exports.responseFlags, "ACTION_COMPLETE",     143);
+
+exports.databaseErrorResponse = {
+  "log": "Server execution error",
+  "flag": 144
+};
+
