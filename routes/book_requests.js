@@ -9,6 +9,8 @@ exports.raiseBooksRequest         = raiseBooksRequest;
 exports.getBookRequests           = getBookRequests;
 exports.putBookRequestResponse    = putBookRequestResponse;
 exports.getMinimumPriceResponse   = getMinimumPriceResponse;
+exports.confirmBookOrder          = confirmBookOrder;
+exports.getDeliveryDetailsById    = getDeliveryDetailsById;
 
 function raiseBooksRequest(req, res) {
   var reqParams     = req.body;
@@ -172,7 +174,7 @@ function insertBookResponse(response_id, vendor_id, book_id, book_price, callbac
 }
 
 function getMinimumBookResponse(request_id, callback) {
-  var minQuery = "SELECT response.*, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, vendors.vendor_address "+ 
+  var minQuery = "SELECT response.*, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, vendors.vendor_address  "+ 
                  "FROM tb_books_response as response "+
                  "JOIN tb_vendors as vendors ON vendors.vendor_id = response.vendor_id "+
                  "WHERE request_id = ? "+
@@ -219,6 +221,10 @@ function getMinimumPriceResponse(req, res) {
     }
     var responseData            = {};
     responseData.response_id    = minResponse.response_id;
+    responseData.vendor_id      = minResponse.vendor_id;
+    responseData.overall_price  = minResponse.overall_price;
+    responseData.request_id     = minResponse.request_id;
+    responseData.responded_on   = minResponse.logged_on;
     responseData.vendor_name    = minResponse.vendor_name;
     responseData.vendor_address = minResponse.vendor_address;
     responseData.vendor_phone   = minResponse.vendor_phone;
@@ -241,4 +247,104 @@ function getMinimumPriceResponse(req, res) {
   });
 }
 
-    
+function confirmBookOrder(req, res) {
+  var vendorId        = req.body.vendor_id;
+  var responseId      = req.body.response_id;
+  var vendorName      = req.body.vendor_name;
+  var requestId       = req.body.request_id;
+  var deliveryAddress = req.body.delivery_address;
+  var reqStatus       = req.body.request_status;
+  var isUrgent        = req.body.is_urgent;
+  var userId          = req.body.user_id;
+  updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, function(updateErr, updateRes) {
+    if(updateErr) {
+      return res.send({
+        "log" : "There was some error in updating request",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrgent, function(delErr, delRes) {
+      if(delErr) {
+        return res.send({
+          "log" : "There was some error in adding delivery to database",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      return res.send({
+        "log" : "Successfully confirmed delivery order",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
+  });
+}
+
+function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, callback) {
+  var sqlQuery = "UPDATE tb_book_requests "+
+                 "SET approved_by = ?, approved_on = NOW(), approver_id = ?, status = ? "+
+                 "WHERE req_id = ?";
+  connection.query(sqlQuery, [vendorName, vendorId, reqStatus, requestId], function(err, result) {
+    if(err) {
+      console.log(err);
+      return callback(err, null);
+    }
+    callback(null, "Sucessfully updated request id");
+  });
+}
+
+function deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrgent, callback) {
+  var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
+  var sqlQuery = "INSERT INTO tb_delivery (user_id, vendor_id, delivery_address, vendor_response_id, is_urgent_delivery, delivery_date) "+
+                 "VALUES (?, ?, ?, ?, ?, "+dateStr+") ";
+  connection.query(sqlQuery, [userId, vendorId, deliveryAddress, responseId, isUrgent], function(err, result) {
+    if(err) {
+      console.log(err);
+      return callback(err, null);
+    }
+    callback(null, "successfully logged a delivery in database");
+  });
+}
+
+function getDeliveryDetailsById(req, res) {
+  var delivery_id     = parseInt(req.body.delivery_id);
+  getDeliveryDetailsHelper(delivery_id, function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+}
+
+function getDeliveryDetailsHelper(deliveryId, callback) {
+  var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, delivery.delivery_date, "+
+                 "delivery.vendor_response_id, users.user_name, users.user_phone, vendors.vendor_name, vendors.vendor_phone "+
+                 "FROM tb_delivery as delivery "+
+                 "JOIN tb_users as users ON delivery.user_id = users.user_id "+
+                 "JOIN tb_vendors as vendors ON vendors.vendor_id = delivery.vendor_id "+
+                 "WHERE delivery.delivery_id = ?";
+  connection.query(sqlQuery, [deliveryId], function(err, deliverRes) {
+    if(err) {
+      console.log(err);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliverRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+    var deliveryData = deliverRes[0];
+    getVendorResponseDetails(deliveryData.vendor_response_id, function(vresErr, vResponseData) {
+      if(vresErr) {
+        return callback("There was some error in fetching vendor's response", null);
+      }
+      deliveryData.bookDetails = vResponseData;
+
+      return callback(null, deliveryData);
+    });
+  });
+}
+

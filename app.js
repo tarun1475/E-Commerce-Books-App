@@ -71,6 +71,12 @@ app.post('/req_book_auth/put_response'          , requests.putBookRequestRespons
 app.post('/books-auth/get_minimum_response'     , requests.getMinimumPriceResponse
    , error);
 
+app.post('/books-auth/confirm_book_order'       , requests.confirmBookOrder
+   , error);
+
+app.post('/books-auth/get_delivery_details'     , requests.getDeliveryDetailsById
+   , error);
+
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));
 });
