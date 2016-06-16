@@ -1,3 +1,8 @@
+/**
+ * @module Users
+ */
+
+
 /*
  * Module dependencies
  */
@@ -5,6 +10,18 @@ var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 exports.createNewAppUser      = createNewAppUser;
 
+/**
+ *
+ * [POST] '/books-auth/create_user'<br> 
+ * API to create a new user during signup/login, <br>Request body requires following parameters:
+ * @param {string} user_name - name of the user
+ * @param {string} user_email - email of the user
+ * @param {string} user_phone - phone number of the user
+ * @param {string} device_name - name of the device 
+ * @param {string} os_name - name of the operating system
+ * @param {integer} user_city - city of user, 1 for chandigarh
+ *
+ */
 function createNewAppUser(req, res) {
   var reqParams     = req.body;
   var userName      = reqParams.user_name;

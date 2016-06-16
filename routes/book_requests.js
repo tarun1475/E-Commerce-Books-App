@@ -1,6 +1,10 @@
-/*
- * Module dependencies
+/**
+ * @module Book-Requests
  */
+
+///////////////////////////////////////////////////////////////////
+//  Module dependencies
+///////////////////////////////////////////////////////////////////
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var async     = require('async');
@@ -12,6 +16,11 @@ exports.getMinimumPriceResponse   = getMinimumPriceResponse;
 exports.confirmBookOrder          = confirmBookOrder;
 exports.getDeliveryDetailsById    = getDeliveryDetailsById;
 
+/**
+ * API responsible for raising a book request
+ * @param req
+ * @param res
+ */
 function raiseBooksRequest(req, res) {
   var reqParams     = req.body;
   var user_id       = reqParams.user_id;
@@ -48,6 +57,15 @@ function raiseBooksRequest(req, res) {
   });
 }
 
+/**
+ * Helper function to log a book request in database
+ * @param request_id
+ * @param name
+ * @param stream
+ * @param semester
+ * @param type
+ * @param callback
+ */
 function insertNewBook(request_id, name, stream, semester, type, callback) {
   var insertQuery = "INSERT INTO tb_books (book_req_id, book_name, book_stream, book_semester, type) VALUES(?, ?, ?, ?, ?)";
   connection.query(insertQuery, [request_id, name, stream, semester, type], function(err, result) {
@@ -59,6 +77,11 @@ function insertNewBook(request_id, name, stream, semester, type, callback) {
   });
 }
 
+/**
+ * API responsible for getting book requests depending upon their status
+ * @param req
+ * @param res
+ */
 function getBookRequests(req, res) {
   var reqParams   = req.body;
   var start_from  = parseInt(reqParams.start_from);
@@ -119,6 +142,11 @@ function getBookRequests(req, res) {
   });
 }
 
+/**
+ * API responsible for fetching a request's response from a particular vendor
+ * @param req
+ * @param res
+ */
 function putBookRequestResponse(req, res) {
   var reqParams      = req.body;
   var vendorId       = reqParams.vendor_id;
@@ -163,6 +191,14 @@ function putBookRequestResponse(req, res) {
   });
 }
 
+/**
+ * Function to insert book responses in database. Helper function to putBookResponse
+ * @param response_id
+ * @param vendor_id
+ * @param book_id
+ * @param book_price
+ * @param callback
+ */
 function insertBookResponse(response_id, vendor_id, book_id, book_price, callback) {
   var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price) VALUES (?, ?, ?, ?)";
   connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price], function(err, result) {
@@ -173,6 +209,11 @@ function insertBookResponse(response_id, vendor_id, book_id, book_price, callbac
   });
 }
 
+/**
+ * function to fetch minimum book response corresponding to a  particular request
+ * @param request_id
+ * @param callback
+ */
 function getMinimumBookResponse(request_id, callback) {
   var minQuery = "SELECT response.*, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, vendors.vendor_address  "+ 
                  "FROM tb_books_response as response "+
@@ -190,6 +231,11 @@ function getMinimumBookResponse(request_id, callback) {
   });
 }
 
+/**
+ * function to get details of a response from vendors
+ * @param response_id
+ * @param callback
+ */
 function getVendorResponseDetails(response_id, callback) {
   var resQuery = "SELECT distribution.book_id, distribution.price, books.book_name, books.book_stream, books.book_semester, books.type "+
                  "FROM `tb_books_overall_distribution` as distribution "+
@@ -204,6 +250,11 @@ function getVendorResponseDetails(response_id, callback) {
   });
 }
 
+/**
+ * API to get minimum response corresponding to a specific request id
+ * @param req
+ * @param res
+ */
 function getMinimumPriceResponse(req, res) {
   var request_id    = req.body.request_id;
   getMinimumBookResponse(request_id, function(minErr, minResponse) {
@@ -247,6 +298,11 @@ function getMinimumPriceResponse(req, res) {
   });
 }
 
+/**
+ * API for confirmation of an order by user
+ * @param req
+ * @param res
+ */
 function confirmBookOrder(req, res) {
   var vendorId        = req.body.vendor_id;
   var responseId      = req.body.response_id;
@@ -278,6 +334,16 @@ function confirmBookOrder(req, res) {
   });
 }
 
+/**
+ * Helper function to update the book request and update it's status
+ *
+ * @param vendorId
+ * @param responseId
+ * @param requestId
+ * @param vendorName
+ * @param reqStatus
+ * @param callback
+ */
 function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, callback) {
   var sqlQuery = "UPDATE tb_book_requests "+
                  "SET approved_by = ?, approved_on = NOW(), approver_id = ?, status = ? "+
@@ -291,6 +357,15 @@ function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatu
   });
 }
 
+/**
+ * Log the delivery details into the database
+ * @param userId
+ * @param vendorId
+ * @param deliveryAddress
+ * @param responseId
+ * @param isUrgent
+ * @param callback
+ */
 function deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrgent, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
   var sqlQuery = "INSERT INTO tb_delivery (user_id, vendor_id, delivery_address, vendor_response_id, is_urgent_delivery, delivery_date) "+
@@ -304,6 +379,11 @@ function deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrg
   });
 }
 
+/**
+ * API to fetch delivery details corresponding to a delivery id
+ * @param req
+ * @param res
+ */
 function getDeliveryDetailsById(req, res) {
   var delivery_id     = parseInt(req.body.delivery_id);
   getDeliveryDetailsHelper(delivery_id, function(delErr, deliveryData) {
@@ -321,6 +401,11 @@ function getDeliveryDetailsById(req, res) {
   });
 }
 
+/**
+ * Helper function to get delivery details for getDeliveryDetails API
+ * @param deliveryId
+ * @param callback
+ */
 function getDeliveryDetailsHelper(deliveryId, callback) {
   var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, delivery.delivery_date, "+
                  "delivery.vendor_response_id, users.user_name, users.user_phone, vendors.vendor_name, vendors.vendor_phone "+

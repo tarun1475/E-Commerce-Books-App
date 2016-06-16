@@ -4,17 +4,23 @@
   "description": "Server serving APIs to vevsa-app",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "genDocs": "node_modules/.bin/jsdoc -c docs/conf.json -t node_modules/docdash/ routes/*.js"
   },
   "author": "Rohan Kumar",
   "license": "ISC",
   "dependencies": {
+    "apn": "^1.7.6",
     "async": "^2.0.0-rc.5",
     "body-parser": "^1.15.1",
     "config": "^1.20.3",
+    "docdash": "^0.4.0",
     "express": "^4.13.4",
+    "jsdoc": "^3.4.0",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
-    "mysql": "^2.10.2"
+    "mysql": "^2.10.2",
+    "node-gcm": "^0.14.3",
+    "request": "^2.72.0"
   }
 }

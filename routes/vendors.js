@@ -5,6 +5,11 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 exports.createNewVendor     = createNewVendor;
 
+/**
+ * API to create a new vendor
+ * @param req
+ * @param res
+ */
 function createNewVendor(req, res) {
   var reqParams     = req.body;
   var vendorName    = reqParams.vendor_name;

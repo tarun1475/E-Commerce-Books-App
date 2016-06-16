@@ -10,19 +10,31 @@ function define(obj, name, value) {
     });
 }
 
+/*
+ * Standard Response flags
+ */
 exports.responseFlags = {};
 define(exports.responseFlags, "ACTION_FAILED"       , 144);
 define(exports.responseFlags, "ACTION_COMPLETE"     , 143);
 
+/*
+ * Common response sent during server execution failure
+ */
 exports.databaseErrorResponse = {
   "log": "Server execution error",
   "flag": 144
 };
 
+/*
+ * Device Type
+ */
 exports.deviceType = {};
 define(exports.deviceType, "ANDROID"                 , 1);
 define(exports.deviceType, "iOS"                     , 2);
 
+/*
+ * Android Ids for server
+ */
 exports.serverAndroidIDs = {};
 define(exports.PUSH_NOTIFICATION_SERVER_ID           , 1);
 

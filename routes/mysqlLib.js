@@ -1,5 +1,11 @@
+/*
+ * @module mysqlLib
+ */
 var mysql = require('mysql');
 
+/**
+ * Function to establish database connection
+ */
 function handleDisconnectLive() {
   connection = mysql.createPool(config.get('dbLiveSettings'));
 

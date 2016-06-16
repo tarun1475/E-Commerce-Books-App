@@ -2,6 +2,13 @@
 
 var env = process.env.NODE_ENV || 'production';
 
+/**
+ * Generic middleware to handle error in APIs
+ * @param err
+ * @param req
+ * @param res
+ * @param next
+ */
 module.exports = function(err, req, res, next) {
   var code = err.status || 500;
   var response = {
