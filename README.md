@@ -11,8 +11,6 @@ This is the back-end https server for vevsa-books application.
 ### How do I get set up? ###
 
 * Clone the repository
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* make sure you have node installed on your machine
+* run npm install to install dependencies
+* NODE_ENV=development node app.js
