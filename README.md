@@ -18,8 +18,8 @@ This is the back-end https server for vevsa-books application.
 
 npm install
 ```
- to install dependencies
-* 
+* to install dependencies
+
 ```
 #!bash
 
