@@ -12,5 +12,16 @@ This is the back-end https server for vevsa-books application.
 
 * Clone the repository
 * make sure you have node installed on your machine
-* run npm install to install dependencies
-* NODE_ENV=development node app.js
+* run 
+```
+#!bash
+
+npm install
+```
+ to install dependencies
+* 
+```
+#!bash
+
+NODE_ENV=development node app.js
+```
