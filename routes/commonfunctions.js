@@ -14,6 +14,7 @@ exports.sendIosPushNotification        = sendIosPushNotification;
 exports.sendAndroidPushNotification    = sendAndroidPushNotification;
 exports.sendNotification               = sendNotification;
 exports.sendNotificationToDevice       = sendNotificationToDevice;
+exports.verifyClientToken              = verifyClientToken;
 
 /**
  * Function to check missing parameters in the API.
@@ -115,7 +116,7 @@ function sendAndroidPushNotification(deviceToken, message) {
     timeToLive: 2419200,
     data: {
       message: message,
-      brand_name: "Vevsa",
+      brand_name: "Vevsa"
     }
   });
   var sender = new gcm.Sender(constants.serverAndroidIDs.PUSH_NOTIFICATION_SERVER_ID);
@@ -163,3 +164,25 @@ function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, pa
   }
 }
 
+function verifyClientToken(req, res, next) {
+  var token = (req.cookies.token && req.cookies) || req.body.token || req.query.token,
+      e = null;
+  if(!token) {
+    e = new Error('User not logged in!');
+    e.status = constants.responseFlags.NOT_LOGGED_IN;
+    return next(e);
+  }
+  var checkToken = "SELECT * FROM tb_users WHERE access_token = ?";
+  connection.query(checkToken, [token], function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      e = new Error('Invalid token provided!');
+      e.status = constants.responseFlags.NOT_AUTHORIZED;
+      return next(e);
+    }
+    res.user_id = result[0].user_id;
+    next();
+  });
+}

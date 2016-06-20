@@ -6,6 +6,7 @@
 /*
  * Module dependencies
  */
+var crypto         = require('crypto');
 var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 exports.createNewAppUser      = createNewAppUser;
@@ -54,9 +55,11 @@ function createNewAppUser(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var sqlQuery = "INSERT INTO tb_users (user_name, user_email, user_phone, user_address, device_name, os_name, os_version, user_city) "+
-                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-    connection.query(sqlQuery, [userName, userEmail, userPhone, userAddress, deviceName, osName, osVersion, userCity], function(err, result) {
+    var access_token = crypto.createHash("md5").update(userEmail).digest("hex");
+    var sqlQuery = "INSERT INTO tb_users (user_name, user_email, user_phone, user_address, device_name, os_name, os_version, user_city, access_token) "+
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    var tt = connection.query(sqlQuery, [userName, userEmail, userPhone, userAddress, deviceName, osName, osVersion, userCity, access_token], function(err, result) {
+      console.log(tt.sql);
       if(err) {
         console.log(err);
         return res.send({
@@ -66,6 +69,7 @@ function createNewAppUser(req, res) {
       }
       res.send({
         "log" : "User created successfully",
+        "access_token": access_token,
         "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });

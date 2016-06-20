@@ -10,11 +10,11 @@ var https       = require('https');
 var bodyParser  = require('body-parser');
 var fs          = require('fs');
 var logger      = require('morgan');
-var bodyParser  = require('body-parser');
 var error       = require('./routes/error');
 var users       = require('./routes/users');
 var vendors     = require('./routes/vendors');
 var requests    = require('./routes/book_requests');
+var utils       = require('./routes/commonfunctions');
 var app         = express();
 
 connection      = undefined;
@@ -53,28 +53,36 @@ app.get('/', function(req, res) {
   res.send('Vevsa.com - You save we save!');
 });
 
-app.post('/books-auth/create_user'              , users.createNewAppUser
+app.post('/books-auth/create_user'
+   , users.createNewAppUser
    , error);
 
-app.post('/books-auth/create_vendor'            , vendors.createNewVendor
+app.post('/books-auth/create_vendor'
+   , vendors.createNewVendor
    , error);
 
-app.post('/req_book_auth/raise_request'         , requests.raiseBooksRequest
+app.post('/req_book_auth/raise_request'         , utils.verifyClientToken
+   , requests.raiseBooksRequest
    , error);
 
-app.post('/req_book_auth/get_pending_requests'  , requests.getBookRequests
+app.post('/req_book_auth/get_pending_requests'  , utils.verifyClientToken
+   , requests.getBookRequests
    , error);
 
-app.post('/req_book_auth/put_response'          , requests.putBookRequestResponse
+app.post('/req_book_auth/put_response'          , utils.verifyClientToken
+   , requests.putBookRequestResponse
    , error);
 
-app.post('/books-auth/get_minimum_response'     , requests.getMinimumPriceResponse
+app.post('/books-auth/get_minimum_response'     , utils.verifyClientToken
+   , requests.getMinimumPriceResponse
    , error);
 
-app.post('/books-auth/confirm_book_order'       , requests.confirmBookOrder
+app.post('/books-auth/confirm_book_order'       , utils.verifyClientToken
+   , requests.confirmBookOrder
    , error);
 
-app.post('/books-auth/get_delivery_details'     , requests.getDeliveryDetailsById
+app.post('/books-auth/get_delivery_details'     , utils.verifyClientToken
+   , requests.getDeliveryDetailsById
    , error);
 
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
