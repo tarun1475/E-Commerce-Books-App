@@ -3,6 +3,7 @@
  */
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
+var crypto    = require('crypto');
 exports.createNewVendor     = createNewVendor;
 
 /**
@@ -46,7 +47,7 @@ function createNewVendor(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var access_token = crypto.createHash("md5").update(userEmail).digest("hex");
+    var access_token = crypto.createHash("md5").update(vendorEmail).digest("hex");
     var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_email, vendor_phone, vendor_address, vendor_device_name, vendor_device_os, vendor_city, access_token) "+
                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     connection.query(sqlQuery, [vendorName, vendorEmail, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token], function(err, result) {
@@ -59,6 +60,7 @@ function createNewVendor(req, res) {
       }
       return res.send({
         "log" : "Successfully created vendor",
+        "access_token": access_token,
         "flag": constants.responseFlags.ACTION_FAILED
       });
     });
