@@ -15,6 +15,7 @@ var users       = require('./routes/users');
 var vendors     = require('./routes/vendors');
 var requests    = require('./routes/book_requests');
 var utils       = require('./routes/commonfunctions');
+var cron        = require('./routes/cron');
 var app         = express();
 
 connection      = undefined;
@@ -53,6 +54,9 @@ app.get('/', function(req, res) {
   res.send('Vevsa.com - You save we save!');
 });
 
+/**
+ * Users APIs
+ */
 app.post('/books-auth/create_user'
    , users.createNewAppUser
    , error);
@@ -61,6 +65,9 @@ app.post('/books-auth/create_vendor'
    , vendors.createNewVendor
    , error);
 
+/**
+ * APIs related to book requests
+ */
 app.post('/req_book_auth/raise_request'         , utils.verifyClientToken
    , requests.raiseBooksRequest
    , error);
@@ -84,6 +91,17 @@ app.post('/books-auth/confirm_book_order'       , utils.verifyClientToken
 app.post('/books-auth/get_delivery_details'     , utils.verifyClientToken
    , requests.getDeliveryDetailsById
    , error);
+
+/**
+ * APIs for crontabs
+ */
+app.get('/req_book_auth/process_pending_req'     , cron.processPendingBookRequests
+   , error);
+
+/**
+ * To change the port, please edit the configuration file
+ * @type {https.Server}
+ */
 
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));

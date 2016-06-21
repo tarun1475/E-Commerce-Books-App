@@ -9,12 +9,14 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var async     = require('async');
 
-exports.raiseBooksRequest         = raiseBooksRequest;
-exports.getBookRequests           = getBookRequests;
-exports.putBookRequestResponse    = putBookRequestResponse;
-exports.getMinimumPriceResponse   = getMinimumPriceResponse;
-exports.confirmBookOrder          = confirmBookOrder;
-exports.getDeliveryDetailsById    = getDeliveryDetailsById;
+exports.raiseBooksRequest               = raiseBooksRequest;
+exports.getBookRequests                 = getBookRequests;
+exports.putBookRequestResponse          = putBookRequestResponse;
+exports.getMinimumPriceResponse         = getMinimumPriceResponse;
+exports.confirmBookOrder                = confirmBookOrder;
+exports.getDeliveryDetailsById          = getDeliveryDetailsById;
+exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
+exports.getPendingRequestArr            = getPendingRequestArr;
 
 /**
  * API responsible for raising a book request
@@ -257,18 +259,33 @@ function getVendorResponseDetails(response_id, callback) {
  */
 function getMinimumPriceResponse(req, res) {
   var request_id    = req.body.request_id;
+  getMinimumBookResponseWrapper(request_id, [], function(err, responseData) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    res.send({
+      "log" :"Successfully fetched response",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": responseData
+    });
+  });
+}
+
+/**
+ * Function to get minimum book response corresponding to a request_id
+ * @param {INTERGER} request_id              -  request id of a request
+ * @param {ARRAY} minimumResponse            -  an array where minimum response would be pushed; although the same
+ *                                              object would also be available in callback's result
+ * @param {FUNCTION} callback(err, result)   - a callback function passed
+ */
+function getMinimumBookResponseWrapper(request_id, minimumResponse, callback) {
   getMinimumBookResponse(request_id, function(minErr, minResponse) {
     if(minErr) {
-      return res.send({
-        "log" : minErr,
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
+      return callback(minErr, null);
     }
     if(minResponse == null) {
-      return res.send({
-        "log" : "No responses could be found for this request id",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
+      minimumResponse.push(null);
+      return callback("No responses could be found for this request id", null);
     }
     var responseData            = {};
     responseData.response_id    = minResponse.response_id;
@@ -283,17 +300,11 @@ function getMinimumPriceResponse(req, res) {
 
     getVendorResponseDetails(responseData.response_id, function(resErr, vendorResponse) {
       if(resErr) {
-        return res.send({
-          "log" : resErr,
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
+        return callback(resErr, null);
       }
       responseData.books = vendorResponse;
-      res.send({
-        "log" :"Successfully fetched response",
-        "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data": responseData
-      });
+      minimumResponse.push(responseData);
+      callback(null, responseData);
     });
   });
 }
@@ -433,3 +444,16 @@ function getDeliveryDetailsHelper(deliveryId, callback) {
   });
 }
 
+function getPendingRequestArr(requestStatus, callback) {
+  var sqlQuery = "SELECT request_id FROM tb_book_requests WHERE approval_status = ?";
+  connection.query(sqlQuery, [requestStatus], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    var reqIDArr = [];
+    for(var i = 0; i < result.length; i++) {
+      reqIDArr.push(result[i].request_id);
+    }
+    callback(null, reqIDArr);
+  });
+}

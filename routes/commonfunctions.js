@@ -8,6 +8,7 @@
 var gcm            = require('node-gcm');
 var request        = require('request');
 var apns           = require('apn');
+var constants      = require('./constants');
 
 exports.checkBlank                     = checkBlank;
 exports.sendIosPushNotification        = sendIosPushNotification;
@@ -165,15 +166,18 @@ function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, pa
 }
 
 function verifyClientToken(req, res, next) {
-  var token = (req.cookies.token && req.cookies) || req.body.token || req.query.token,
+  var token = (req.cookies && req.cookies.token) || req.body.token || req.query.token,
       e = null;
+  var userType = (req.body.reg_as || req.query.reg_as || 0);
   if(!token) {
     e = new Error('User not logged in!');
     e.status = constants.responseFlags.NOT_LOGGED_IN;
     return next(e);
   }
-  var checkToken = "SELECT * FROM tb_users WHERE access_token = ?";
-  connection.query(checkToken, [token], function(err, result) {
+  var userTable = ((userType == constants.userType.VENDORS) ? "tb_vendors" : "tb_users");
+  var checkToken = "SELECT * FROM "+userTable+" WHERE access_token = ?";
+  var qq = connection.query(checkToken, [token], function(err, result) {
+    console.log(qq.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }

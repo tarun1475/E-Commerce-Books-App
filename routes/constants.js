@@ -40,3 +40,17 @@ define(exports.deviceType, "iOS"                     , 2);
 exports.serverAndroidIDs = {};
 define(exports.serverAndroidIDs, "PUSH_NOTIFICATION_SERVER_ID"           , 1);
 
+/*
+ * Constants for book request status
+ */
+exports.bookRequestStatus = {};
+define(exports.bookRequestStatus, "PENDING"           , 0);
+define(exports.bookRequestStatus, "APPROVED"          , 1);
+define(exports.bookRequestStatus, "DISAPPROVED"       , 2);
+
+/*
+ * Constants for user type
+ */
+exports.userType = {};
+define(exports.userType, "USERS"                       , 0);
+define(exports.userType, "VENDORS"                     , 1);
