@@ -1,12 +1,18 @@
-/*
- * Module dependencies
+/**
+ * @module Vendors
  */
+
+////////////////////////////////////////////////////////////////////
+// MODULE DEPENDENCIES
+///////////////////////////////////////////////////////////////////
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var crypto    = require('crypto');
 exports.createNewVendor     = createNewVendor;
 
 /**
+ * [POST] '/books-auth/create_vendor' <br>
+ * 
  * API to create a new vendor
  * @param {string} vendor_name - Name of the vendor
  * @param {string} vendor_email - Email of vendor
@@ -15,7 +21,6 @@ exports.createNewVendor     = createNewVendor;
  * @param {string} device_name - Name of the device
  * @param {string} os_version - OS version
  * @param {integer} vendor_city - city of vendor, 1 for chandigarh
- * @param res
  */
 function createNewVendor(req, res) {
   var reqParams     = req.body;

@@ -189,7 +189,7 @@ function verifyClientToken(req, res, next) {
       e.status = constants.responseFlags.NOT_AUTHORIZED;
       return next(e);
     }
-    res.user_id = result[0].user_id;
+    req.body.user_id = result[0].user_id || result[0].vendor_id;
     next();
   });
 }

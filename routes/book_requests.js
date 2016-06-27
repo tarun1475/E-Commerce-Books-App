@@ -19,9 +19,11 @@ exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getPendingRequestArr            = getPendingRequestArr;
 
 /**
- * API responsible for raising a book request
- * @param req
- * @param res
+ * [POST] '/req_book_auth/raise_request' <br>
+ * API responsible for raising a book request.<br>
+ * request body requires the following parameters:
+ * @param {STRING} token - access token of user 
+ * @param {OBJECT} books - a json object of book requests
  */
 function raiseBooksRequest(req, res) {
   var reqParams     = req.body;
@@ -80,9 +82,14 @@ function insertNewBook(request_id, name, stream, semester, type, callback) {
 }
 
 /**
- * API responsible for getting book requests depending upon their status
- * @param req
- * @param res
+ * [POST] '/req_book_auth/get_pending_requests' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ * Request body requires the following parameters:
+ * @param {STRING}  token      - access token
+ * @param {INTEGER} start_from - start index  
+ * @param {INTEGER} page_size  - end index
+ * @param {INTEGER} req_status - status for request <br>
+ *  i.e {0 -> pending, 1-> approved, 2 -> disapproved}
  */
 function getBookRequests(req, res) {
   var reqParams   = req.body;
@@ -145,9 +152,11 @@ function getBookRequests(req, res) {
 }
 
 /**
- * API responsible for fetching a request's response from a particular vendor
- * @param req
- * @param res
+ * [POST] '/req_book_auth/put_response'<br>
+ * API responsible for submitting a request's response from a particular vendor.<br>
+ * @param {STRING} token - access token
+ * @param {INTEGER} req_id - request id of book request
+ * @param {ARRAY} books - An Array of objects 
  */
 function putBookRequestResponse(req, res) {
   var reqParams      = req.body;
