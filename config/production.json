@@ -2,7 +2,7 @@
   "port" : 7001,
 
   "dbLiveSettings" : {
-    "host"     : "app.vevsa.com",
+    "host"     : "localhost",
     "user"     : "root",
     "password" : "12345",
     "database" : "vevsa_live",

@@ -262,9 +262,9 @@ function getVendorResponseDetails(response_id, callback) {
 }
 
 /**
+ * [POST] '/books-auth/get_minimum_response'
  * API to get minimum response corresponding to a specific request id
- * @param req
- * @param res
+ * @param {INTEGER} request_id - request id of a request
  */
 function getMinimumPriceResponse(req, res) {
   var request_id    = req.body.request_id;
@@ -319,8 +319,15 @@ function getMinimumBookResponseWrapper(request_id, minimumResponse, callback) {
 }
 
 /**
- * API for confirmation of an order by user
- * @param req
+ * <b>[POST] '/books-auth/confirm_book_order'</b><br>
+ * API for confirmation of an order by user<br>
+ * Request body requires following parameters:
+ * @param {STRING} token - access token of user
+ * @param {INTEGER} response_id - response id of vendor
+ * @param {INTEGER} request_id - request id of the request
+ * @param {VARCHAR} delivery_address - address of the delivery
+ * @param {INTEGER} is_urgent - whether delivery is urgent or not
+ * @param {INTEGER} vendor_id - vendor who gave the response
  * @param res
  */
 function confirmBookOrder(req, res) {

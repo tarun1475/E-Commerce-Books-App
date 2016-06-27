@@ -72,7 +72,7 @@
 
     
 
-    <h4 class="name" id="~confirmBookOrder"><span class="type-signature">(inner) </span>confirmBookOrder<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~confirmBookOrder"><span class="type-signature">(inner) </span>confirmBookOrder<span class="signature">(token, response_id, request_id, delivery_address, is_urgent, vendor_id, res)</span><span class="type-signature"></span></h4>
 
     
 
@@ -119,7 +119,9 @@
 
 
 <div class="description">
-    <p>API for confirmation of an order by user</p>
+    <p><b>[POST] '/books-auth/confirm_book_order'</b><br>
+API for confirmation of an order by user<br>
+Request body requires following parameters:</p>
 </div>
 
 
@@ -157,10 +159,15 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>token</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">STRING</span>
+
+
             
             </td>
 
@@ -168,7 +175,122 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>access token of user</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">INTEGER</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>response id of vendor</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>request_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">INTEGER</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>request id of the request</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delivery_address</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">VARCHAR</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>address of the delivery</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>is_urgent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">INTEGER</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether delivery is urgent or not</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vendor_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">INTEGER</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>vendor who gave the response</p></td>
         </tr>
 
     
@@ -1224,7 +1346,7 @@ Request body requires the following parameters:</p>
 
     
 
-    <h4 class="name" id="~getMinimumPriceResponse"><span class="type-signature">(inner) </span>getMinimumPriceResponse<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~getMinimumPriceResponse"><span class="type-signature">(inner) </span>getMinimumPriceResponse<span class="signature">(request_id)</span><span class="type-signature"></span></h4>
 
     
 
@@ -1271,7 +1393,8 @@ Request body requires the following parameters:</p>
 
 
 <div class="description">
-    <p>API to get minimum response corresponding to a specific request id</p>
+    <p>[POST] '/books-auth/get_minimum_response'
+API to get minimum response corresponding to a specific request id</p>
 </div>
 
 
@@ -1309,10 +1432,15 @@ Request body requires the following parameters:</p>
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>request_id</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">INTEGER</span>
+
+
             
             </td>
 
@@ -1320,25 +1448,7 @@ Request body requires the following parameters:</p>
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
+            <td class="description last"><p>request id of a request</p></td>
         </tr>
 
     
@@ -2468,7 +2578,7 @@ request body requires the following parameters:</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Jun 27 2016 22:51:59 GMT+0530 (IST) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Jun 28 2016 00:19:05 GMT+0530 (IST) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
