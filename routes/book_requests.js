@@ -273,7 +273,7 @@ function getMinimumPriceResponse(req, res) {
 
 /**
  * Function to get minimum book response corresponding to a request_id
- * @param {INTERGER} request_id              -  request id of a request
+ * @param {INTEGER} request_id              -  request id of a request
  * @param {ARRAY} minimumResponse            -  an array where minimum response would be pushed; although the same
  *                                              object would also be available in callback's result
  * @param {FUNCTION} callback(err, result)   - a callback function passed

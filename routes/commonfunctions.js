@@ -9,6 +9,7 @@ var gcm            = require('node-gcm');
 var request        = require('request');
 var apns           = require('apn');
 var constants      = require('./constants');
+var messenger      = require('./messenger');
 
 exports.checkBlank                     = checkBlank;
 exports.sendIosPushNotification        = sendIosPushNotification;
@@ -16,6 +17,8 @@ exports.sendAndroidPushNotification    = sendAndroidPushNotification;
 exports.sendNotification               = sendNotification;
 exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
+exports.sendOTP                        = sendOTP;
+exports.verifyOTP                      = verifyOTP;
 
 /**
  * Function to check missing parameters in the API.
@@ -188,5 +191,57 @@ function verifyClientToken(req, res, next) {
     }
     res.user_id = result[0].user_id;
     next();
+  });
+}
+
+function sendOTP(req, res) {
+  var otp = Math.floor(Math.random()*10000+50000);
+  var phone_no = req.query.phone_no
+  var message  = 'Hello,\n'+
+                 'Your OTP for vevsa-books registration is :'+otp+'\n'+
+                 'Please provide this OTP in app to proceed\n\n'+
+                 'Vevsa';
+               
+
+  var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
+  connection.query(sqlQuery, [otp, phone_no], function(err, result) {
+    if(err) {
+      console.log(err);
+      return res.send(constants.databaseErrorResponse);
+    }
+    messenger.sendMessageToUser(phone_no, message, function(msgErr, msgRes) {
+      if(msgErr) {
+        return res.send({
+          "log": "There was some error in sending message",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      res.send({
+        "session_id": result.insertId,
+        "password"  : otp,
+        "flag"      : constants.responseFlags.ACTION_COMPLETE
+      });
+    });
+  });
+}
+
+function verifyOTP(req, res) {
+  var otp = req.query.otp;
+  var session_id = req.query.session_id;
+  var sqlQuery = "SELECT * FROM tb_otp WHERE otp = ? AND session_id = ?";
+  connection.query(sqlQuery, [otp, session_id], function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "Verified",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
   });
 }
