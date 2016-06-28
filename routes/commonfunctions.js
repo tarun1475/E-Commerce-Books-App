@@ -179,8 +179,7 @@ function verifyClientToken(req, res, next) {
   }
   var userTable = ((userType == constants.userType.VENDORS) ? "tb_vendors" : "tb_users");
   var checkToken = "SELECT * FROM "+userTable+" WHERE access_token = ?";
-  var qq = connection.query(checkToken, [token], function(err, result) {
-    console.log(qq.sql);
+  connection.query(checkToken, [token], function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -189,7 +188,12 @@ function verifyClientToken(req, res, next) {
       e.status = constants.responseFlags.NOT_AUTHORIZED;
       return next(e);
     }
-    req.body.user_id = result[0].user_id || result[0].vendor_id;
+    if(userType == 0) {
+      req.body.user_id = result[0].user_id;
+    }
+    else {
+      req.body.vendor_id = result[0].vendor_id;
+    }
     next();
   });
 }

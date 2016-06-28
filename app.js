@@ -88,9 +88,6 @@ app.post('/req_book_auth/put_response'          , utils.verifyClientToken
    , requests.putBookRequestResponse
    , error);
 
-app.post('/books-auth/get_minimum_response'     , utils.verifyClientToken
-   , requests.getMinimumPriceResponse
-   , error);
 
 app.post('/books-auth/confirm_book_order'       , utils.verifyClientToken
    , requests.confirmBookOrder
@@ -106,6 +103,9 @@ app.post('/books-auth/get_delivery_details'     , utils.verifyClientToken
 app.get('/req_book_auth/process_pending_req'     , cron.processPendingBookRequests
    , error);
 
+app.post('/books-auth/get_minimum_response'
+    , requests.getMinimumPriceResponse
+    , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}
