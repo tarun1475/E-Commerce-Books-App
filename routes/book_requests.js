@@ -17,6 +17,7 @@ exports.confirmBookOrder                = confirmBookOrder;
 exports.getDeliveryDetailsById          = getDeliveryDetailsById;
 exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getPendingRequestArr            = getPendingRequestArr;
+exports.getRequestDetailsById           = getRequestDetailsById;
 
 /**
  * [POST] '/req_book_auth/raise_request' <br>
@@ -273,7 +274,10 @@ function getMinimumPriceResponse(req, res) {
   var request_id    = req.body.request_id;
   getMinimumBookResponseWrapper(request_id, [], function(err, responseData) {
     if(err) {
-      return res.send(constants.databaseErrorResponse);
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
     }
     res.send({
       "log" :"Successfully fetched response",
@@ -291,7 +295,8 @@ function getMinimumPriceResponse(req, res) {
  * @param {FUNCTION} callback(err, result)   - a callback function passed
  */
 function getMinimumBookResponseWrapper(request_id, minimumResponse, callback) {
-  getRequestDetailsById(request_id, function(err, requestData) {
+  var reqObj = {};
+  getRequestDetailsById(request_id, reqObj, function(err, requestData) {
     if(err) {
       return callback(err, null);
     }
@@ -467,16 +472,16 @@ function getPendingRequestArr(requestStatus, callback) {
   });
 }
 
-function getRequestDetailsById(request_id, callback) {
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.* "+
+function getRequestDetailsById(request_id, requestObj, callback) {
+  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.*, "+
+                  "requests.approved_by, requests.approved_on, requests.approver_id as vendor_id "+
                   "FROM tb_book_requests as requests "+
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
                   "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
                   "WHERE requests.req_id = ? "+
                   " ORDER BY requests.req_id, requests.generated_on ";
-  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
+  connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
-      console.log(err);
       return callback(err, null);
     }
     if(result.length == 0) {
@@ -487,6 +492,9 @@ function getRequestDetailsById(request_id, callback) {
     curRequest.generated_on  = result[0].generated_on;
     curRequest.user_id       = result[0].user_id;
     curRequest.user_name     = result[0].user_name;
+    curRequest.approved_by   = result[0].approved_by;
+    curRequest.approved_on   = result[0].approved_on;
+    curRequest.vendor_id     = result[0].vendor_id;
 
     var books = [], i = 0;
     do {
@@ -500,6 +508,7 @@ function getRequestDetailsById(request_id, callback) {
       i++;
     } while(i < result.length && result[i].req_id == result[i-1].req_id);
     curRequest.books         = books;
+    requestObj[request_id] = curRequest;
     callback(null, curRequest);
   });
 }

@@ -7,9 +7,12 @@
  * Module dependencies
  */
 var crypto         = require('crypto');
+var async          = require('async');
 var utils          = require('./commonfunctions');
 var constants      = require('./constants');
-exports.createNewAppUser      = createNewAppUser;
+var bookRequests   = require('./book_requests');
+exports.createNewAppUser                  = createNewAppUser;
+exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 
 /**
  *
@@ -71,6 +74,42 @@ function createNewAppUser(req, res) {
         "log" : "User created successfully",
         "access_token": access_token,
         "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
+  });
+}
+
+function getRecentRequestsByUserId(req, res) {
+  var user_id = req.query.user_id;
+  var start_from = req.body.start_from || 0;
+  var page_size = req.body.page_size || 5;
+  var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE user_id = ? ORDER BY generated_on DESC LIMIT ?, ?";
+  connection.query(sqlQuery, [user_id, start_from, page_size], function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var requestArr = [];
+    for(var i = 0; i < result.length; i++) {
+      requestArr.push(result[i].req_id);
+    }
+    var asyncTasks = [];
+    var requestObj = {};
+    for(var i = 0; i < requestArr.length; i++) {
+      asyncTasks.push(bookRequests.getRequestDetailsById.bind(null, requestArr[i], requestObj));
+    }
+    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+      if(asyncErr) {
+        return res.send({
+          "log": asyncErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      var response = Object.keys(requestObj).map(function(key) { return requestObj[key] });
+      response.sort(function(a, b) { return b.req_id-a.req_id; });
+      res.send({
+        "log": "Successfully fetched request data",
+        "data": response,
+        "flag": constants.responseFlags.ACTION_FAILED
       });
     });
   });

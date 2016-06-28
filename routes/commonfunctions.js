@@ -190,9 +190,11 @@ function verifyClientToken(req, res, next) {
     }
     if(userType == 0) {
       req.body.user_id = result[0].user_id;
+      req.query.user_id = result[0].user_id;
     }
     else {
       req.body.vendor_id = result[0].vendor_id;
+      req.query.vendor_id = result[0].vendor_id;
     }
     next();
   });

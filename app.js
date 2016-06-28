@@ -65,6 +65,10 @@ app.post('/books-auth/create_vendor'
    , vendors.createNewVendor
    , error);
 
+app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
+   , users.getRecentRequestsByUserId
+   , error);
+
 app.get('/books-auth/send_otp'
    , utils.sendOTP
    , error);
