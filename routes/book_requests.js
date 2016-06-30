@@ -282,6 +282,7 @@ function getMinimumPriceResponse(req, res) {
     res.send({
       "log" :"Successfully fetched response",
       "flag": constants.responseFlags.ACTION_COMPLETE,
+      "request_id": request_id,
       "data": responseData
     });
   });
@@ -329,9 +330,7 @@ function getMinimumBookResponseWrapper(request_id, minimumResponse, callback) {
  * @param res
  */
 function confirmBookOrder(req, res) {
-  var vendorId        = req.body.vendor_id;
-  var responseId      = req.body.response_id;
-  var vendorName      = req.body.vendor_name;
+  var responseData    = req.body.data;
   var requestId       = req.body.request_id;
   var deliveryAddress = req.body.delivery_address;
   var reqStatus       = req.body.request_status;
@@ -344,7 +343,7 @@ function confirmBookOrder(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrgent, function(delErr, delRes) {
+    deliverBooksToUser(requestId, userId, vendorId, deliveryAddress, responseId, isUrgent, responseData, function(delErr, delRes) {
       if(delErr) {
         return res.send({
           "log" : "There was some error in adding delivery to database",
@@ -371,9 +370,9 @@ function confirmBookOrder(req, res) {
  */
 function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, callback) {
   var sqlQuery = "UPDATE tb_book_requests "+
-                 "SET approved_by = ?, approved_on = NOW(), approver_id = ?, status = ? "+
+                 "SET approved_on = NOW(), status = ? "+
                  "WHERE req_id = ?";
-  connection.query(sqlQuery, [vendorName, vendorId, reqStatus, requestId], function(err, result) {
+  connection.query(sqlQuery, [reqStatus, requestId], function(err, result) {
     if(err) {
       console.log(err);
       return callback(err, null);
@@ -391,16 +390,36 @@ function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatu
  * @param isUrgent
  * @param callback
  */
-function deliverBooksToUser(userId, vendorId, deliveryAddress, responseId, isUrgent, callback) {
+function deliverBooksToUser(requestId, userId, vendorId, deliveryAddress, responseId, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
-  var sqlQuery = "INSERT INTO tb_delivery (user_id, vendor_id, delivery_address, vendor_response_id, is_urgent_delivery, delivery_date) "+
-                 "VALUES (?, ?, ?, ?, ?, "+dateStr+") ";
-  connection.query(sqlQuery, [userId, vendorId, deliveryAddress, responseId, isUrgent], function(err, result) {
+  var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id, delivery_address, is_urgent_delivery, delivery_date) "+
+                 "VALUES (?, ?, ?, ?, "+dateStr+") ";
+  connection.query(sqlQuery, [requestId, userId, deliveryAddress, isUrgent], function(err, result) {
     if(err) {
-      console.log(err);
+      process.stderr.write(err);
       return callback(err, null);
     }
-    callback(null, "successfully logged a delivery in database");
+    var deliveryId = result.insertId;
+    var asyncTasks = [];
+    for(var i = 0; i < responseData.length; i++) {
+      asyncTasks.push(logDeliveryDistribution.bind(null, deliveryId, responseData[i].book_id, responseData[i].vendor_id));
+    }
+    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+      if(asyncErr) {
+        return callback(asyncErr, null);
+      }
+      callback(null, "successfully logged a delivery in database");
+    });
+  });
+}
+
+function logDeliveryDistribution(deliveryId, book_id, vendor_id, callback) {
+  var sqlQuery = "INSERT INTO tb_delivery_distributino (delivery_id, book_id, vendor_id) VALUES(?, ?, ?)";
+  connection.query(sqlQuery, [deliveryId, book_id, vendor_id], function(err, result) {
+    if(err) {
+      return callback("There was some error in logging delivery distribution", null):
+    }
+    callback(null, "Successfully logged a distribution");
   });
 }
 
