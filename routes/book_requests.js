@@ -8,6 +8,7 @@
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var async     = require('async');
+var messenger = require('./messenger');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
@@ -336,25 +337,67 @@ function confirmBookOrder(req, res) {
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
-  updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, function(updateErr, updateRes) {
+  updateBookRequest(requestId, reqStatus, function(updateErr, updateRes) {
     if(updateErr) {
       return res.send({
         "log" : "There was some error in updating request",
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    deliverBooksToUser(requestId, userId, vendorId, deliveryAddress, responseId, isUrgent, responseData, function(delErr, delRes) {
-      if(delErr) {
-        return res.send({
-          "log" : "There was some error in adding delivery to database",
-          "flag": constants.responseFlags.ACTION_FAILED
+    if(reqStatus == constants.bookRequestStatus.APPROVED) { 
+      var totalPrice = 0;
+      for(var i = 0; i < responseData.length; i++)
+        totalPrice += responseData[i].price;
+      var urgentDeliveryCharges = (isUrgent == 1 ? constants.deliveryCharges.URGENT_DELIVERY : 0);
+      deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
+        if(delErr) {
+          return res.send({
+            "log" : "There was some error in adding delivery to database",
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+        }
+        // send email to admins 
+        var from     = 'helpvevsa@gmail.com';
+        var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
+        var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
+        var text     = "";
+        var html     = "Hello, <br><br>"+
+                       "The request corresponding to the request id : "+requestId+
+                       " has been confirmed. Details are :<br><br>"+
+                       "<table border=1 width=60%>"+
+                       "<tr><th align=center>Book Name</th>"+
+                       "<th align=center>Fetched from Vender</th>"+
+                       "<th align=center>Price</th></tr>";
+        for(var i = 0; i < responseData.length; i++) {
+          html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
+          html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
+          html += ("<td align=center> Rs."+responseData[i].price+"</td>");
+          html += "</tr>";
+        }
+        html += "<tr><td colspan=2 align=center><b>Total Price</b></td><td align=center><b> Rs."+totalPrice+"</b></td>";
+        html += "<tr><td colspan=2 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "</table><br><br>";
+
+        html += "These would be delivered to :<br><b>"+deliveryAddress+"</b>";
+        html += "<br><br>Cheers,<br>Vevsa Support";
+        messenger.sendEmailToUser(from, to, subject, text, html, function(emailErr, emailRes) {
+          if(emailErr) {
+            process.stdout.write("there was some error in sending email");
+          }
+          console.log(emailRes);
+          return res.send({
+            "log" : "Successfully confirmed delivery order",
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
         });
-      }
+      });
+    }
+    else {
       return res.send({
-        "log" : "Successfully confirmed delivery order",
+        "log": "Successfully disapproved book request",
         "flag": constants.responseFlags.ACTION_COMPLETE
       });
-    });
+    }
   });
 }
 
@@ -368,7 +411,7 @@ function confirmBookOrder(req, res) {
  * @param reqStatus
  * @param callback
  */
-function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatus, callback) {
+function updateBookRequest(requestId, reqStatus, callback) {
   var sqlQuery = "UPDATE tb_book_requests "+
                  "SET approved_on = NOW(), status = ? "+
                  "WHERE req_id = ?";
@@ -390,13 +433,13 @@ function updateBookRequest(vendorId, responseId, requestId, vendorName, reqStatu
  * @param isUrgent
  * @param callback
  */
-function deliverBooksToUser(requestId, userId, vendorId, deliveryAddress, responseId, isUrgent, responseData, callback) {
+function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
   var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id, delivery_address, is_urgent_delivery, delivery_date) "+
                  "VALUES (?, ?, ?, ?, "+dateStr+") ";
   connection.query(sqlQuery, [requestId, userId, deliveryAddress, isUrgent], function(err, result) {
     if(err) {
-      process.stderr.write(err);
+      console.log(err);
       return callback(err, null);
     }
     var deliveryId = result.insertId;
@@ -414,10 +457,12 @@ function deliverBooksToUser(requestId, userId, vendorId, deliveryAddress, respon
 }
 
 function logDeliveryDistribution(deliveryId, book_id, vendor_id, callback) {
-  var sqlQuery = "INSERT INTO tb_delivery_distributino (delivery_id, book_id, vendor_id) VALUES(?, ?, ?)";
+  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id) VALUES(?, ?, ?)";
   connection.query(sqlQuery, [deliveryId, book_id, vendor_id], function(err, result) {
     if(err) {
-      return callback("There was some error in logging delivery distribution", null):
+      process.stderr.write("Some error in sql");
+      console.log(err);
+      return callback("There was some error in logging delivery distribution", null);
     }
     callback(null, "Successfully logged a distribution");
   });

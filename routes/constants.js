@@ -54,3 +54,6 @@ define(exports.bookRequestStatus, "DISAPPROVED"       , 2);
 exports.userType = {};
 define(exports.userType, "USERS"                       , 0);
 define(exports.userType, "VENDORS"                     , 1);
+
+exports.deliveryCharges = {};
+define(exports.deliveryCharges, "URGENT_DELIVERY"      , 30);
