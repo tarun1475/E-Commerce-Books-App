@@ -1,4 +1,6 @@
 
+var defaultLoggingLevel = 3;
+var isLoggingEnabled    = true;
 var levels = {
   trace : 0,
   debug : 1,
@@ -16,14 +18,13 @@ exports.logDatabaseQuery    = logDatabaseQuery;
 
 // A variadic function to log the stuff
 function log(loggingLevel, loggingParameters) {
-  var handlineInfo   = logginParameters[0];
+  var handlingInfo   = loggingParameters[0];
   var apiModule      = handlingInfo.apiModule;
   var apiHandler     = handlingInfo.apiHandler;
 
-  var defaultLoggingLevel = debuggingPermisssions[apiModule].defaultLoggingLevel;
 
   // We need to log all the errors
-  if(loggingLevel !== levels.error && (!isLoggingEnabled(apiModule, apiHandler) || loggingLevel > defaultLoggingLevel)) {
+  if(loggingLevel !== levels.error && (!isLoggingEnabled || loggingLevel > defaultLoggingLevel)) {
     return;
   }
 
@@ -66,7 +67,7 @@ function logDatabaseQuery(handlerInfo, eventFired, error, result, query) {
   }
   else {
     if(typeof query !== 'undefined') 
-      module.exports.error(handlerInfo, {event: eventFired}, {error: error}, {result: result}, {query: query});
+      module.exports.trace(handlerInfo, {event: eventFired}, {error: error}, {result: result}, {query: query});
     else 
       module.exports.trace(handlerInfo, {event: eventFired}, {error: error}, {result: result});
   }

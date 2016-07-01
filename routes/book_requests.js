@@ -9,6 +9,7 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var async     = require('async');
 var messenger = require('./messenger');
+var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
@@ -28,12 +29,17 @@ exports.getRequestDetailsById           = getRequestDetailsById;
  * @param {OBJECT} books - a json object of book requests
  */
 function raiseBooksRequest(req, res) {
+  var handlerInfo   = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "raiseBookRequest"
+  };
   var reqParams     = req.body;
   var user_id       = reqParams.user_id;
   var books         = reqParams.books;
   
   var insertReq  = "INSERT INTO tb_book_requests (user_id) VALUES (?)";
-  connection.query(insertReq, [user_id], function(insErr, insRes) {
+  var tt = connection.query(insertReq, [user_id], function(insErr, insRes) {
+    logging.logDatabaseQuery(handlerInfo, "logging book request", insErr, insRes);
     if(insErr) {
       console.log(insErr);
       return res.send({
@@ -45,7 +51,7 @@ function raiseBooksRequest(req, res) {
     var asyncTasks = [];
 
     for(var i = 0; i < books.length; i++) {
-      asyncTasks.push(insertNewBook.bind(null, request_id, books[i].name, books[i].stream, books[i].semester, books[i].type));
+      asyncTasks.push(insertNewBook.bind(null, handlerInfo, request_id, books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].type, books[i].book_author || "NA"));
     }
     async.series(asyncTasks, function(err, result) {
       if(err) {
@@ -72,9 +78,10 @@ function raiseBooksRequest(req, res) {
  * @param type
  * @param callback
  */
-function insertNewBook(request_id, name, stream, semester, type, callback) {
-  var insertQuery = "INSERT INTO tb_books (book_req_id, book_name, book_stream, book_semester, type) VALUES(?, ?, ?, ?, ?)";
-  connection.query(insertQuery, [request_id, name, stream, semester, type], function(err, result) {
+function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author, callback) {
+  var insertQuery = "INSERT INTO tb_books (book_req_id, book_name, book_stream, book_semester, type, book_author) VALUES(?, ?, ?, ?, ?, ?)";
+  var tt = connection.query(insertQuery, [request_id, name, stream, semester, type, author], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result, tt.sql);
     if(err) {
       console.log(err);
       return callback(err, null);
@@ -112,7 +119,7 @@ function getBookRequests(req, res) {
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
                   "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
                   "WHERE requests.status = ? "+
-                  " ORDER BY requests.req_id, requests.generated_on "+
+                  " ORDER BY requests.generated_on DESC "+
                   "LIMIT ?, ?";
   var tt = connection.query(sqlQuery, [bookStatus, start_from, page_size], function(err, result) {
     if(err) {
@@ -138,6 +145,7 @@ function getBookRequests(req, res) {
         curBook.book_name      = result[i].book_name;
         curBook.book_photograph= result[i].book_photograph;
         curBook.book_stream    = result[i].book_stream;
+        curBook.book_author    = result[i].book_author;
         curBook.type           = result[i].type;
         books.push(curBook);
         i++;
@@ -161,11 +169,14 @@ function getBookRequests(req, res) {
  * @param {ARRAY} books - An Array of objects 
  */
 function putBookRequestResponse(req, res) {
+  var handlerInfo    = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "putBookRequestResponse"
+  };
   var reqParams      = req.body;
   var vendorId       = reqParams.vendor_id;
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
-  var overallPrice   = reqParams.overall_price;
 
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
@@ -178,10 +189,11 @@ function putBookRequestResponse(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id, overall_price) VALUES(?, ?, ?) ";
-    connection.query(reqQuery, [vendorId, requestId, overallPrice], function(reqErr, insRes) {
+    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id) VALUES(?, ?) ";
+    var tt = connection.query(reqQuery, [vendorId, requestId], function(reqErr, insRes) {
+      logging.logDatabaseQuery(handlerInfo, "inserting book response", reqErr, insRes, tt.sql);
       if(reqErr) {
-        res.send(constants.databaseErrorResponse);
+        return res.send(constants.databaseErrorResponse);
       }
       var responseId = insRes.insertId;
       var asyncTasks = [];
@@ -228,22 +240,23 @@ function insertBookResponse(response_id, vendor_id, book_id, book_price, callbac
  * @param {OBJECT} minResponseObj - an object whether minimum response would be added
  * @param {FUNCTION} callback - a callback function
  */
-function getMinimumBookResponse(book_id, minResponseObj, callback) {
+function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) {
   var minQuery = "SELECT books.book_name, books.book_stream, books.book_semester, books.type, distribution.*, "+
         "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
         "WHERE distribution.book_id = ? ORDER BY distribution.price ";
-  connection.query(minQuery, [book_id], function(minErr, minResponse) {
-    if(minErr) {
-      return callback("There was some error in getting minimum request", null);
-    }
-    if(minResponse.length == 0) {
-      return callback(null, null);
-    }
-    minResponseObj[book_id] = minResponse[0];
-    callback(null, "Successfully fetched minimum response");
+   var qq = connection.query(minQuery, [book_id], function(minErr, minResponse) {
+     logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse, qq.sql);
+     if(minErr) {
+       return callback("There was some error in getting minimum request", null);
+     }
+     if(minResponse.length == 0) {
+       return callback(null, null);
+     }
+     minResponseObj[book_id] = minResponse[0];
+     callback(null, "Successfully fetched minimum response");
   });
 }
 
@@ -273,7 +286,11 @@ function getVendorResponseDetails(response_id, callback) {
  */
 function getMinimumPriceResponse(req, res) {
   var request_id    = req.body.request_id;
-  getMinimumBookResponseWrapper(request_id, [], function(err, responseData) {
+  var handlerInfo   = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "get_minimum_response"
+  };
+  getMinimumBookResponseWrapper(handlerInfo, request_id, [], function(err, responseData) {
     if(err) {
       return res.send({
         "log": err,
@@ -296,16 +313,16 @@ function getMinimumPriceResponse(req, res) {
  *                                              object would also be available in callback's result
  * @param {FUNCTION} callback(err, result)   - a callback function passed
  */
-function getMinimumBookResponseWrapper(request_id, minimumResponse, callback) {
+function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse, callback) {
   var reqObj = {};
-  getRequestDetailsById(request_id, reqObj, function(err, requestData) {
+  getRequestDetailsById(handlerInfo, request_id, reqObj, function(err, requestData) {
     if(err) {
       return callback(err, null);
     }
     var responseObj = {};
     var asyncTasks  = [];
     for(var i = 0; i < requestData.books.length; i++) {
-      asyncTasks.push(getMinimumBookResponse.bind(null, requestData.books[i].book_id, responseObj));
+      asyncTasks.push(getMinimumBookResponse.bind(null, handlerInfo, requestData.books[i].book_id, responseObj));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
       if(asyncErr) {
@@ -536,15 +553,15 @@ function getPendingRequestArr(requestStatus, callback) {
   });
 }
 
-function getRequestDetailsById(request_id, requestObj, callback) {
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.*, "+
-                  "requests.approved_by, requests.approved_on, requests.approver_id as vendor_id "+
+function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
+  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.*,  requests.approved_on "+
                   "FROM tb_book_requests as requests "+
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
                   "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
                   "WHERE requests.req_id = ? "+
                   " ORDER BY requests.req_id, requests.generated_on ";
-  connection.query(sqlQuery, [request_id], function(err, result) {
+  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, result, tt.sql);
     if(err) {
       return callback(err, null);
     }
@@ -556,9 +573,7 @@ function getRequestDetailsById(request_id, requestObj, callback) {
     curRequest.generated_on  = result[0].generated_on;
     curRequest.user_id       = result[0].user_id;
     curRequest.user_name     = result[0].user_name;
-    curRequest.approved_by   = result[0].approved_by;
     curRequest.approved_on   = result[0].approved_on;
-    curRequest.vendor_id     = result[0].vendor_id;
 
     var books = [], i = 0;
     do {

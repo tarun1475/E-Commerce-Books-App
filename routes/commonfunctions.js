@@ -10,6 +10,7 @@ var request        = require('request');
 var apns           = require('apn');
 var constants      = require('./constants');
 var messenger      = require('./messenger');
+var logging        = require('./logging');
 
 exports.checkBlank                     = checkBlank;
 exports.sendIosPushNotification        = sendIosPushNotification;
@@ -169,6 +170,10 @@ function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, pa
 }
 
 function verifyClientToken(req, res, next) {
+  var handlerInfo = {
+    "apiModule": "commonfunction",
+    "apiHander": "verifyClientToken"
+  };
   var token = (req.cookies && req.cookies.token) || req.body.token || req.query.token,
       e = null;
   var userType = (req.body.reg_as || req.query.reg_as || 0);
@@ -179,7 +184,8 @@ function verifyClientToken(req, res, next) {
   }
   var userTable = ((userType == constants.userType.VENDORS) ? "tb_vendors" : "tb_users");
   var checkToken = "SELECT * FROM "+userTable+" WHERE access_token = ?";
-  connection.query(checkToken, [token], function(err, result) {
+  var tt = connection.query(checkToken, [token], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "geting user details ", err, result);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }

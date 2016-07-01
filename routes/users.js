@@ -11,6 +11,7 @@ var async          = require('async');
 var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
+var logging        = require('./logging');
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 
@@ -27,6 +28,10 @@ exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
  *
  */
 function createNewAppUser(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"createNewAppUser"
+  };
   var reqParams     = req.body;
   var userName      = reqParams.user_name;
   var userEmail     = reqParams.user_email;
@@ -45,7 +50,8 @@ function createNewAppUser(req, res) {
   }
 
   var dupQuery = "SELECT * FROM tb_users WHERE user_email = ? OR user_phone = ? ";
-  connection.query(dupQuery, [userEmail, userPhone], function(dupErr, dupData) {
+  var tt = connection.query(dupQuery, [userEmail, userPhone], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
     if(dupErr) {
       return res.send({
         "log": "Internal server error",
@@ -62,9 +68,8 @@ function createNewAppUser(req, res) {
     var sqlQuery = "INSERT INTO tb_users (user_name, user_email, user_phone, user_address, device_name, os_name, os_version, user_city, access_token) "+
                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     var tt = connection.query(sqlQuery, [userName, userEmail, userPhone, userAddress, deviceName, osName, osVersion, userCity, access_token], function(err, result) {
-      console.log(tt.sql);
+      logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
       if(err) {
-        console.log(err);
         return res.send({
           "log" : "Internal server error",
           "flag": constants.responseFlags.ACTION_FAILED
