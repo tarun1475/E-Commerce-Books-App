@@ -26,7 +26,7 @@ function sendMessageToUser(phone_no, message, callback) {
     return callback(null, "Test");
 }
 
-function sendEmailToUser(from, to, subject, text, htmlText, callback) {
+function sendEmailToUser(from, to, subject, text, htmlText) {
   var mailOptions = {
     "from": from,
     "to": to,
@@ -37,9 +37,7 @@ function sendEmailToUser(from, to, subject, text, htmlText, callback) {
   transport.sendMail(mailOptions, function(err, info) {
     if(err) {
       console.log(err);
-      return callback(err, null);
     }
     console.log("Email sent "+ info.response);
-    callback(null, info);
   });
 }

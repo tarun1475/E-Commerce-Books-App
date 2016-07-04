@@ -241,7 +241,7 @@ function insertBookResponse(response_id, vendor_id, book_id, book_price, callbac
  * @param {FUNCTION} callback - a callback function
  */
 function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) {
-  var minQuery = "SELECT books.book_name, books.book_stream, books.book_semester, books.type, distribution.*, "+
+  var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, books.type, distribution.*, "+
         "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
@@ -350,7 +350,8 @@ function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse,
 function confirmBookOrder(req, res) {
   var responseData    = req.body.data;
   var requestId       = req.body.request_id;
-  var deliveryAddress = req.body.delivery_address;
+  var deliveryAddress = req.body.delivery_address || req.body.user_address;
+  var userName        = req.body.user_name;
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
@@ -375,37 +376,34 @@ function confirmBookOrder(req, res) {
         }
         // send email to admins 
         var from     = 'helpvevsa@gmail.com';
-        var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
+        var to       = ['rohankanojia420@gmail.com',/* 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'*/];
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
         var text     = "";
         var html     = "Hello, <br><br>"+
                        "The request corresponding to the request id : "+requestId+
                        " has been confirmed. Details are :<br><br>"+
-                       "<table border=1 width=60%>"+
+                       "<table border=1 width=65%>"+
                        "<tr><th align=center>Book Name</th>"+
+                       "<th align=center>Book Author</th>"+
                        "<th align=center>Fetched from Vender</th>"+
                        "<th align=center>Price</th></tr>";
         for(var i = 0; i < responseData.length; i++) {
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
+          html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += "</tr>";
         }
-        html += "<tr><td colspan=2 align=center><b>Total Price</b></td><td align=center><b> Rs."+totalPrice+"</b></td>";
-        html += "<tr><td colspan=2 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
         html += "</table><br><br>";
 
-        html += "These would be delivered to :<br><b>"+deliveryAddress+"</b>";
+        html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";
         html += "<br><br>Cheers,<br>Vevsa Support";
-        messenger.sendEmailToUser(from, to, subject, text, html, function(emailErr, emailRes) {
-          if(emailErr) {
-            process.stdout.write("there was some error in sending email");
-          }
-          console.log(emailRes);
-          return res.send({
-            "log" : "Successfully confirmed delivery order",
-            "flag": constants.responseFlags.ACTION_COMPLETE
-          });
+        messenger.sendEmailToUser(from, to, subject, text, html);
+        return res.send({
+          "log" : "Successfully confirmed delivery order",
+          "flag": constants.responseFlags.ACTION_COMPLETE
         });
       });
     }
@@ -475,10 +473,8 @@ function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, respon
 
 function logDeliveryDistribution(deliveryId, book_id, vendor_id, callback) {
   var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id) VALUES(?, ?, ?)";
-  connection.query(sqlQuery, [deliveryId, book_id, vendor_id], function(err, result) {
+  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id], function(err, result) {
     if(err) {
-      process.stderr.write("Some error in sql");
-      console.log(err);
       return callback("There was some error in logging delivery distribution", null);
     }
     callback(null, "Successfully logged a distribution");
@@ -554,7 +550,8 @@ function getPendingRequestArr(requestStatus, callback) {
 }
 
 function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.*,  requests.approved_on "+
+  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, "+
+                  "users.user_address, books.*,  requests.approved_on "+
                   "FROM tb_book_requests as requests "+
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
                   "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
@@ -582,6 +579,7 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
       curBook.book_name      = result[i].book_name;
       curBook.book_photograph= result[i].book_photograph;
       curBook.book_stream    = result[i].book_stream;
+      curBook.book_author    = result[i].book_author;
       curBook.type           = result[i].type;
       books.push(curBook);
       i++;
