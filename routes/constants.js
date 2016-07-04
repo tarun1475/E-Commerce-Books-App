@@ -57,3 +57,12 @@ define(exports.userType, "VENDORS"                     , 1);
 
 exports.deliveryCharges = {};
 define(exports.deliveryCharges, "URGENT_DELIVERY"      , 30);
+
+
+/*
+ * OTP API key
+ */
+exports.sendotp = {};
+define(exports.sendotp, "API_LEY"                      ,
+ "9Fms2JislBIgnYgRkjLp29uy1xAl-uh2zK1RbUd2AO6MWhuSHAQDRT3TuJKxzOI_pqHxV-rnKhRolMPFYWT3Tn7HHgc5Y9RL1oopyp1tO1kxeegf7gzy0rrduS6Na3JVndBudytFTJgdvuJiRpheRNlqpCtZFRqem1kl_J2Vra8=");
+define(exports.sendotp, "API_LINK", "https://sendotp.msg91.com/api/generateOTP");

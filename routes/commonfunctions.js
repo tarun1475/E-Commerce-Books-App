@@ -202,31 +202,45 @@ function verifyClientToken(req, res, next) {
       req.body.vendor_id = result[0].vendor_id;
       req.query.vendor_id = result[0].vendor_id;
     }
+    if(result[0].is_blocked == 1) {
+      return res.send({
+        "log": "This user is blocked",
+        "flag": constants.responseFlags.NOT_AUTHORIZED
+      });
+    }
     next();
   });
 }
 
 function sendOTP(req, res) {
-  var otp = Math.floor(Math.random()*10000+50000);
-  var phone_no = req.query.phone_no
-  var message  = 'Hello,\n'+
-                 'Your OTP for vevsa-books registration is :'+otp+'\n'+
-                 'Please provide this OTP in app to proceed\n\n'+
-                 'Vevsa';
-               
-
-  var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
-  connection.query(sqlQuery, [otp, phone_no], function(err, result) {
-    if(err) {
-      console.log(err);
-      return res.send(constants.databaseErrorResponse);
+  var phone_no = req.query.phone_no;
+  // Request sendotp for getting otp
+  var options = {};
+  options.url = constants.sendotp.API_LINK;
+  options.headers = {
+    'Content-Type': 'application/json',
+    'application-Key': constants.sendotp.API_KEY
+  };
+  options.body = {
+    "countryCode": "91",
+    "mobileNumber": phone_no,
+    "getGeneratedOTP": true
+  };
+  request.post(options, function(error, response, body) {
+    if(error) {
+      logging.error({event:"getting response from sendotp"}, {"error": error});
+      return res.send({
+        "log": "There was some error in getting otp",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
     }
-    messenger.sendMessageToUser(phone_no, message, function(msgErr, msgRes) {
-      if(msgErr) {
-        return res.send({
-          "log": "There was some error in sending message",
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
+    var otp = body.response.oneTimePassword;
+    var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
+    var tt = connection.query(sqlQuery, [otp, phone_no], function(err, result) {
+      loggging.logDatabaseQuery("inserting otp into database", err, result, tt.sql);
+      if(err) {
+        console.log(err);
+        return res.send(constants.databaseErrorResponse);
       }
       res.send({
         "session_id": result.insertId,
