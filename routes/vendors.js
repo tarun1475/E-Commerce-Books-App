@@ -8,7 +8,9 @@
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var crypto    = require('crypto');
-exports.createNewVendor     = createNewVendor;
+exports.createNewVendor        = createNewVendor;
+exports.blockVendorById        = blockVendorById;
+exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 
 /**
  * [POST] '/books-auth/create_vendor' <br>
@@ -69,5 +71,82 @@ function createNewVendor(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     });
+  });
+}
+
+function blockVendorById(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "blockUserById"
+  };
+  var userId = req.body.vendor_id;
+  var userStatus = req.body.status;
+  if(utils.checkBlank([userId])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  updateVendorAccountStatus(handlerInfo, userId, userStatus, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully blocked/unblocked user",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function updateVendorAccountStatus(handlerInfo, vendorId, status, callback) {
+  if(status != constants.userAccountStatus.BLOCKED && status != constants.userAccountStatus.UNBLOCKED) {
+    return callback("Invalid account status provided", null);
+  }
+  var sqlQuery = "UPDATE tb_vendors SET is_blocked = ? WHERE vendor_id = ?";
+  var tt = connection.query(sqlQuery, [status, vendorId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "block/unblock user by id", err, result, tt.sql);
+    if(err) {
+      return callback("There was some error in updating user", null);
+    }
+    if(result.affectedRows == 0) {
+      return callback("Invalid user id provided", null);
+    }
+    callback(null, "successfully updated user account")
+  });
+}
+
+function getVendorDetailsPanel(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "getVendorDetailsPanel"
+  };
+  var vendorId = req.body.vendor_id;
+  getVendorDetails(handlerInfo, vendorId, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched vendor details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+}
+
+function getVendorDetails(handlerInfo, vendor_id, callback) {
+  var sqlQuery = "SELECT delivery_distribution.*, books.*"+
+      "FROM vevsa_live.tb_delivery_distribution as delivery_distribution "+
+      "JOIN tb_delivery as delivery ON delivery.delivery_id = delivery_distribution.delivery_id " +
+      "JOIN tb_books as books ON books.book_id = delivery_distribution.book_id" +
+      "WHERE delivery_distribution.vendor_id = ?";
+  var tt = connection.query(sqlQuery, [vendor_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
+    if(err) {
+      return callback("There was some error in getting vendor details", null);
+    }
+    callback(null, result);
   });
 }

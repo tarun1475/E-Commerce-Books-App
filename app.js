@@ -118,10 +118,17 @@ app.post('/books-auth/get/details_user'          , utils.verifyPanelToken
     , users.getUserDetailsPanel
     , error);
 
+app.post('/books-auth/get/details_vendor'        , utils.verifyPanelToken
+    , vendors.getVendorDetailsPanel
+    , error);
+
 app.post('/books-auth/block/user'                , utils.verifyPanelToken
     , users.blockUserById
     , error);
 
+app.post('/books-auth/block/vendor'              , utils.verifyPanelToken
+    , vendors.blockVendorById
+    , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}

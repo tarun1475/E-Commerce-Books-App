@@ -20,6 +20,7 @@ exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
 exports.sendOTP                        = sendOTP;
 exports.verifyOTP                      = verifyOTP;
+exports.verifyPanelToken               = verifyPanelToken;
 
 /**
  * Function to check missing parameters in the API.
@@ -278,4 +279,26 @@ function verifyOTP(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
+}
+
+function verifyPanelToken(req, res, next) {
+  var handlerInfo = {
+    "apiModule": "Commonfunctions",
+    "apiHandler": "verifyPanelToken"
+  };
+
+  var token = (req.cookies && req.cookies.token) || req.body.token || req.query.token,
+      e = null;
+  var userType = (req.body.reg_as || req.query.reg_as || 0);
+  if(!token) {
+    e = new Error('User not logged in!');
+    e.status = constants.responseFlags.NOT_LOGGED_IN;
+    return next(e);
+  }
+  if(token != constants.adminPanel.ACCESS_TOKEN) {
+    e = new Error('Invalid token provided!');
+    e.status = constants.responseFlags.NOT_AUTHORIZED;
+    return next(e);
+  }
+  next();
 }
