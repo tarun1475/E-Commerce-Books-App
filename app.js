@@ -16,6 +16,7 @@ var vendors     = require('./routes/vendors');
 var requests    = require('./routes/book_requests');
 var utils       = require('./routes/commonfunctions');
 var cron        = require('./routes/cron');
+var analytics   = require('./routes/analytics');
 var app         = express();
 
 connection      = undefined;
@@ -128,6 +129,10 @@ app.post('/books-auth/block/user'                , utils.verifyPanelToken
 
 app.post('/books-auth/block/vendor'              , utils.verifyPanelToken
     , vendors.blockVendorById
+    , error);
+
+app.post('/books-auth/report'                    , utils.verifyPanelToken
+    , analytics.getOverallReportPanel
     , error);
 /**
  * To change the port, please edit the configuration file

@@ -16,7 +16,6 @@ exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 exports.getUserDetailsPanel               = getUserDetailsPanel;
 exports.blockUserById                     = blockUserById;
-exports.unBlockUserById                   = unBlockUserById;
 
 /**
  *
@@ -88,11 +87,16 @@ function createNewAppUser(req, res) {
 }
 
 function getRecentRequestsByUserId(req, res) {
+  var handlerInfo = {
+    "apiModule":"Users",
+    "apiHandler":"getRecentRequestsByUserId"
+  };
   var user_id = req.query.user_id;
-  var start_from = req.body.start_from || 0;
-  var page_size = req.body.page_size || 5;
+  var start_from = parseInt(req.query.start_from || 0);
+  var page_size = parseInt(req.query.page_size || 5);
   var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE user_id = ? ORDER BY generated_on DESC LIMIT ?, ?";
-  connection.query(sqlQuery, [user_id, start_from, page_size], function(err, result) {
+  var tt = connection.query(sqlQuery, [user_id, start_from, page_size], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -103,7 +107,7 @@ function getRecentRequestsByUserId(req, res) {
     var asyncTasks = [];
     var requestObj = {};
     for(var i = 0; i < requestArr.length; i++) {
-      asyncTasks.push(bookRequests.getRequestDetailsById.bind(null, requestArr[i], requestObj));
+      asyncTasks.push(bookRequests.getRequestDetailsById.bind(null, handlerInfo, requestArr[i], requestObj));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
       if(asyncErr) {
@@ -128,7 +132,7 @@ function getUserDetailsPanel(req, res) {
     "apiModule": "Users",
     "apiHandler": "getUserDetailsPanel"
   };
-  var user_id = req.body.user_id;
+  var user_id = parseInt(req.body.user_id);
   if(utils.checkBlank([user_id])) {
     return res.send(constants.parameterMissingResponse);
   }
@@ -139,19 +143,15 @@ function getUserDetailsPanel(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    res.send({
-      "log": "Successfully fetched user data from database",
-      "data": result,
-      "flag": constants.responseFlags.ACTION_COMPLETE
-    });
+    res.send(result);
   });
 }
 
 function getUserDetailsPanelHelper(handlerInfo, user_id, callback) {
   var sqlQuery = "SELECT users.*, requests.req_id, requests.status, requests.generated_on "+
-      "FROM tb_users " +
+      "FROM tb_users as users " +
       "JOIN tb_book_requests as requests ON requests.user_id = users.user_id "+
-      "WHERE users.user_id = ? AND requests.is_valid = 0";
+      "WHERE users.user_id = ? AND requests.is_valid = 1";
   var getUserDetails = connection.query(sqlQuery, [user_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, {"event": "getting user details"}, err, result, getUserDetails.sql);
     if(err) {
@@ -176,7 +176,20 @@ function getUserDetailsPanelHelper(handlerInfo, user_id, callback) {
         return callback(asyncErr, null);
       }
       var requestArr = Object.keys(reqDetailsObj).map(function(key) { return reqDetailsObj[key]});
-      callback(null, requestArr);
+      var responseData = {};
+      responseData.user_name = result[0].user_name;
+      responseData.user_email = result[0].user_email;
+      responseData.user_phone = result[0].user_phone;
+      responseData.user_address = result[0].user_address;
+      responseData.user_city = result[0].city;
+      responseData.is_blocked = result[0].is_blocked;
+      responseData.os_name = result[0].os_name;
+      responseData.device_name = result[0].device_name;
+      responseData.os_version = result[0].os_version;
+      responseData.requests = requestArr;
+      responseData.log = "Successfully fetched user data from database";
+      responseData.flag = constants.responseFlags.ACTION_COMPLETE;
+      callback(null, responseData);
     });
   });
 }

@@ -222,9 +222,16 @@ function verifyClientToken(req, res, next) {
 }
 
 function sendOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "sendOtp"
+  };
   var phone_no = req.query.phone_no;
   // Request sendotp for getting otp
   var options = {};
+  options.method = 'POST';
+  options.json = true;
+  options.rejectUnauthorized = false;
   options.url = constants.sendotp.API_LINK;
   options.headers = {
     'Content-Type': 'application/json',
@@ -235,9 +242,9 @@ function sendOTP(req, res) {
     "mobileNumber": phone_no,
     "getGeneratedOTP": true
   };
-  request.post(options, function(error, response, body) {
-    if(error) {
-      logging.error({event:"getting response from sendotp"}, {"error": error});
+  request(options, function(error, response, body) {
+    if(error || response.statusCode != 200) {
+      logging.error(handlerInfo, {event:"getting response from sendotp"}, {"error": error});
       return res.send({
         "log": "There was some error in getting otp",
         "flag": constants.responseFlags.ACTION_FAILED
@@ -246,9 +253,8 @@ function sendOTP(req, res) {
     var otp = body.response.oneTimePassword;
     var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
     var tt = connection.query(sqlQuery, [otp, phone_no], function(err, result) {
-      loggging.logDatabaseQuery("inserting otp into database", err, result, tt.sql);
+      logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
       if(err) {
-        console.log(err);
         return res.send(constants.databaseErrorResponse);
       }
       res.send({
@@ -261,11 +267,17 @@ function sendOTP(req, res) {
 }
 
 function verifyOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfuntions",
+    "apiHandler": "verifyOTP"
+  };
   var otp = req.query.otp;
   var session_id = req.query.session_id;
-  var sqlQuery = "SELECT * FROM tb_otp WHERE otp = ? AND session_id = ?";
-  connection.query(sqlQuery, [otp, session_id], function(err, result) {
+  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
+  var tt = connection.query(sqlQuery, [otp, session_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result);
     if(err) {
+      console.log(err);
       return res.send(constants.databaseErrorResponse);
     }
     if(result.length == 0) {

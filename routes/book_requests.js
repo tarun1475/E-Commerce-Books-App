@@ -81,7 +81,7 @@ function raiseBooksRequest(req, res) {
 function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author, callback) {
   var insertQuery = "INSERT INTO tb_books (book_req_id, book_name, book_stream, book_semester, type, book_author) VALUES(?, ?, ?, ?, ?, ?)";
   var tt = connection.query(insertQuery, [request_id, name, stream, semester, type, author], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result, tt.sql);
+    logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result.insertId, tt.sql);
     if(err) {
       console.log(err);
       return callback(err, null);
@@ -191,8 +191,8 @@ function putBookRequestResponse(req, res) {
     }
     var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id) VALUES(?, ?) ";
     var tt = connection.query(reqQuery, [vendorId, requestId], function(reqErr, insRes) {
-      logging.logDatabaseQuery(handlerInfo, "inserting book response", reqErr, insRes, tt.sql);
       if(reqErr) {
+        logging.logDatabaseQuery(handlerInfo, "inserting book response", reqErr, insRes, tt.sql);
         return res.send(constants.databaseErrorResponse);
       }
       var responseId = insRes.insertId;
@@ -248,7 +248,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) 
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
         "WHERE distribution.book_id = ? ORDER BY distribution.price ";
    var qq = connection.query(minQuery, [book_id], function(minErr, minResponse) {
-     logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse, qq.sql);
+     logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse.length, qq.sql);
      if(minErr) {
        return callback("There was some error in getting minimum request", null);
      }
@@ -558,7 +558,7 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
                   "WHERE requests.req_id = ? "+
                   " ORDER BY requests.req_id, requests.generated_on ";
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, result, tt.sql);
+    logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, null, tt.sql);
     if(err) {
       return callback(err, null);
     }

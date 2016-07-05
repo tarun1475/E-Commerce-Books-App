@@ -8,6 +8,7 @@
 var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var crypto    = require('crypto');
+var logging   = require('./logging');
 exports.createNewVendor        = createNewVendor;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
@@ -106,7 +107,7 @@ function updateVendorAccountStatus(handlerInfo, vendorId, status, callback) {
   var tt = connection.query(sqlQuery, [status, vendorId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "block/unblock user by id", err, result, tt.sql);
     if(err) {
-      return callback("There was some error in updating user", null);
+      return callback("There was some error in updating vendor", null);
     }
     if(result.affectedRows == 0) {
       return callback("Invalid user id provided", null);
@@ -120,7 +121,7 @@ function getVendorDetailsPanel(req, res) {
     "apiModule": "Vendors",
     "apiHandler": "getVendorDetailsPanel"
   };
-  var vendorId = req.body.vendor_id;
+  var vendorId = parseInt(req.body.vendor_id || 0);
   getVendorDetails(handlerInfo, vendorId, function(err, result) {
     if(err) {
       return res.send({
@@ -137,11 +138,12 @@ function getVendorDetailsPanel(req, res) {
 }
 
 function getVendorDetails(handlerInfo, vendor_id, callback) {
-  var sqlQuery = "SELECT delivery_distribution.*, books.*"+
-      "FROM vevsa_live.tb_delivery_distribution as delivery_distribution "+
-      "JOIN tb_delivery as delivery ON delivery.delivery_id = delivery_distribution.delivery_id " +
-      "JOIN tb_books as books ON books.book_id = delivery_distribution.book_id" +
-      "WHERE delivery_distribution.vendor_id = ?";
+  var sqlQuery = "SELECT delivery_distribution.*, books.*, vendors.* "+
+      "FROM tb_vendors as vendors  "+
+      " LEFT JOIN tb_delivery_distribution as delivery_distribution  ON vendors.vendor_id = delivery_distribution.vendor_id "+
+      " LEFT JOIN tb_delivery as delivery ON delivery.delivery_id = delivery_distribution.delivery_id " +
+      " LEFT JOIN tb_books as books ON books.book_id = delivery_distribution.book_id " +
+      "WHERE vendors.vendor_id = ?";
   var tt = connection.query(sqlQuery, [vendor_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
     if(err) {

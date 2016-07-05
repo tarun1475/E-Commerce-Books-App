@@ -74,7 +74,7 @@ define(exports.deliveryCharges, "URGENT_DELIVERY"      , 30);
  * OTP API key
  */
 exports.sendotp = {};
-define(exports.sendotp, "API_LEY"                      ,
+define(exports.sendotp, "API_KEY"                      ,
  "9Fms2JislBIgnYgRkjLp29uy1xAl-uh2zK1RbUd2AO6MWhuSHAQDRT3TuJKxzOI_pqHxV-rnKhRolMPFYWT3Tn7HHgc5Y9RL1oopyp1tO1kxeegf7gzy0rrduS6Na3JVndBudytFTJgdvuJiRpheRNlqpCtZFRqem1kl_J2Vra8=");
 define(exports.sendotp, "API_LINK", "https://sendotp.msg91.com/api/generateOTP");
 
@@ -82,4 +82,5 @@ define(exports.sendotp, "API_LINK", "https://sendotp.msg91.com/api/generateOTP")
  * Panel API key
  */
 exports.adminPanel = {};
-define(adminPanel, "ACCESS_TOKEN"                      , "6vnZSz78C+kLxHfveUbAwgi4JwFj4zwk+AWjgEZw+K4");
+define(exports.adminPanel, "ACCESS_TOKEN"                      , "6vnZSz78C+kLxHfveUbAwgi4JwFj4zwk+AWjgEZw+K4");
+
