@@ -96,6 +96,7 @@ function getSalesDetails(handlerInfo, totalSales, salesPerVendor, dateInterval, 
             salesPerVendor.push(result[i]);
             totalSales[0]  += result[i].price;
         }
+        salesPerVendor = result;
         callback(null, "Sucessfully fetched data from database");
     });
 }
