@@ -110,6 +110,18 @@ app.get('/req_book_auth/process_pending_req'     , cron.processPendingBookReques
 app.post('/books-auth/get_minimum_response'
     , requests.getMinimumPriceResponse
     , error);
+
+/**
+ * Panel related apis
+ */
+app.post('/books-auth/get/details_user'          , utils.verifyPanelToken
+    , users.getUserDetailsPanel
+    , error);
+
+app.post('/books-auth/block/user'                , utils.verifyPanelToken
+    , users.blockUserById
+    , error);
+
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}

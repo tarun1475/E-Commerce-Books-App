@@ -14,6 +14,9 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
+exports.getUserDetailsPanel               = getUserDetailsPanel;
+exports.blockUserById                     = blockUserById;
+exports.unBlockUserById                   = unBlockUserById;
 
 /**
  *
@@ -117,5 +120,104 @@ function getRecentRequestsByUserId(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     });
+  });
+}
+
+function getUserDetailsPanel(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "getUserDetailsPanel"
+  };
+  var user_id = req.body.user_id;
+  if(utils.checkBlank([user_id])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  getUserDetailsPanelHelper(handlerInfo, user_id, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched user data from database",
+      "data": result,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function getUserDetailsPanelHelper(handlerInfo, user_id, callback) {
+  var sqlQuery = "SELECT users.*, requests.req_id, requests.status, requests.generated_on "+
+      "FROM tb_users " +
+      "JOIN tb_book_requests as requests ON requests.user_id = users.user_id "+
+      "WHERE users.user_id = ? AND requests.is_valid = 0";
+  var getUserDetails = connection.query(sqlQuery, [user_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, {"event": "getting user details"}, err, result, getUserDetails.sql);
+    if(err) {
+      return callback("There was some error in getting user details", null);
+    }
+    if(result.length == 0) {
+      return callback("Invalid user entered", null);
+    }
+    var requests = [], i;
+    for(i = 0; i < result.length; i++) {
+      if(requests.indexOf(result[i].req_id) == -1) {
+        requests.push(result[i].req_id);
+      }
+    }
+    var reqDetailsObj = {};
+    var asyncTasks = [];
+    for(i = 0; i < requests.length; i++) {
+      asyncTasks.push(bookRequests.getRequestDetailsById.bind(null, handlerInfo, requests[i], reqDetailsObj));
+    }
+    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+      if(asyncErr) {
+        return callback(asyncErr, null);
+      }
+      var requestArr = Object.keys(reqDetailsObj).map(function(key) { return reqDetailsObj[key]});
+      callback(null, requestArr);
+    });
+  });
+}
+
+function blockUserById(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "blockUserById"
+  };
+  var userId = req.body.user_id;
+  var userStatus = req.body.status;
+  if(utils.checkBlank([userId])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  updateUserAccountStatus(handlerInfo, userId, userStatus, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully blocked/unblocked user",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function updateUserAccountStatus(handlerInfo, userId, status, callback) {
+  if(status != constants.userAccountStatus.BLOCKED && status != constants.userAccountStatus.UNBLOCKED) {
+    return callback("Invalid account status provided", null);
+  }
+  var sqlQuery = "UPDATE tb_users SET is_blocked = ? WHERE user_id = ?";
+  var tt = connection.query(sqlQuery, [status, userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "block/unblock user by id", err, result, tt.sql);
+    if(err) {
+      return callback("There was some error in updating user", null);
+    }
+    if(result.affectedRows == 0) {
+      return callback("Invalid user id provided", null);
+    }
+    callback(null, "successfully updated user account")
   });
 }
