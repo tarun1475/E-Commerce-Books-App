@@ -134,6 +134,11 @@ app.post('/books-auth/block/vendor'              , utils.verifyPanelToken
 app.post('/books-auth/report'                    , utils.verifyPanelToken
     , analytics.getOverallReportPanel
     , error);
+
+app.post('/books-auth/get_requests'              , utils.verifyPanelToken
+    , analytics.getTotalRequests
+    , errror);
+
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}
