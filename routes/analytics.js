@@ -9,6 +9,8 @@ var bookRequests = require('./book_requests');
 
 exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
+exports.getVendorEngagements  = getVendorEngagements;
+exports.getCancelledRequests  = getCancelledRequests;
 
 function getOverallReportPanel(req, res) {
     var handlerInfo = {
@@ -106,7 +108,7 @@ function getSalesDetails(handlerInfo, totalSales, salesPerVendor, dateInterval, 
 function getOverallRequests(req, res) {
     var handlerInfo = {
       "apiModule" : "analytics",
-      "apiHanlder": "getOverallRequests"
+      "apiHandler": "getOverallRequests"
     };
     var reqParams = req.body;
     var dateInterval = reqParams.date_interval;
@@ -136,17 +138,89 @@ function getOverallRequestsHelper(handlerInfo, dateInterval, callback) {
         for(var i = 0; i < result.length; i++) {
             requestArr.push(result[i].req_id);
         }
-        var asyncTasks = [];
-        var requestObj = {};
-        for(var i = 0; i < result.length; i++) {
-            asyncTasks.push(bookRequests.getRequestDetailsById.bind(handlerInfo, requestArr[i], requestObj));
-        }
-        async.parallel(asyncTasks, function(asyncErr, asyncRes) {
-            if(asyncErr) {
-                return callback(asyncErr, null);
-            }
-            var requestObj = Object.keys(resquestObj).map(function(key) { return resquestObj[key] });
-            callback(null, "Successfully fetched the request information");
+        bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
+          if(reqErr) {
+            return callback(reqErr, null);
+          }
+          callback(null, reqArr);
         });
     });
+}
+
+function getVendorEngagements(req, res) {
+    var handlerInfo = {
+      "apiModule": "analytics",
+      "apiHandler": "getVendorEngagements"
+    };
+    var dateInterval = req.body.date_interval;
+    getVendorEngagementsHelper(handlerInfo, dateInterval, function(err, result) {
+        if(err) {
+          return res.send({
+            "log": err,
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+        }
+        res.send({
+          "log": "Successfully fetched vendor engagement",
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "data":result
+        });
+    });
+}
+
+function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
+    var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, COUNT(*) as responses_provided "+ 
+        "FROM `tb_books_overall_distribution` as distribution "+
+        "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
+        "WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?) "+
+        "GROUP BY distribution.vendor_id";
+    var tt = connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+        if(err) {
+            logging.logDatabaseQuery(handlerInfo, "getting vendor engagements", err, result);
+            return callback("There was some error in getting vendors engagement", null);
+        }
+        callback(null, result);
+    });
+}
+
+function getCancelledRequests(req, res) {
+    var handlerInfo = {
+      "apiModule": "analytics",
+      "apiHandler": "getCancelledRequests"
+    }
+    var dateInterval = req.body.date_interval;
+    getCancelledRequestHelper(handlerInfo, dateInterval, function(err, result) {
+      if(err) {
+        return res.send({
+          "log": err,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      res.send({
+        "log": "Successfully fetched data from database",
+        "flag": constants.responseFlags.ACTION_FAILED,
+        "data": result
+      });
+    });
+}
+
+function getCancelledRequestHelper(handlerInfo, dateInterval, callback) {
+   var sqlQuery = "SELECT req_id FROM tb_book_requests "+
+       " WHERE status = 2 AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?) ";
+   connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+      if(err) {
+         logging.logDatabaseQuery(handlerInfo, "getting cancelled requests", err, result);
+         return callback("There was some error in getting cancelled requests", null);
+      }
+      var requestArr = [];
+      for(var i = 0; i < result.length; i++) {
+         requestArr.push(result[i].req_id);
+      }
+      bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
+         if(reqErr) {
+           return callback(reqErr, null);
+         }
+         callback(null, reqArr);
+      });
+   });
 }
