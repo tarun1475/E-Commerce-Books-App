@@ -5,8 +5,10 @@
 var async = require('async');
 var logging = require('./logging');
 var constants = require('./constants');
+var bookRequests = require('./book_requests');
 
 exports.getOverallReportPanel = getOverallReportPanel;
+exports.getOverallRequests    = getOverallRequests;
 
 function getOverallReportPanel(req, res) {
     var handlerInfo = {
@@ -98,5 +100,53 @@ function getSalesDetails(handlerInfo, totalSales, salesPerVendor, dateInterval, 
         }
         salesPerVendor = result;
         callback(null, "Sucessfully fetched data from database");
+    });
+}
+
+function getOverallRequests(req, res) {
+    var handlerInfo = {
+      "apiModule" : "analytics",
+      "apiHanlder": "getOverallRequests"
+    };
+    var reqParams = req.body;
+    var dateInterval = reqParams.date_interval;
+    getOverallRequestsHelper(handlerInfo, dateInterval, function(err, result) {
+        if(err) {
+            return res.send({
+                "log": err,
+                "flag": constants.responseFlags.ACTION_FAILED
+            });
+        }
+        res.send({
+            "log": "Successfully fetched the requests",
+            "flag": constants.responseFlags.ACTION_COMPLETE,
+            "data": result
+        });
+    });
+}
+
+function getOverallRequestsHelper(handlerInfo, dateInterval, callback) {
+    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+    var tt =connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+        if(err) {
+            logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
+            return callback("There was some error in getting requests data", null);
+        }
+        var requestArr = [];
+        for(var i = 0; i < result.length; i++) {
+            requestArr.push(result[i].req_id);
+        }
+        var asyncTasks = [];
+        var requestObj = {};
+        for(var i = 0; i < result.length; i++) {
+            asyncTasks.push(bookRequests.getRequestDetailsById.bind(handlerInfo, requestArr[i], requestObj));
+        }
+        async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+            if(asyncErr) {
+                return callback(asyncErr, null);
+            }
+            var requestObj = Object.keys(resquestObj).map(function(key) { return resquestObj[key] });
+            callback(null, "Successfully fetched the request information");
+        });
     });
 }
