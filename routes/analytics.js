@@ -9,6 +9,7 @@ var bookRequests = require('./book_requests');
 
 exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
+exports.getVendorEngagements  = getVendorEngagements;
 
 function getOverallReportPanel(req, res) {
     var handlerInfo = {
@@ -106,11 +107,12 @@ function getSalesDetails(handlerInfo, totalSales, salesPerVendor, dateInterval, 
 function getOverallRequests(req, res) {
     var handlerInfo = {
       "apiModule" : "analytics",
-      "apiHanlder": "getOverallRequests"
+      "apiHandler": "getOverallRequests"
     };
     var reqParams = req.body;
     var dateInterval = reqParams.date_interval;
-    getOverallRequestsHelper(handlerInfo, dateInterval, function(err, result) {
+    var requestStatus = reqParams.req_type;
+    getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, function(err, result) {
         if(err) {
             return res.send({
                 "log": err,
@@ -125,9 +127,9 @@ function getOverallRequests(req, res) {
     });
 }
 
-function getOverallRequestsHelper(handlerInfo, dateInterval, callback) {
-    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
-    var tt =connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, callback) {
+    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+    var tt =connection.query(sqlQuery, [requestStatus, dateInterval.start_date, dateInterval.end_date], function(err, result) {
         if(err) {
             logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
             return callback("There was some error in getting requests data", null);
@@ -136,17 +138,47 @@ function getOverallRequestsHelper(handlerInfo, dateInterval, callback) {
         for(var i = 0; i < result.length; i++) {
             requestArr.push(result[i].req_id);
         }
-        var asyncTasks = [];
-        var requestObj = {};
-        for(var i = 0; i < result.length; i++) {
-            asyncTasks.push(bookRequests.getRequestDetailsById.bind(handlerInfo, requestArr[i], requestObj));
-        }
-        async.parallel(asyncTasks, function(asyncErr, asyncRes) {
-            if(asyncErr) {
-                return callback(asyncErr, null);
-            }
-            var requestObj = Object.keys(resquestObj).map(function(key) { return resquestObj[key] });
-            callback(null, "Successfully fetched the request information");
+        bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
+          if(reqErr) {
+            return callback(reqErr, null);
+          }
+          callback(null, reqArr);
         });
+    });
+}
+
+function getVendorEngagements(req, res) {
+    var handlerInfo = {
+      "apiModule": "analytics",
+      "apiHandler": "getVendorEngagements"
+    };
+    var dateInterval = req.body.date_interval;
+    getVendorEngagementsHelper(handlerInfo, dateInterval, function(err, result) {
+        if(err) {
+          return res.send({
+            "log": err,
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+        }
+        res.send({
+          "log": "Successfully fetched vendor engagement",
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "data":result
+        });
+    });
+}
+
+function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
+    var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, COUNT(*) as responses_provided "+ 
+        "FROM `tb_books_overall_distribution` as distribution "+
+        "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
+        "WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?) "+
+        "GROUP BY distribution.vendor_id";
+    var tt = connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+        if(err) {
+            logging.logDatabaseQuery(handlerInfo, "getting vendor engagements", err, result);
+            return callback("There was some error in getting vendors engagement", null);
+        }
+        callback(null, result);
     });
 }

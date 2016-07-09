@@ -20,6 +20,7 @@ exports.getDeliveryDetailsById          = getDeliveryDetailsById;
 exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getPendingRequestArr            = getPendingRequestArr;
 exports.getRequestDetailsById           = getRequestDetailsById;
+exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
 
 /**
  * [POST] '/req_book_auth/raise_request' <br>
@@ -460,7 +461,7 @@ function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, respon
     var deliveryId = result.insertId;
     var asyncTasks = [];
     for(var i = 0; i < responseData.length; i++) {
-      asyncTasks.push(logDeliveryDistribution.bind(null, deliveryId, responseData[i].book_id, responseData[i].vendor_id));
+      asyncTasks.push(logDeliveryDistribution.bind(null, deliveryId, responseData[i].book_id, responseData[i].vendor_id, responseData[i].price));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
       if(asyncErr) {
@@ -471,9 +472,9 @@ function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, respon
   });
 }
 
-function logDeliveryDistribution(deliveryId, book_id, vendor_id, callback) {
-  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id) VALUES(?, ?, ?)";
-  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id], function(err, result) {
+function logDeliveryDistribution(deliveryId, book_id, vendor_id, price, callback) {
+  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id, book_price) VALUES(?, ?, ?, ?)";
+  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id, price], function(err, result) {
     if(err) {
       return callback("There was some error in logging delivery distribution", null);
     }
@@ -558,12 +559,14 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
                   "WHERE requests.req_id = ? "+
                   " ORDER BY requests.req_id, requests.generated_on ";
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, null, tt.sql);
     if(err) {
+      logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, null, tt.sql);
       return callback(err, null);
     }
     if(result.length == 0) {
-      return callback("No request found corresponding to this request id", null);
+      logging.error(handlerInfo, "No request found corresponding to request id - "+request_id);
+      return callback(null, null);
+      //return callback("No request found corresponding to this request id", null);
     }
     var curRequest = {};
     curRequest.req_id        = result[0].req_id;
@@ -587,5 +590,21 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
     curRequest.books         = books;
     requestObj[request_id] = curRequest;
     callback(null, curRequest);
+  });
+}
+
+function getRequestDetailsWrapper(handlerInfo, requestArr, callback) {
+  var asyncTasks = [];
+  var requestObj = {};
+  for(var i = 0; i < requestArr.length; i++) {
+    asyncTasks.push(getRequestDetailsById.bind(null, handlerInfo, requestArr[i], requestObj));
+  }
+  async.parallel(asyncTasks, function(err, result) {
+    if(err) {
+      console.log(err);
+      return callback("There was some error in getting request details", null);
+    }
+    var requestArray = Object.keys(requestObj).map(function(key) { return requestObj[key] });
+    callback(null, requestArray);
   });
 }

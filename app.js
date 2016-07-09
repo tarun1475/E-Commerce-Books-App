@@ -136,8 +136,12 @@ app.post('/books-auth/report'                    , utils.verifyPanelToken
     , error);
 
 app.post('/books-auth/get_requests'              , utils.verifyPanelToken
-    , analytics.getTotalRequests
-    , errror);
+    , analytics.getOverallRequests
+    , error);
+
+app.post('/books-auth/get_vendors_engagement'    , utils.verifyPanelToken
+    , analytics.getVendorEngagements
+    , error);
 
 /**
  * To change the port, please edit the configuration file
