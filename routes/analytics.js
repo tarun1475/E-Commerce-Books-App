@@ -10,7 +10,6 @@ var bookRequests = require('./book_requests');
 exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
 exports.getVendorEngagements  = getVendorEngagements;
-exports.getCancelledRequests  = getCancelledRequests;
 
 function getOverallReportPanel(req, res) {
     var handlerInfo = {
@@ -112,7 +111,8 @@ function getOverallRequests(req, res) {
     };
     var reqParams = req.body;
     var dateInterval = reqParams.date_interval;
-    getOverallRequestsHelper(handlerInfo, dateInterval, function(err, result) {
+    var requestStatus = reqParams.req_type;
+    getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, function(err, result) {
         if(err) {
             return res.send({
                 "log": err,
@@ -127,9 +127,9 @@ function getOverallRequests(req, res) {
     });
 }
 
-function getOverallRequestsHelper(handlerInfo, dateInterval, callback) {
-    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
-    var tt =connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, callback) {
+    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+    var tt =connection.query(sqlQuery, [requestStatus, dateInterval.start_date, dateInterval.end_date], function(err, result) {
         if(err) {
             logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
             return callback("There was some error in getting requests data", null);
@@ -181,46 +181,4 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
         }
         callback(null, result);
     });
-}
-
-function getCancelledRequests(req, res) {
-    var handlerInfo = {
-      "apiModule": "analytics",
-      "apiHandler": "getCancelledRequests"
-    }
-    var dateInterval = req.body.date_interval;
-    getCancelledRequestHelper(handlerInfo, dateInterval, function(err, result) {
-      if(err) {
-        return res.send({
-          "log": err,
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
-      }
-      res.send({
-        "log": "Successfully fetched data from database",
-        "flag": constants.responseFlags.ACTION_FAILED,
-        "data": result
-      });
-    });
-}
-
-function getCancelledRequestHelper(handlerInfo, dateInterval, callback) {
-   var sqlQuery = "SELECT req_id FROM tb_book_requests "+
-       " WHERE status = 2 AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?) ";
-   connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
-      if(err) {
-         logging.logDatabaseQuery(handlerInfo, "getting cancelled requests", err, result);
-         return callback("There was some error in getting cancelled requests", null);
-      }
-      var requestArr = [];
-      for(var i = 0; i < result.length; i++) {
-         requestArr.push(result[i].req_id);
-      }
-      bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
-         if(reqErr) {
-           return callback(reqErr, null);
-         }
-         callback(null, reqArr);
-      });
-   });
 }

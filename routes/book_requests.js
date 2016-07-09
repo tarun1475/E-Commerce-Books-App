@@ -559,12 +559,14 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
                   "WHERE requests.req_id = ? "+
                   " ORDER BY requests.req_id, requests.generated_on ";
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, null, tt.sql);
     if(err) {
+      logging.logDatabaseQuery(handlerInfo, "Getting request details for user", err, null, tt.sql);
       return callback(err, null);
     }
     if(result.length == 0) {
-      return callback("No request found corresponding to this request id", null);
+      logging.error(handlerInfo, "No request found corresponding to request id - "+request_id);
+      return callback(null, null);
+      //return callback("No request found corresponding to this request id", null);
     }
     var curRequest = {};
     curRequest.req_id        = result[0].req_id;
@@ -602,7 +604,7 @@ function getRequestDetailsWrapper(handlerInfo, requestArr, callback) {
       console.log(err);
       return callback("There was some error in getting request details", null);
     }
-    var requestArray = Object.keys(resquestObj).map(function(key) { return resquestObj[key] });
+    var requestArray = Object.keys(requestObj).map(function(key) { return requestObj[key] });
     callback(null, requestArray);
   });
 }
