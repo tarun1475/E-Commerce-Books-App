@@ -7,11 +7,12 @@
 var request     = require('request');
 var nodemailer  = require('nodemailer');
 var smtpTransport   = require('nodemailer-smtp-transport');
+var logging     = require('./logging');
 
 var transport = nodemailer.createTransport(smtpTransport({
   host: 'smtp.gmail.com',
   secureConnection: false,
-  port: 587,
+  port: 465,
   auth: {
     user: "helpvevsa@gmail.com",
     pass: "9779766030"
@@ -36,8 +37,11 @@ function sendEmailToUser(from, to, subject, text, htmlText) {
   };
   transport.sendMail(mailOptions, function(err, info) {
     if(err) {
-      console.log(err);
+      logging.error(err);
     }
-    console.log("Email sent "+ info.response);
+    else {
+      logging.trace("Email sent "+ info.response);
+    }
+    return;
   });
 }

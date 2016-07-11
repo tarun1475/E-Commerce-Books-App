@@ -173,7 +173,7 @@ function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, pa
 function verifyClientToken(req, res, next) {
   var handlerInfo = {
     "apiModule": "commonfunction",
-    "apiHander": "verifyClientToken"
+    "apiHandler": "verifyClientToken"
   };
   var token = (req.cookies && req.cookies.token) || req.body.token || req.query.token,
       e = null;

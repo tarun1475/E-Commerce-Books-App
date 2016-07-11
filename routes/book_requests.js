@@ -37,6 +37,7 @@ function raiseBooksRequest(req, res) {
   var reqParams     = req.body;
   var user_id       = reqParams.user_id;
   var books         = reqParams.books;
+  var requestCat    = reqParams.book_req_category; // 0 : College, 1 : School, 2 : Competitions, 3 : Novel
   
   var insertReq  = "INSERT INTO tb_book_requests (user_id) VALUES (?)";
   var tt = connection.query(insertReq, [user_id], function(insErr, insRes) {
@@ -52,7 +53,10 @@ function raiseBooksRequest(req, res) {
     var asyncTasks = [];
 
     for(var i = 0; i < books.length; i++) {
-      asyncTasks.push(insertNewBook.bind(null, handlerInfo, request_id, books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].type, books[i].book_author || "NA"));
+      asyncTasks.push(insertNewBook.bind(null, handlerInfo, request_id,
+        books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].type || 0, books[i].book_author || "NA",
+        books[i].medium || "English", requestCat || 0, books[i].Class || "NA", books[i].competition_name || "NA",
+        books[i].is_ncert || 0, books[i].is_guide || 0, books[i].publisher_name || "NA"));
     }
     async.series(asyncTasks, function(err, result) {
       if(err) {
@@ -79,10 +83,18 @@ function raiseBooksRequest(req, res) {
  * @param type
  * @param callback
  */
-function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author, callback) {
-  var insertQuery = "INSERT INTO tb_books (book_req_id, book_name, book_stream, book_semester, type, book_author) VALUES(?, ?, ?, ?, ?, ?)";
-  var tt = connection.query(insertQuery, [request_id, name, stream, semester, type, author], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result.insertId, tt.sql);
+function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author, 
+  medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, callback) {
+  var insertQuery = "INSERT INTO tb_books "+
+    "(book_req_id, book_name, book_stream, book_semester, type, book_author, medium, book_category, "+
+    "class, competition_name, is_ncert, is_guide, publisher) "+
+    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  var queryParams = [
+    request_id, name, stream, semester, type, author, medium, book_category, Class,
+    competition_name, isNcert, isGuide, publisherName
+  ];
+  var tt = connection.query(insertQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result, tt.sql);
     if(err) {
       console.log(err);
       return callback(err, null);
@@ -148,6 +160,13 @@ function getBookRequests(req, res) {
         curBook.book_stream    = result[i].book_stream;
         curBook.book_author    = result[i].book_author;
         curBook.type           = result[i].type;
+        curBook.medium           = result[i].medium;
+        curBook.book_category    = result[i].book_category;
+        curBook.publisher        = result[i].publisher;
+        curBook.Class            = result[i]["class"];
+        curBook.competition_name = result[i].competition_name;
+        curBook.is_ncert         = result[i].is_ncert;
+        curBook.is_guide         = result[i].is_guide;
         books.push(curBook);
         i++;
       } while(i < result.length && result[i].req_id == result[i-1].req_id);
@@ -199,7 +218,7 @@ function putBookRequestResponse(req, res) {
       var responseId = insRes.insertId;
       var asyncTasks = [];
       for(var i = 0; i < books.length; i++) {
-        asyncTasks.push(insertBookResponse.bind(null, responseId, vendorId, books[i].book_id, books[i].price));
+        asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id, books[i].price, books[i].mrp));
       }
       async.series(asyncTasks, function(error, result) {
         if(error) {
@@ -225,10 +244,11 @@ function putBookRequestResponse(req, res) {
  * @param book_price
  * @param callback
  */
-function insertBookResponse(response_id, vendor_id, book_id, book_price, callback) {
-  var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price) VALUES (?, ?, ?, ?)";
-  connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price], function(err, result) {
+function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_price, mrp, callback) {
+  var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price, mrp) VALUES (?, ?, ?, ?, ?)";
+  connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price, mrp], function(err, result) {
     if(err) {
+      logging.error(handlerInfo, "logging book response into db", err, result);
       return callback("There was some error in logging vendor response", null);
     }
     callback(null, "successfully logged request response");
@@ -349,6 +369,10 @@ function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse,
  * @param res
  */
 function confirmBookOrder(req, res) {
+  var handlerInfo     = {
+    "apiModule": "bookRequests",
+    "apiHandler": "confirmBookOrder"
+  };
   var responseData    = req.body.data;
   var requestId       = req.body.request_id;
   var deliveryAddress = req.body.delivery_address || req.body.user_address;
@@ -356,7 +380,7 @@ function confirmBookOrder(req, res) {
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
-  updateBookRequest(requestId, reqStatus, function(updateErr, updateRes) {
+  updateBookRequest(handlerInfo, requestId, reqStatus, function(updateErr, updateRes) {
     if(updateErr) {
       return res.send({
         "log" : "There was some error in updating request",
@@ -368,7 +392,7 @@ function confirmBookOrder(req, res) {
       for(var i = 0; i < responseData.length; i++)
         totalPrice += responseData[i].price;
       var urgentDeliveryCharges = (isUrgent == 1 ? constants.deliveryCharges.URGENT_DELIVERY : 0);
-      deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
+      deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
           return res.send({
             "log" : "There was some error in adding delivery to database",
@@ -387,16 +411,18 @@ function confirmBookOrder(req, res) {
                        "<tr><th align=center>Book Name</th>"+
                        "<th align=center>Book Author</th>"+
                        "<th align=center>Fetched from Vender</th>"+
-                       "<th align=center>Price</th></tr>";
+                       "<th align=center>Price</th>"+
+                       "<th align=center>Vevsa Comission</th></tr>";
         for(var i = 0; i < responseData.length; i++) {
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
           html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
+          html += ("<td align=center> Rs."+parseInt(responseData[i].price-(responseData[i].mrp*0.5))+"</td>");
           html += "</tr>";
         }
-        html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
+        html += "<tr><td colspan=4 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=4 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";
@@ -427,13 +453,13 @@ function confirmBookOrder(req, res) {
  * @param reqStatus
  * @param callback
  */
-function updateBookRequest(requestId, reqStatus, callback) {
+function updateBookRequest(handlerInfo, requestId, reqStatus, callback) {
   var sqlQuery = "UPDATE tb_book_requests "+
                  "SET approved_on = NOW(), status = ? "+
                  "WHERE req_id = ?";
-  connection.query(sqlQuery, [reqStatus, requestId], function(err, result) {
+  var tt = connection.query(sqlQuery, [reqStatus, requestId], function(err, result) {
     if(err) {
-      console.log(err);
+      logging.logDatabaseQuery(handlerInfo, "updating book request", err, result, tt.sql);
       return callback(err, null);
     }
     callback(null, "Sucessfully updated request id");
@@ -449,19 +475,21 @@ function updateBookRequest(requestId, reqStatus, callback) {
  * @param isUrgent
  * @param callback
  */
-function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, responseData, callback) {
+function deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
   var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id, delivery_address, is_urgent_delivery, delivery_date) "+
                  "VALUES (?, ?, ?, ?, "+dateStr+") ";
-  connection.query(sqlQuery, [requestId, userId, deliveryAddress, isUrgent], function(err, result) {
+  var tt = connection.query(sqlQuery, [requestId, userId, deliveryAddress, isUrgent], function(err, result) {
     if(err) {
-      console.log(err);
+      logging.logDatabaseQuery(handlerInfo, "adding delivery", err, result, tt.sql);
       return callback(err, null);
     }
     var deliveryId = result.insertId;
     var asyncTasks = [];
     for(var i = 0; i < responseData.length; i++) {
-      asyncTasks.push(logDeliveryDistribution.bind(null, deliveryId, responseData[i].book_id, responseData[i].vendor_id, responseData[i].price));
+      var vevsaComission = (responseData[i].price - (responseData[i].mrp*0.5));
+      asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId, responseData[i].book_id, responseData[i].vendor_id, 
+        responseData[i].price, responseData[i].mrp, vevsaComission));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
       if(asyncErr) {
@@ -472,10 +500,11 @@ function deliverBooksToUser(requestId, userId, deliveryAddress, isUrgent, respon
   });
 }
 
-function logDeliveryDistribution(deliveryId, book_id, vendor_id, price, callback) {
-  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id, book_price) VALUES(?, ?, ?, ?)";
-  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id, price], function(err, result) {
+function logDeliveryDistribution(handlerInfo, deliveryId, book_id, vendor_id, price, mrp, vevsa_commission, callback) {
+  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id, book_id, vendor_id, book_price, mrp, vevsa_commission) VALUES(?, ?, ?, ?, ?, ?)";
+  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id, price, mrp, vevsa_commission], function(err, result) {
     if(err) {
+      logging.logDatabaseQuery(handlerInfo, "logging delivery distribution", err, result, tt.sql);
       return callback("There was some error in logging delivery distribution", null);
     }
     callback(null, "Successfully logged a distribution");
@@ -578,12 +607,20 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
     var books = [], i = 0;
     do {
       var curBook = {};
-      curBook.book_id        = result[i].book_id;
-      curBook.book_name      = result[i].book_name;
-      curBook.book_photograph= result[i].book_photograph;
-      curBook.book_stream    = result[i].book_stream;
-      curBook.book_author    = result[i].book_author;
-      curBook.type           = result[i].type;
+      curBook.book_id          = result[i].book_id;
+      curBook.book_name        = result[i].book_name;
+      curBook.book_photograph  = result[i].book_photograph;
+      curBook.book_stream      = result[i].book_stream;
+      curBook.book_author      = result[i].book_author;
+      curBook.type             = result[i].type;
+      curBook.medium           = result[i].medium;
+      curBook.book_category    = result[i].book_category;
+      curBook.publisher        = result[i].publisher;
+      curBook.Class            = result[i]["class"];
+      curBook.competition_name = result[i].competition_name;
+      curBook.is_ncert         = result[i].is_ncert;
+      curBook.is_guide         = result[i].is_guide;
+
       books.push(curBook);
       i++;
     } while(i < result.length && result[i].req_id == result[i-1].req_id);

@@ -121,7 +121,7 @@ function getRecentRequestsByUserId(req, res) {
       res.send({
         "log": "Successfully fetched request data",
         "data": response,
-        "flag": constants.responseFlags.ACTION_FAILED
+        "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });
   });
