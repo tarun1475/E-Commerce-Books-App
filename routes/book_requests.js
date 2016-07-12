@@ -218,7 +218,9 @@ function putBookRequestResponse(req, res) {
       var responseId = insRes.insertId;
       var asyncTasks = [];
       for(var i = 0; i < books.length; i++) {
-        asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id, books[i].price, books[i].mrp));
+        console.log("is_available : ", books[i].is_available);
+        asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id,
+          books[i].price || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
       }
       async.series(asyncTasks, function(error, result) {
         if(error) {
@@ -244,9 +246,10 @@ function putBookRequestResponse(req, res) {
  * @param book_price
  * @param callback
  */
-function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_price, mrp, callback) {
-  var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price, mrp) VALUES (?, ?, ?, ?, ?)";
-  connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price, mrp], function(err, result) {
+function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_price, mrp, isAvailable, callback) {
+  var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price, mrp, is_available) "+
+    "VALUES (?, ?, ?, ?, ?, ?)";
+  var tt = connection.query(sqlQuery, [response_id, vendor_id, book_id, book_price, mrp, isAvailable], function(err, result) {
     if(err) {
       logging.error(handlerInfo, "logging book response into db", err, result);
       return callback("There was some error in logging vendor response", null);
@@ -274,6 +277,18 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) 
        return callback("There was some error in getting minimum request", null);
      }
      if(minResponse.length == 0) {
+       return callback(null, null);
+     }
+     if(minResponse[0].is_available == 0) {
+       var bookObj = {};
+       bookObj.book_name = minResponse[0].book_name;
+       bookObj.book_stream = minResponse[0].book_stream;
+       bookObj.book_author = minResponse[0].book_author;
+       bookObj.book_semester = minResponse[0].book_semester;
+       bookObj.type = minResponse[0].type;
+       bookObj.is_available = 0;
+       bookObj.msg = "Sorry, this book is not available right now";
+       minResponseObj[book_id] = bookObj;
        return callback(null, null);
      }
      minResponseObj[book_id] = minResponse[0];
@@ -380,6 +395,14 @@ function confirmBookOrder(req, res) {
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
+  // only process available books:
+  var tmp = responseData.slice();
+  responseData = [];
+  for(var i = 0; i < tmp.length; i++) {
+    if(tmp[i].is_available == 1) {
+      responseData.push(tmp[i]);
+    }
+  }
   updateBookRequest(handlerInfo, requestId, reqStatus, function(updateErr, updateRes) {
     if(updateErr) {
       return res.send({
