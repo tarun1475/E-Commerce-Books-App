@@ -12,6 +12,7 @@ var logging   = require('./logging');
 exports.createNewVendor        = createNewVendor;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
+exports.getVendorSales         = getVendorSales;
 
 /**
  * [POST] '/books-auth/create_vendor' <br>
@@ -150,5 +151,33 @@ function getVendorDetails(handlerInfo, vendor_id, callback) {
       return callback("There was some error in getting vendor details", null);
     }
     callback(null, result);
+  });
+}
+
+function getVendorSales(req, res) {
+  var handlerInfo = {
+    "apiModule": "vendors",
+    "apiHandler": "getVendorSales"
+  };
+  var reqParams = req.query;
+  var vendorId = reqParams.vendor_id;
+
+  var sqlQuery = "SELECT distribution.logged_on,SUM(distribution.vevsa_commission) as total_vevsa_commission, "+
+    "SUM(distribution.mrp) as total_sales FROM ( "+
+    "SELECT vendor_id, mrp, vevsa_commission, DATE(logged_on)as logged_on FROM tb_delivery_distribution "+
+    ") as distribution "+
+    "WHERE distribution.vendor_id = ? "+
+    "GROUP BY distribution.logged_on"
+  var rr = connection.query(sqlQuery, [vendorId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendor sales", err, result, rr.sql);
+    if(err) {
+      console.log(err);
+      return res.send(constants.databaseErrorResponse);
+    }
+    res.send({
+      "log": "Successfully fetched sales information from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
   });
 }

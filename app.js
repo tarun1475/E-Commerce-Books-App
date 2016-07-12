@@ -78,6 +78,10 @@ app.get('/books-auth/verify_otp'
    , utils.verifyOTP
    , error);
 
+app.get('/books-auth/get_vendor_sales'         , utils.verifyClientToken
+  , vendors.getVendorSales
+  , error);
+
 /**
  * APIs related to book requests
  */
