@@ -148,6 +148,12 @@ app.post('/books-auth/get_vendors_engagement'    , utils.verifyPanelToken
  * @type {https.Server}
  */
 
+/*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
+  console.log('Express server listening on port ' + app.get('port'));
+});
+*/
+
+var httpServer = http.createServer(app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));
 });
