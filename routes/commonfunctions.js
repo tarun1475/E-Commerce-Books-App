@@ -317,7 +317,6 @@ function verifyOTP(req, res) {
  * @param req - {OBJECT} request body/query should contain the token
  * @param res - {OBJECT} if no token
  * @param next - {FUNCTION} next middleware to be called
- * @returns {*}
  */
 function verifyPanelToken(req, res, next) {
   var handlerInfo = {
@@ -339,4 +338,31 @@ function verifyPanelToken(req, res, next) {
     return next(e);
   }
   next();
+}
+
+/**
+ * middleware to log request in database
+ * @param req {OBJECT} request of API
+ * @param res {OBJECT} response object that would be returned
+ * @param next {FUNCTION} next middleware function to be called
+ */
+function logRequest(req, res, next) {
+  var requestData = "";
+  if(req.method === "POST") {
+    requestData = JSON.stringify(req.body);
+  }
+  else if(req.method === "GET") {
+    requestData = JSON.stringify(req.query);
+  }
+
+  var data = [req.url, requestData, req.token, req.connection.remoteAddress];
+  var insertLog = "INSERT INTO tb_app_api_logs "+
+    "(api_name, request, requested_by, logged_on, ip_address) "+
+    "VALUES(?, ?, ?, NOW(), ?)";
+  connection_addn.query(insertLog, data, function(err, insRes) {
+    if(err) {
+      logging.error("Error while inserting logs", err);
+    }
+    next();
+  });
 }

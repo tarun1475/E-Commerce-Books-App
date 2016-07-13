@@ -147,6 +147,9 @@ app.post('/books-auth/get_vendors_engagement'    , utils.verifyPanelToken
     , analytics.getVendorEngagements
     , error);
 
+app.post('/books-auth/get_deliveries'            , utils.verifyPanelToken
+    , requests.getDeliveries
+    , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}

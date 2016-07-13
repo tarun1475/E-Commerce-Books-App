@@ -21,6 +21,7 @@ exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getPendingRequestArr            = getPendingRequestArr;
 exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
+exports.getDeliveries                   = getDeliveries;
 
 /**
  * <b>API [POST] '/req_book_auth/raise_request' </b><br>
@@ -681,5 +682,40 @@ function getRequestDetailsWrapper(handlerInfo, requestArr, callback) {
     }
     var requestArray = Object.keys(requestObj).map(function(key) { return requestObj[key] });
     callback(null, requestArray);
+  });
+}
+
+/**
+ * <b>API [POST] /books-auth/get_deliveries</b><br>
+ * API to get book deliveries in panel
+ * @param req - request body requires token and date object
+ * @param res - response body would provide an array of deliveries
+ * @return @type {{log: string, flag: number, data: array}}
+ */
+function getDeliveries(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "getDeliveries"
+  };
+  var reqParams = req.body;
+  var dateInterval = reqParams.date_interval;
+  if(utils.checkBlank([dateInterval])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  var sqlQuery = "SELECT delivery.*, users.user_name, users.user_phone, users.user_address, users.user_city " +
+      "FROM `tb_delivery` as delivery " +
+      "LEFT JOIN tb_users as users ON users.user_id = delivery.user_id " +
+      "WHERE delivery.logged_on BETWEEN DATE(?) AND DATE(?) " +
+      "ORDER BY delivery.`logged_on` DESC";
+  var tt = connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting deliveries", err, result, tt.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    res.send({
+      "log": "successfully fetched data from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
   });
 }
