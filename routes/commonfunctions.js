@@ -170,6 +170,13 @@ function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, pa
   }
 }
 
+/**
+ * Utility function to verify client token
+ * @param req {OBJECT} request body/url should contain token
+ * @param res {OBJECT} error response would be sent
+ * @param next {FUNCTION} next middleware if everything is ok
+ * @returns {*}
+ */
 function verifyClientToken(req, res, next) {
   var handlerInfo = {
     "apiModule": "commonfunction",
@@ -193,6 +200,8 @@ function verifyClientToken(req, res, next) {
     if(result.length == 0) {
       e = new Error('Invalid token provided!');
       e.status = constants.responseFlags.NOT_AUTHORIZED;
+      e.log = "Invalid token provided!";
+      e.flag = constants.responseFlags.NOT_AUTHORIZED;
       return next(e);
     }
     if(userType == 0) {
@@ -221,6 +230,11 @@ function verifyClientToken(req, res, next) {
   });
 }
 
+/**
+ * <b>API [GET] /books-auth/send_otp</b><br>
+ * @param req {OBJECT} request object should contain phone_no
+ * @param res {OBJECT} response would contain session id
+ */
 function sendOTP(req, res) {
   var handlerInfo = {
     "apiModule": "commonfunctions",
@@ -266,6 +280,11 @@ function sendOTP(req, res) {
   });
 }
 
+/**
+ * <b>API [GET] /books-auth/verify_otp</b><br>
+ * @param req {OBJECT} request query should contain session_id and otp
+ * @param res {OBJECT} response would contain a json object indicating verification status
+ */
 function verifyOTP(req, res) {
   var handlerInfo = {
     "apiModule": "commonfuntions",
@@ -293,6 +312,13 @@ function verifyOTP(req, res) {
   });
 }
 
+/**
+ * This middleware would be used on the panel side for verification
+ * @param req - {OBJECT} request body/query should contain the token
+ * @param res - {OBJECT} if no token
+ * @param next - {FUNCTION} next middleware to be called
+ * @returns {*}
+ */
 function verifyPanelToken(req, res, next) {
   var handlerInfo = {
     "apiModule": "Commonfunctions",

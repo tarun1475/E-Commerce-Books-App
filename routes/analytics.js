@@ -1,7 +1,8 @@
 /**
  * @module Analytics
- * Created by rohan on 7/5/16.
  */
+
+// Created by rohan on 7/5/16.
 var async = require('async');
 var logging = require('./logging');
 var constants = require('./constants');
@@ -11,6 +12,13 @@ exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
 exports.getVendorEngagements  = getVendorEngagements;
 
+/**
+ * <b>API [POST] /books-auth/report </b> <br>
+ * API to get overall report regarding sales and requests
+ * @param token - {STRING} access token
+ * @param date_interval - {OBJECT} object containing start and end date offsets
+ * @return {JSON} - Response body contains an object containing report counts
+ */
 function getOverallReportPanel(req, res) {
     var handlerInfo = {
         "apiModule": "analytics",
@@ -104,6 +112,15 @@ function getSalesDetails(handlerInfo, totalSales, salesPerVendor, dateInterval, 
     });
 }
 
+/**
+ * <b>API [POST] /books-auth/get_requests</b><br>
+ * API to get overall panel requests
+ * @param token {STRING} access token
+ * @param date_interval {OBJECT} date interval for requests
+ * @param req_type {INTEGER} 0 -> Pending, 1 -> Complete, 2 -> Cancelled
+ * @return {JSON}  Response body would contain an array of request objects in 'data' key
+ *
+ */
 function getOverallRequests(req, res) {
     var handlerInfo = {
       "apiModule" : "analytics",
@@ -147,6 +164,13 @@ function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, call
     });
 }
 
+/**
+ * <b>API [POST] /books-auth/get_vendors_engagement</b><br>
+ * API to get overall panel requests
+ * @param token {STRING} access token
+ * @param date_interval {OBJECT} date interval for requests
+ * @return {JSON} Response body contains array of vendor objects
+ */
 function getVendorEngagements(req, res) {
     var handlerInfo = {
       "apiModule": "analytics",

@@ -27,6 +27,7 @@ exports.blockUserById                     = blockUserById;
  * @param {string} device_name - name of the device 
  * @param {string} os_name - name of the operating system
  * @param {integer} user_city - city of user, 1 for chandigarh
+ * @return {JSON} Response body contains simple json object that contains access_token
  *
  */
 function createNewAppUser(req, res) {
@@ -127,6 +128,14 @@ function getRecentRequestsByUserId(req, res) {
   });
 }
 
+
+/**
+ * <b>API [POST]/books-auth/get/details_user</b> <br>
+ * API to get user details
+ * @param token - {STRING} access token
+ * @param user_id - {INTEGER} user_id
+ * @return {JSON} - Response body contains user detail
+ */
 function getUserDetailsPanel(req, res) {
   var handlerInfo = {
     "apiModule": "Users",
@@ -194,6 +203,13 @@ function getUserDetailsPanelHelper(handlerInfo, user_id, callback) {
   });
 }
 
+/**
+ * <b>API [POST] /books-auth/block/user </b> <br>
+ * API to block user
+ * @param token - {STRING} access token
+ * @param status - {INTEGER} 1 -> block, 0 -> unblock
+ * @return {JSON} - Response body contains log and flag
+ */
 function blockUserById(req, res) {
   var handlerInfo = {
     "apiModule": "Users",

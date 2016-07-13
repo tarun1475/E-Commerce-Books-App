@@ -23,11 +23,13 @@ exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
 
 /**
- * [POST] '/req_book_auth/raise_request' <br>
+ * <b>API [POST] '/req_book_auth/raise_request' </b><br>
  * API responsible for raising a book request.<br>
  * request body requires the following parameters:
  * @param {STRING} token - access token of user 
  * @param {OBJECT} books - a json object of book requests
+ * @param {INTEGER} book_req_category -  0 : College, 1 : School, 2 : Competitions, 3 : Novel
+ * @return {JSON} response body contains log and flag indicating success/failure
  */
 function raiseBooksRequest(req, res) {
   var handlerInfo   = {
@@ -75,15 +77,24 @@ function raiseBooksRequest(req, res) {
 }
 
 /**
- * Helper function to log a book request in database
- * @param request_id
- * @param name
- * @param stream
- * @param semester
- * @param type
- * @param callback
+ * Function to insert books in database
+ * @param handlerInfo {OBJECT} handlerInfo for logging
+ * @param request_id {INTEGER} request id
+ * @param name {STRING} name of book
+ * @param stream {STRING} stream of book
+ * @param semester {INTEGER} semester
+ * @param type {INTEGER} 0->Old, 1->New
+ * @param author {STRING} book author
+ * @param medium {STRING} English/Hindi/Punjabi
+ * @param book_category {INTEGER}  0 : College, 1 : School, 2 : Competitions, 3 : Novel
+ * @param Class {STRING} class (in case of schools)
+ * @param competition_name {STRING} Competitive exam
+ * @param isNcert {INTEGER} if book is a ncert book
+ * @param isGuide {INTEGER} if book is a helper book
+ * @param publisherName {STRING} publisher name
+ * @param callback {FUNCTION} a function for success/failure
  */
-function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author, 
+function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author,
   medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, callback) {
   var insertQuery = "INSERT INTO tb_books "+
     "(book_req_id, book_name, book_stream, book_semester, type, book_author, medium, book_category, "+
@@ -240,11 +251,14 @@ function putBookRequestResponse(req, res) {
 
 /**
  * Function to insert book responses in database. Helper function to putBookResponse
- * @param response_id
- * @param vendor_id
- * @param book_id
- * @param book_price
- * @param callback
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param response_id {INTEGER} response id of the response
+ * @param vendor_id {INTERGER} vendor id
+ * @param book_id {INTEGER} book id
+ * @param book_price {INTERGER} price
+ * @param mrp {INTERGER} Maximum retail price of book
+ * @param isAvailable {INTEGER} A flag holding availability of book
+ * @param callback {FUNCTION} callback function
  */
 function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_price, mrp, isAvailable, callback) {
   var sqlQuery = "INSERT INTO tb_books_overall_distribution (response_id, vendor_id, book_id, price, mrp, is_available) "+
@@ -298,8 +312,8 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) 
 
 /**
  * function to get details of a response from vendors
- * @param response_id
- * @param callback
+ * @param response_id {INTEGER} response id
+ * @param callback {FUNCTION} a callback function
  */
 function getVendorResponseDetails(response_id, callback) {
   var resQuery = "SELECT distribution.book_id, distribution.price, books.book_name, books.book_stream, books.book_semester, books.type "+
@@ -344,10 +358,11 @@ function getMinimumPriceResponse(req, res) {
 
 /**
  * Function to get minimum book response corresponding to a request_id
+ * @param {OBJECT} handlerInfo - handlerinfo for logging
  * @param {INTEGER} request_id              -  request id of a request
  * @param {ARRAY} minimumResponse            -  an array where minimum response would be pushed; although the same
  *                                              object would also be available in callback's result
- * @param {FUNCTION} callback(err, result)   - a callback function passed
+ * @param {FUNCTION} callback   - a callback function passed
  */
 function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse, callback) {
   var reqObj = {};
@@ -381,7 +396,6 @@ function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse,
  * @param {VARCHAR} delivery_address - address of the delivery
  * @param {INTEGER} is_urgent - whether delivery is urgent or not
  * @param {INTEGER} vendor_id - vendor who gave the response
- * @param res
  */
 function confirmBookOrder(req, res) {
   var handlerInfo     = {
@@ -468,13 +482,10 @@ function confirmBookOrder(req, res) {
 
 /**
  * Helper function to update the book request and update it's status
- *
- * @param vendorId
- * @param responseId
- * @param requestId
- * @param vendorName
- * @param reqStatus
- * @param callback
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param requestId {INTEGER} request id
+ * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
+ * @param callback [FUNCTION] callback function
  */
 function updateBookRequest(handlerInfo, requestId, reqStatus, callback) {
   var sqlQuery = "UPDATE tb_book_requests "+
@@ -491,12 +502,13 @@ function updateBookRequest(handlerInfo, requestId, reqStatus, callback) {
 
 /**
  * Log the delivery details into the database
- * @param userId
- * @param vendorId
- * @param deliveryAddress
- * @param responseId
- * @param isUrgent
- * @param callback
+ * @param handlerInfo {OBJECT} Object for logging
+ * @param requestId {INTEGER} request id
+ * @param userId {INTEGER} user_id
+ * @param deliveryAddress {STRING} address to be delivered
+ * @param isUrgent {INTEGER} 0->No, 1->Yes
+ * @param responseData {OBJECT} This is the same object returned from minimum response
+ * @param callback {FUNCTION} callback function
  */
 function deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
@@ -535,9 +547,12 @@ function logDeliveryDistribution(handlerInfo, deliveryId, book_id, vendor_id, pr
 }
 
 /**
- * API to fetch delivery details corresponding to a delivery id
- * @param req
- * @param res
+ * <b>API [POST] /books-auth/get_delivery_details</b><br>
+ * API to fetch delivery details corresponding to a delivery id,<br>
+ * Request body requires the following parameters
+ *
+ * @param delivery_id {INTEGER} delivery id
+ * @param token {STRING} access token
  */
 function getDeliveryDetailsById(req, res) {
   var delivery_id     = parseInt(req.body.delivery_id);
@@ -558,8 +573,8 @@ function getDeliveryDetailsById(req, res) {
 
 /**
  * Helper function to get delivery details for getDeliveryDetails API
- * @param deliveryId
- * @param callback
+ * @param deliveryId {INTEGER} delivery id
+ * @param callback {FUNCTION} callback function
  */
 function getDeliveryDetailsHelper(deliveryId, callback) {
   var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, delivery.delivery_date, "+

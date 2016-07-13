@@ -4,7 +4,7 @@
 var mysql = require('mysql');
 
 /**
- * Function to establish database connection
+ * Function to handle database connectivity
  */
 function handleDisconnectLive() {
   connection = mysql.createPool(config.get('dbLiveSettings'));

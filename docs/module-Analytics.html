@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Vendors - Documentation</title>
+    <title>Analytics - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Vendors</h1>
+    <h1 class="page-title">Analytics</h1>
     
 
     
@@ -72,7 +72,7 @@
 
     
 
-    <h4 class="name" id="~blockVendorById"><span class="type-signature">(inner) </span>blockVendorById<span class="signature">(token, status)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
+    <h4 class="name" id="~getOverallReportPanel"><span class="type-signature">(inner) </span>getOverallReportPanel<span class="signature">(token, date_interval)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
 
     
 
@@ -119,8 +119,8 @@
 
 
 <div class="description">
-    <p><b>API [POST] /books-auth/block/vendor </b> <br>
-API to block vendor</p>
+    <p><b>API [POST] /books-auth/report </b> <br>
+API to get overall report regarding sales and requests</p>
 </div>
 
 
@@ -181,7 +181,206 @@ API to block vendor</p>
 
         <tr>
             
-                <td class="name"><code>status</code></td>
+                <td class="name"><code>date_interval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">OBJECT</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>object containing start and end date offsets</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>Response body contains an object containing report counts</li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">JSON</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~getOverallRequests"><span class="type-signature">(inner) </span>getOverallRequests<span class="signature">(token, date_interval, req_type)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p><b>API [POST] /books-auth/get_requests</b><br>
+API to get overall panel requests</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>token</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">STRING</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>access token</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>date_interval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">OBJECT</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>date interval for requests</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>req_type</code></td>
             
 
             <td class="type">
@@ -197,7 +396,7 @@ API to block vendor</p>
 
             
 
-            <td class="description last"><p>1 -&gt; block, 0 -&gt; unblock</p></td>
+            <td class="description last"><p>0 -&gt; Pending, 1 -&gt; Complete, 2 -&gt; Cancelled</p></td>
         </tr>
 
     
@@ -221,9 +420,7 @@ API to block vendor</p>
 
         
 <div class="param-desc">
-    <ul>
-<li>Response body contains log and flag</li>
-</ul>
+    <p>Response body would contain an array of request objects in 'data' key</p>
 </div>
 
 
@@ -248,7 +445,7 @@ API to block vendor</p>
 
     
 
-    <h4 class="name" id="~createNewVendor"><span class="type-signature">(inner) </span>createNewVendor<span class="signature">(vendor_name, vendor_email, vendor_phone, vendor_address, device_name, os_version, vendor_city)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
+    <h4 class="name" id="~getVendorEngagements"><span class="type-signature">(inner) </span>getVendorEngagements<span class="signature">(token, date_interval)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
 
     
 
@@ -295,297 +492,8 @@ API to block vendor</p>
 
 
 <div class="description">
-    <p><b>API [POST] '/books-auth/create_vendor' </b><br></p>
-<p>API to create a new vendor</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>vendor_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Name of the vendor</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vendor_email</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Email of vendor</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vendor_phone</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Phone number of vendor</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vendor_address</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>address of the vendor</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>device_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Name of the device</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>os_version</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>OS version</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vendor_city</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">integer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>city of vendor, 1 for chandigarh</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>response body contains access_token</p>
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">JSON</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getVendorDetailsPanel"><span class="type-signature">(inner) </span>getVendorDetailsPanel<span class="signature">(token, vendor_id)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p><b>API [POST] /books-auth/get/details_vendor</b> <br>
-API to get vendor details</p>
+    <p><b>API [POST] /books-auth/get_vendors_engagement</b><br>
+API to get overall panel requests</p>
 </div>
 
 
@@ -646,13 +554,13 @@ API to get vendor details</p>
 
         <tr>
             
-                <td class="name"><code>vendor_id</code></td>
+                <td class="name"><code>date_interval</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">INTERGER</span>
+<span class="param-type">OBJECT</span>
 
 
             
@@ -662,7 +570,7 @@ API to get vendor details</p>
 
             
 
-            <td class="description last"><p>vendor id</p></td>
+            <td class="description last"><p>date interval for requests</p></td>
         </tr>
 
     
@@ -686,162 +594,7 @@ API to get vendor details</p>
 
         
 <div class="param-desc">
-    <ul>
-<li>Response body contains vendor detail</li>
-</ul>
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">JSON</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getVendorSales"><span class="type-signature">(inner) </span>getVendorSales<span class="signature">(token)</span><span class="type-signature"> &rarr; {JSON}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p><b>API [POST] /books-auth/get_vendor_sales </b> <br>
-API to get sales by day of a particular vendor</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>token</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">STRING</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>access token</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <ul>
-<li>Response body contains log and flag</li>
-</ul>
+    <p>Response body contains array of vendor objects</p>
 </div>
 
 
@@ -879,7 +632,7 @@ API to get sales by day of a particular vendor</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jul 13 2016 15:32:23 GMT+0530 (IST) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jul 13 2016 15:32:22 GMT+0530 (IST) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

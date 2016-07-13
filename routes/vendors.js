@@ -15,7 +15,7 @@ exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
 
 /**
- * [POST] '/books-auth/create_vendor' <br>
+ * <b>API [POST] '/books-auth/create_vendor' </b><br>
  * 
  * API to create a new vendor
  * @param {string} vendor_name - Name of the vendor
@@ -25,6 +25,7 @@ exports.getVendorSales         = getVendorSales;
  * @param {string} device_name - Name of the device
  * @param {string} os_version - OS version
  * @param {integer} vendor_city - city of vendor, 1 for chandigarh
+ * @return {JSON} response body contains access_token
  */
 function createNewVendor(req, res) {
   var reqParams     = req.body;
@@ -76,6 +77,13 @@ function createNewVendor(req, res) {
   });
 }
 
+/**
+ * <b>API [POST] /books-auth/block/vendor </b> <br>
+ * API to block vendor
+ * @param token - {STRING} access token
+ * @param status - {INTEGER} 1 -> block, 0 -> unblock
+ * @return {JSON} - Response body contains log and flag
+ */
 function blockVendorById(req, res) {
   var handlerInfo = {
     "apiModule": "Users",
@@ -117,6 +125,13 @@ function updateVendorAccountStatus(handlerInfo, vendorId, status, callback) {
   });
 }
 
+/**
+ * <b>API [POST] /books-auth/get/details_vendor</b> <br>
+ * API to get vendor details
+ * @param token - {STRING} access token
+ * @param vendor_id - {INTERGER} vendor id
+ * @return {JSON} - Response body contains vendor detail
+ */
 function getVendorDetailsPanel(req, res) {
   var handlerInfo = {
     "apiModule": "Vendors",
@@ -154,6 +169,12 @@ function getVendorDetails(handlerInfo, vendor_id, callback) {
   });
 }
 
+/**
+ * <b>API [POST] /books-auth/get_vendor_sales </b> <br>
+ * API to get sales by day of a particular vendor
+ * @param token - {STRING} access token
+ * @return {JSON} - Response body contains log and flag
+ */
 function getVendorSales(req, res) {
   var handlerInfo = {
     "apiModule": "vendors",
