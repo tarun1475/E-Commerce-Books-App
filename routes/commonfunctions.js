@@ -11,6 +11,7 @@ var apns           = require('apn');
 var constants      = require('./constants');
 var messenger      = require('./messenger');
 var logging        = require('./logging');
+var users          = require('./users');
 
 exports.checkBlank                     = checkBlank;
 exports.sendIosPushNotification        = sendIosPushNotification;
@@ -21,7 +22,8 @@ exports.verifyClientToken              = verifyClientToken;
 exports.sendOTP                        = sendOTP;
 exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
-
+exports.logRequest                     = logRequest;
+exports.loginUser                      = loginUser;
 /**
  * Function to check missing parameters in the API.
  * @param arr
@@ -347,6 +349,10 @@ function verifyPanelToken(req, res, next) {
  * @param next {FUNCTION} next middleware function to be called
  */
 function logRequest(req, res, next) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "logRequest"
+  };
   var requestData = "";
   if(req.method === "POST") {
     requestData = JSON.stringify(req.body);
@@ -355,14 +361,63 @@ function logRequest(req, res, next) {
     requestData = JSON.stringify(req.query);
   }
 
-  var data = [req.url, requestData, req.token, req.connection.remoteAddress];
+  var data = [req.url, requestData, req.token || "NA", req.connection.remoteAddress];
   var insertLog = "INSERT INTO tb_app_api_logs "+
     "(api_name, request, requested_by, logged_on, ip_address) "+
     "VALUES(?, ?, ?, NOW(), ?)";
-  connection_addn.query(insertLog, data, function(err, insRes) {
+  var tt= connection.query(insertLog, data, function(err, insRes) {
+    console.log(tt.sql);
+    logging.logDatabaseQuery(handlerInfo, "insert api log", err, insRes, tt.sql);
     if(err) {
+      console.log(err);
       logging.error("Error while inserting logs", err);
     }
     next();
+  });
+}
+
+function loginUser(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "loginUser"
+  };
+  var reqParams    = req.body;
+  var phoneNo      = reqParams.phone_no;
+  var deviceToken = reqParams.device_token;
+  var regAs        = reqParams.reg_as || 0;
+  users.verifyUserByPhone(handlerInfo, phoneNo, regAs, function(verifyErr, userDetails) {
+    if(verifyErr) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(userDetails.length == 0) {
+      return res.send({
+        "log": "Not authorized, this phone number is not registered",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    var userId = (regAs == constants.userType.USERS ? userDetails[0].user_id : userDetails[0].vendor_id);
+    updateDeviceToken(handlerInfo, userId, regAs, deviceToken, function(updateErr, updateRes) {
+      if(updateErr) {
+        return res.send(constants.databaseErrorResponse);
+      }
+      res.send({
+        "log": "login successful",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "access_token": userDetails[0].access_token
+      });
+    });
+  });
+}
+
+function updateDeviceToken(handlerInfo, userId, regAs, deviceToken, callback) {
+  var tableName = (regAs == constants.userType.USERS ? "tb_users" : "tb_vendors");
+  var searchKey = (regAs == constants.userType.USERS ? "user_id" : "vendor_id");
+  var sqlQuery = "SELECT * FROM "+tableName+" WHERE "+searchKey +" = ?";
+  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user/vendor details", err, result, null);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }

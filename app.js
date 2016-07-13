@@ -58,11 +58,11 @@ app.get('/', function(req, res) {
 /**
  * Users APIs
  */
-app.post('/books-auth/create_user'
+app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
    , error);
 
-app.post('/books-auth/create_vendor'
+app.post('/books-auth/create_vendor'           , utils.logRequest
    , vendors.createNewVendor
    , error);
 
@@ -70,84 +70,103 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
    , users.getRecentRequestsByUserId
    , error);
 
-app.get('/books-auth/send_otp'
+app.get('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
 
-app.get('/books-auth/verify_otp'
+app.get('/books-auth/verify_otp'               , utils.logRequest
    , utils.verifyOTP
    , error);
 
-app.get('/books-auth/get_vendor_sales'         , utils.verifyClientToken
+app.get('/books-auth/get_vendor_sales'         , utils.logRequest
+  , utils.verifyClientToken
   , vendors.getVendorSales
+  , error);
+
+app.post('/books-auth/login'                   , utils.logRequest
+  , utils.loginUser
   , error);
 
 /**
  * APIs related to book requests
  */
-app.post('/req_book_auth/raise_request'         , utils.verifyClientToken
+app.post('/req_book_auth/raise_request'        , utils.logRequest
+   , utils.verifyClientToken
    , requests.raiseBooksRequest
    , error);
 
-app.post('/req_book_auth/get_pending_requests'  , utils.verifyClientToken
+app.post('/req_book_auth/get_pending_requests'  , utils.logRequest
+   , utils.verifyClientToken
    , requests.getBookRequests
    , error);
 
-app.post('/req_book_auth/put_response'          , utils.verifyClientToken
+app.post('/req_book_auth/put_response'          , utils.logRequest
+   , utils.verifyClientToken
    , requests.putBookRequestResponse
    , error);
 
 
-app.post('/books-auth/confirm_book_order'       , utils.verifyClientToken
+app.post('/books-auth/confirm_book_order'       , utils.logRequest
+   , utils.verifyClientToken
    , requests.confirmBookOrder
    , error);
 
-app.post('/books-auth/get_delivery_details'     , utils.verifyClientToken
+app.post('/books-auth/get_delivery_details'     , utils.logRequest
+   , utils.verifyClientToken
    , requests.getDeliveryDetailsById
    , error);
 
 /**
  * APIs for crontabs
  */
-app.get('/req_book_auth/process_pending_req'     , cron.processPendingBookRequests
+app.get('/req_book_auth/process_pending_req'     , utils.logRequest
+   , cron.processPendingBookRequests
    , error);
 
-app.post('/books-auth/get_minimum_response'
+app.post('/books-auth/get_minimum_response'      , utils.logRequest
     , requests.getMinimumPriceResponse
     , error);
 
 /**
  * Panel related apis
  */
-app.post('/books-auth/get/details_user'          , utils.verifyPanelToken
+app.post('/books-auth/get/details_user'          , utils.logRequest
+    , utils.verifyPanelToken
     , users.getUserDetailsPanel
     , error);
 
-app.post('/books-auth/get/details_vendor'        , utils.verifyPanelToken
+app.post('/books-auth/get/details_vendor'        , utils.logRequest
+    , utils.verifyPanelToken
     , vendors.getVendorDetailsPanel
     , error);
 
-app.post('/books-auth/block/user'                , utils.verifyPanelToken
+app.post('/books-auth/block/user'                , utils.logRequest
+    , utils.verifyPanelToken
     , users.blockUserById
     , error);
 
-app.post('/books-auth/block/vendor'              , utils.verifyPanelToken
+app.post('/books-auth/block/vendor'              , utils.logRequest
+    , utils.verifyPanelToken
     , vendors.blockVendorById
     , error);
 
-app.post('/books-auth/report'                    , utils.verifyPanelToken
+app.post('/books-auth/report'                    , utils.logRequest
+    , utils.verifyPanelToken
     , analytics.getOverallReportPanel
     , error);
 
-app.post('/books-auth/get_requests'              , utils.verifyPanelToken
+app.post('/books-auth/get_requests'              , utils.logRequest
+    , utils.verifyPanelToken
     , analytics.getOverallRequests
     , error);
 
-app.post('/books-auth/get_vendors_engagement'    , utils.verifyPanelToken
+app.post('/books-auth/get_vendors_engagement'    , utils.logRequest
+    , utils.verifyPanelToken
     , analytics.getVendorEngagements
     , error);
 
-app.post('/books-auth/get_deliveries'            , utils.verifyPanelToken
+app.post('/books-auth/get_deliveries'            , utils.logRequest
+    , utils.verifyPanelToken
     , requests.getDeliveries
     , error);
 /**

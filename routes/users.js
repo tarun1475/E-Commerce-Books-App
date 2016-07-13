@@ -16,6 +16,7 @@ exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 exports.getUserDetailsPanel               = getUserDetailsPanel;
 exports.blockUserById                     = blockUserById;
+exports.verifyUserByPhone                 = verifyUserByPhone;
 
 /**
  *
@@ -248,5 +249,18 @@ function updateUserAccountStatus(handlerInfo, userId, status, callback) {
       return callback("Invalid user id provided", null);
     }
     callback(null, "successfully updated user account")
+  });
+}
+
+function verifyUserByPhone(handlerInfo, phoneNo, regAs, callback) {
+  var table = (regAs == constants.userType.USERS ? "tb_users" : "tb_vendors");
+  var searchKey = (regAs == constants.userType.USERS ? "user_phone" : "vendor_phone");
+  var sqlQuery = "SELECT * FROM "+table+" WHERE "+searchKey +" = ?";
+  var tt = connection.query(sqlQuery, [phoneNo], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "verifying user via phone", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }
