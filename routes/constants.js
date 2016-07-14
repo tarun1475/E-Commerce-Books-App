@@ -87,5 +87,6 @@ define(exports.sendotp, "API_LINK", "https://sendotp.msg91.com/api/generateOTP")
  * Panel API key
  */
 exports.adminPanel = {};
-define(exports.adminPanel, "ACCESS_TOKEN"                      , "6vnZSz78C+kLxHfveUbAwgi4JwFj4zwk+AWjgEZw+K4");
+//define(exports.adminPanel, "ACCESS_TOKEN"                      , "6vnZSz78C+kLxHfveUbAwgi4JwFj4zwk+AWjgEZw+K");
+define(exports.adminPanel, "ACCESS_TOKEN"                      , "27f5cc7f0fc4372148192822e1129bd7e987a9720097201d9c42d9c6829ca7be");
 

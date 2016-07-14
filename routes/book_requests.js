@@ -459,8 +459,8 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center> Rs."+parseInt(responseData[i].price-(responseData[i].mrp*0.5))+"</td>");
           html += "</tr>";
         }
-        html += "<tr><td colspan=4 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=4 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";

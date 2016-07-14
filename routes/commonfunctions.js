@@ -376,6 +376,13 @@ function logRequest(req, res, next) {
   });
 }
 
+/**
+ * <b>API [POST] /books-auth/login </b><br>
+ * API for logging user/vendor in
+ * @param req - request body should contain phone_no and device_token
+ * @param res - response object would return flag and access_token
+ * @returns  @type {{log: string, flag: number, access_token: string}}
+ */
 function loginUser(req, res) {
   var handlerInfo = {
     "apiModule": "commonfunctions",
@@ -412,9 +419,9 @@ function loginUser(req, res) {
 function updateDeviceToken(handlerInfo, userId, regAs, deviceToken, callback) {
   var tableName = (regAs == constants.userType.USERS ? "tb_users" : "tb_vendors");
   var searchKey = (regAs == constants.userType.USERS ? "user_id" : "vendor_id");
-  var sqlQuery = "SELECT * FROM "+tableName+" WHERE "+searchKey +" = ?";
-  var tt = connection.query(sqlQuery, [userId], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "getting user/vendor details", err, result, null);
+  var sqlQuery = "UPDATE "+tableName+" SET device_token = ? WHERE  "+searchKey +" = ?";
+  var tt = connection.query(sqlQuery, [deviceToken, userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user/vendor details", err, result, tt.sql);
     if(err) {
       return callback(err, null);
     }

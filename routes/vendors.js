@@ -13,6 +13,7 @@ exports.createNewVendor        = createNewVendor;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
+exports.searchVendor           = searchVendor;
 
 /**
  * <b>API [POST] '/books-auth/create_vendor' </b><br>
@@ -137,8 +138,10 @@ function getVendorDetailsPanel(req, res) {
     "apiModule": "Vendors",
     "apiHandler": "getVendorDetailsPanel"
   };
-  var vendorId = parseInt(req.body.vendor_id || 0);
-  getVendorDetails(handlerInfo, vendorId, function(err, result) {
+  var reqParams = req.body;
+  var vendorId = parseInt(reqParams.vendor_id || 0);
+  var deliveryPagination = reqParams.deliveryPagination;
+  getVendorDetails(handlerInfo, vendorId, deliveryPagination, function(err, result) {
     if(err) {
       return res.send({
         "log": err,
@@ -153,19 +156,43 @@ function getVendorDetailsPanel(req, res) {
   });
 }
 
-function getVendorDetails(handlerInfo, vendor_id, callback) {
-  var sqlQuery = "SELECT delivery_distribution.*, books.*, vendors.* "+
-      "FROM tb_vendors as vendors  "+
-      " LEFT JOIN tb_delivery_distribution as delivery_distribution  ON vendors.vendor_id = delivery_distribution.vendor_id "+
-      " LEFT JOIN tb_delivery as delivery ON delivery.delivery_id = delivery_distribution.delivery_id " +
-      " LEFT JOIN tb_books as books ON books.book_id = delivery_distribution.book_id " +
-      "WHERE vendors.vendor_id = ?";
+function getVendorDetails(handlerInfo, vendor_id, deliveryPagination, callback) {
+  var sqlQuery = "SELECT vendor_id, vendor_name, vendor_phone, vendor_email, vendor_address, vendor_device_name, " +
+      "vendor_device_os, vendor_city " +
+      "FROM tb_vendors " +
+      "WHERE vendor_id = ?";
   var tt = connection.query(sqlQuery, [vendor_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
     if(err) {
       return callback("There was some error in getting vendor details", null);
     }
-    callback(null, result);
+    var responseData = {};
+    responseData.vendor_id         = result[0].vendor_id;
+    responseData.vendor_name       = result[0].vendor_name;
+    responseData.vendor_phone      = result[0].vendor_phone;
+    responseData.vendor_email      = result[0].vendor_email;
+    responseData.vendor_address    = result[0].vendor_address;
+    responseData.vendor_device_name= result[0].vendor_device_name;
+    responseData.vendor_device_os  = result[0].vendor_device_os;
+    responseData.vendor_city       = result[0].vendor_city;
+    var getDeliveryQuery = "SELECT deliveryDistribution.delivery_id, deliveryDistribution.book_id, " +
+        "deliveryDistribution.book_price, deliveryDistribution.mrp, deliveryDistribution.vevsa_commission, " +
+        "books.book_name, books.book_stream, books.book_semester, books.type, books.book_author, " +
+        "books.book_category, books.publisher, deliveryDistribution.logged_on, " +
+        "books.class, books.competition_name, books.is_ncert, books.is_guide " +
+        "FROM `tb_delivery_distribution` as deliveryDistribution " +
+        "JOIN tb_books as books ON books.book_id = deliveryDistribution.book_id " +
+        "WHERE deliveryDistribution.vendor_id = ? " +
+        "ORDER BY deliveryDistribution.logged_on DESC " +
+        "LIMIT ?, ?";
+    var jj = connection.query(getDeliveryQuery, [vendor_id, deliveryPagination.start_from, deliveryPagination.page_size], function(delErr, deliveriesData) {
+      logging.logDatabaseQuery(handlerInfo, "getting deliveries for a vendor", delErr, deliveriesData, jj.sql);
+      if(delErr) {
+        return callback("There was some error in getting delivery details", null);
+      }
+      responseData.recent_deliveries = deliveriesData;
+      callback(null, responseData);
+    });
   });
 }
 
@@ -200,5 +227,48 @@ function getVendorSales(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE,
       "data": result
     });
+  });
+}
+
+/**
+ * <b> API [GET] books-auth/searchVendor</b><br>
+ * @param req {OBJECT} request query should contain token and key for search
+ * @param res {OBJECT} response would return the result
+ */
+function searchVendor(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "searchVendor"
+  };
+  var reqParams = req.query;
+  var searchKey = reqParams.key;
+  searchVendorHelper(handlerInfo, searchKey, function (err, result) {
+    if (err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if (result.length == 0) {
+      return res.send({
+        "log": "Invalid vendor ",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched data from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+}
+
+function searchVendorHelper(handlerInfo, searchKey, callback) {
+  var sqlQuery = "SELECT * FROM tb_vendors " +
+      "WHERE vendor_id = ? OR vendor_name LIKE '%"+searchKey+"%' OR vendor_email LIKE '%"+searchKey+"%' " +
+      "OR vendor_address LIKE '%"+searchKey+"%' ";
+  var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }

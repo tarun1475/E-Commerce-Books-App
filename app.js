@@ -140,6 +140,16 @@ app.post('/books-auth/get/details_vendor'        , utils.logRequest
     , vendors.getVendorDetailsPanel
     , error);
 
+app.get('/books-auth/searchUser'               , utils.logRequest
+    , utils.verifyPanelToken
+    , users.searchUser
+    , error);
+
+app.get('/books-auth/searchVendor'              , utils.logRequest
+    , utils.verifyPanelToken
+    , vendors.searchVendor
+    , error);
+
 app.post('/books-auth/block/user'                , utils.logRequest
     , utils.verifyPanelToken
     , users.blockUserById

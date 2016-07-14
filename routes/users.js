@@ -17,6 +17,7 @@ exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 exports.getUserDetailsPanel               = getUserDetailsPanel;
 exports.blockUserById                     = blockUserById;
 exports.verifyUserByPhone                 = verifyUserByPhone;
+exports.searchUser                        = searchUser;
 
 /**
  *
@@ -259,6 +260,52 @@ function verifyUserByPhone(handlerInfo, phoneNo, regAs, callback) {
   var tt = connection.query(sqlQuery, [phoneNo], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "verifying user via phone", err, result, tt.sql);
     if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+/**
+ * <b>API [GET] /books-auth/searchUser</b><br>
+ * API to search user
+ * @param req {OBJECT} request body should contain token and key
+ * @param res {OBJECT} response would send results
+ */
+function searchUser(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "searchUser"
+  };
+  var reqParams = req.query;
+  var searchKey = reqParams.key;
+  searchUserHelper(handlerInfo, searchKey, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log": "Invalid user entered",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully searched user ",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+
+}
+
+function searchUserHelper(handlerInfo, searchKey, callback) {
+  var sqlQuery = "SELECT * FROM tb_users " +
+      "WHERE user_id = ? OR user_name LIKE '%"+searchKey+"%' OR user_email LIKE '%"+searchKey+"%' " +
+      "OR user_address LIKE '%"+searchKey+"%' ";
+  var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "searching user", err, result, tt.sql);
+    if(err) {
+      console.log(err);
       return callback(err, null);
     }
     callback(null, result);
