@@ -165,7 +165,7 @@ function sendNotification(user_id, message, flag, payload) {
  */
 function sendNotificationToDevice(deviceType, userDeviceToken, message, flag, payload) {
   if(deviceType == constants.deviceType.ANDROID && userDeviceToken != '') {
-    sendAndroidPushNotification(userDeviceToken, payload);
+    sendAndroidPushNotification(userDeviceToken, message);
   }
   else if(deviceType == constants.deviceType.iOS && userDeviceToken != '') {
     sendIosPushNotification(userDeviceToken, message, flag, payload);

@@ -281,10 +281,11 @@ function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_p
  */
 function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) {
   var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, books.type, distribution.*, "+
-        "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone "+
+        "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone, requests.user_id "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
+        "JOIN tb_book_requests as requests ON books.book_req_id = requests.req_id "
         "WHERE distribution.book_id = ? ORDER BY distribution.price ";
    var qq = connection.query(minQuery, [book_id], function(minErr, minResponse) {
      logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse.length, qq.sql);
