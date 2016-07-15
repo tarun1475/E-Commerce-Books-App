@@ -13,6 +13,14 @@ var utils        = require('./commonfunctions');
 
 exports.processPendingBookRequests        = processPendingBookRequests;
 
+/**
+ * <b> API [GET] /req_book_auth/process_pending_requests </b> <br>
+ *  This API would be called after a specific time interval that would send <br>
+ *  push notification to user devices regarding their book requests
+ *
+ *  @param req {OBJECT} request query doesn't require any parameter
+ *  @param res {OBJECT} response would contain the status of pushes sent
+ */
 function processPendingBookRequests(req, res) {
     var handlerInfo = {
         "apiModule": "cron",

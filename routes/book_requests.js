@@ -142,8 +142,8 @@ function getBookRequests(req, res) {
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
-  var sqlQuery = "SELECT req_id FROM tb_book_requests ORDER BY generated_on DESC LIMIT ?, ?";
-  var jj = connection.query(sqlQuery, [start_from, page_size], function(err, result) {
+  var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? ORDER BY generated_on DESC LIMIT ?, ?";
+  var jj = connection.query(sqlQuery, [bookStatus, start_from, page_size], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
@@ -389,6 +389,7 @@ function confirmBookOrder(req, res) {
   var requestId       = req.body.request_id;
   var deliveryAddress = req.body.delivery_address || req.body.user_address;
   var userName        = req.body.user_name;
+  var userPhone       = req.body.user_phone;
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
@@ -444,11 +445,11 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center> Rs."+parseInt(responseData[i].price-(responseData[i].mrp*0.5))+"</td>");
           html += "</tr>";
         }
-        html += "<tr><td colspan=4 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=4 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
         html += "</table><br><br>";
 
-        html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";
+        html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"<br>"+userPhone+"</b>";
         html += "<br><br>Cheers,<br>Vevsa Support";
         messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
           if(mailErr) {

@@ -210,6 +210,7 @@ function verifyClientToken(req, res, next) {
       req.body.user_id = result[0].user_id;
       req.query.user_id = result[0].user_id;
       req.body.user_name = result[0].user_name;
+      req.body.user_phone = result[0].user_phone;
       req.body.user_address = result[0].user_address;
       req.query.user_name = result[0].user_name;
       req.query.user_address = result[0].user_address;
@@ -217,10 +218,12 @@ function verifyClientToken(req, res, next) {
     else {
       req.body.vendor_id = result[0].vendor_id;
       req.query.vendor_id = result[0].vendor_id;
-      req.body.vendor_name = result[0].user_name;
-      req.body.dendor_address = result[0].user_address;
-      req.query.vendor_name = result[0].user_name;
-      req.query.vendor_address = result[0].user_address;
+      req.body.vendor_name = result[0].vendor_name;
+      req.body.vendor_phone = result[0].vendor_phone;
+      req.body.dendor_address = result[0].vendor_address;
+      req.query.vendor_name = result[0].vendor_name;
+      req.query.vendor_address = result[0].vendor_address;
+      req.query.vendor_phone = result[0].vendor_phone;
     }
     if(result[0].is_blocked == 1) {
       return res.send({

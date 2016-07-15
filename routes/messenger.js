@@ -11,6 +11,16 @@ var logging    = require('./logging');
 
 exports.sendEmailToUser = sendEmailToUser;
 
+/**
+ * Function to send email(Currently you can't edit the sender's address
+ * @param from {STRING} fromName
+ * @param to   {ARRAY} array of recipents
+ * @param subject {STRING} subject of email
+ * @param text {STRING} email text
+ * @param htmlText {STRING} email html content
+ * @param callback {FUNCTION} callback function
+ *
+ */
 function sendEmailToUser(from, to, subject, text, htmlText, callback) {
   var handlerInfo = {
     "apiModule": "messenger",
