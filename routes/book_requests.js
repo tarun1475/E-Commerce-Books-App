@@ -126,6 +126,10 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, type, au
  *  i.e {0 -> pending, 1-> approved, 2 -> disapproved}
  */
 function getBookRequests(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "getBookRequests"
+  };
   var reqParams   = req.body;
   var start_from  = parseInt(reqParams.start_from);
   var page_size   = parseInt(reqParams.page_size);
@@ -138,57 +142,33 @@ function getBookRequests(req, res) {
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
-
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, books.* "+
-                  "FROM tb_book_requests as requests "+
-                  "JOIN tb_users as users ON users.user_id = requests.user_id "+
-                  "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
-                  "WHERE requests.status = ? "+
-                  " ORDER BY requests.generated_on DESC "+
-                  "LIMIT ?, ?";
-  var tt = connection.query(sqlQuery, [bookStatus, start_from, page_size], function(err, result) {
+  var sqlQuery = "SELECT req_id FROM tb_book_requests ORDER BY generated_on DESC LIMIT ?, ?";
+  var jj = connection.query(sqlQuery, [start_from, page_size], function(err, result) {
     if(err) {
-      console.log(err);
-      return res.send({
-        "log": "Server execution error",
-        "flag": constants.responseFlags.ACTION_FAILED
+      logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+    var requestArr = [];
+    for(var i = 0; i < result.length; i++) {
+      requestArr.push(result[i].req_id);
+    }
+    getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, requestDetails) {
+      if(reqErr) {
+        return res.send({
+          "log": reqErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      requestDetails.sort(function(a, b) {
+        var d1 = new Date(a.generated_on);
+        var d2 = new Date(b.generated_on);
+        return d1 < d2;
       });
-    }
-    var resData = [];
-
-    for(var i = 0; i < result.length; ) {
-      var curRequest = {};
-      curRequest.req_id        = result[i].req_id;
-      curRequest.generated_on  = result[i].generated_on;
-      curRequest.user_id       = result[i].user_id;
-      curRequest.user_name     = result[i].user_name;
-
-      var books = [];
-      do {
-        var curBook = {};
-        curBook.book_id        = result[i].book_id;
-        curBook.book_name      = result[i].book_name;
-        curBook.book_photograph= result[i].book_photograph;
-        curBook.book_stream    = result[i].book_stream;
-        curBook.book_author    = result[i].book_author;
-        curBook.type           = result[i].type;
-        curBook.medium           = result[i].medium;
-        curBook.book_category    = result[i].book_category;
-        curBook.publisher        = result[i].publisher;
-        curBook.Class            = result[i]["class"];
-        curBook.competition_name = result[i].competition_name;
-        curBook.is_ncert         = result[i].is_ncert;
-        curBook.is_guide         = result[i].is_guide;
-        books.push(curBook);
-        i++;
-      } while(i < result.length && result[i].req_id == result[i-1].req_id);
-      curRequest.books         = books;
-      resData.push(curRequest);
-    }
-    return res.send({
-      "log": "Successfully fetched pending book requests",
-      "flag": constants.responseFlags.ACTION_COMPLETE,
-      "data":resData
+      res.send({
+        "log": "Successfully fetched pending book requests",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": requestDetails
+      });
     });
   });
 }
@@ -281,7 +261,7 @@ function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_p
  */
 function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) {
   var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, books.type, distribution.*, "+
-        "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone, requests.user_id "+
+        "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone, requests.user_id, books.book_category "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
@@ -303,6 +283,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) 
        bookObj.book_semester = minResponse[0].book_semester;
        bookObj.type = minResponse[0].type;
        bookObj.is_available = 0;
+       bookObj.book_category = minResponse[0].book_category;
        bookObj.msg = "Sorry, this book is not available right now";
        minResponseObj[book_id] = bookObj;
        return callback(null, null);
@@ -439,7 +420,7 @@ function confirmBookOrder(req, res) {
           });
         }
         // send email to admins 
-        var from     = 'support@vevsa.com';
+        var from     = 'Vevsa Support <support@vevsa.com>';
         var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
         var text     = "";
@@ -451,17 +432,20 @@ function confirmBookOrder(req, res) {
                        "<th align=center>Book Author</th>"+
                        "<th align=center>Fetched from Vender</th>"+
                        "<th align=center>Price</th>"+
+                       "<th align=center>Category</th>"+
                        "<th align=center>Vevsa Comission</th></tr>";
+        var bookCategory = ["College", "School", "Competition", "Novel"];
         for(var i = 0; i < responseData.length; i++) {
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
           html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
+          html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
           html += ("<td align=center> Rs."+parseInt(responseData[i].price-(responseData[i].mrp*0.5))+"</td>");
           html += "</tr>";
         }
-        html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
+        html += "<tr><td colspan=4 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
+        html += "<tr><td colspan=4 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totalPrice+urgentDeliveryCharges)+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";
