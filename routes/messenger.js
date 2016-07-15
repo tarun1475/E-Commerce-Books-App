@@ -4,30 +4,18 @@
 /////////////////////////////////////////////////////////////////////
 // Module dependencies
 /////////////////////////////////////////////////////////////////////
-var request     = require('request');
-var nodemailer  = require('nodemailer');
-var smtpTransport   = require('nodemailer-smtp-transport');
-var logging     = require('./logging');
+var sys        = require('util');
+var fs         = require('fs');
+var exec       = require('child_process').exec, child;
+var logging    = require('./logging');
 
-var transport = nodemailer.createTransport(smtpTransport({
-  host: 'smtp.gmail.com',
-  secureConnection: false,
-  port: 465,
-  auth: {
-    user: "helpvevsa@gmail.com",
-    pass: "9779766030"
-  }
-}));
-      
-exports.sendMessageToUser       = sendMessageToUser;
-exports.sendEmailToUser         = sendEmailToUser;
+exports.sendEmailToUser = sendEmailToUser;
 
-function sendMessageToUser(phone_no, message, callback) {
-
-    return callback(null, "Test");
-}
-
-function sendEmailToUser(from, to, subject, text, htmlText) {
+function sendEmailToUser(from, to, subject, text, htmlText, callback) {
+  var handlerInfo = {
+    "apiModule": "messenger",
+    "apiHandler": "sendEmailToUser"
+  };
   var mailOptions = {
     "from": from,
     "to": to,
@@ -35,13 +23,33 @@ function sendEmailToUser(from, to, subject, text, htmlText) {
     "text": text,
     "html": htmlText
   };
-  transport.sendMail(mailOptions, function(err, info) {
+  sendMailToUsers(handlerInfo, mailOptions, function(err, info) {
     if(err) {
-      logging.error(err);
+      logging.error(handlerInfo, err);
+      return callback(err, null);
     }
     else {
-      logging.trace("Email sent "+ info.response);
+      logging.trace(handlerInfo, "Email sent "+ info);
     }
-    return;
+    callback(null, info);
+  });
+}
+
+function sendMailToUsers(handlerInfo, mailOptions, callback) {
+  var commandStr = "( echo 'From: "+mailOptions.from+"'\n";
+  commandStr    += "echo 'To: "+mailOptions.to.join(' ')+"'\n";
+  commandStr    += "echo 'Subject: "+mailOptions.subject+"'\n";
+  commandStr    += "echo 'Content-Type: text/html'\n";
+  commandStr    += "echo 'MIME-Version: 1.0'\n";
+  commandStr    += "echo ''\n";
+  commandStr    += "echo '"+mailOptions.html+"'\n";
+  commandStr    += ") | sendmail -t";
+  console.log("executed "+commandStr);
+  child = exec(commandStr, function(error, stdout, stderr) {
+    logging.trace(handlerInfo, stdout);
+    if(error !== null) {
+      logging.error(handlerInfo, error);
+    }
+    return callback(null, null);
   });
 }

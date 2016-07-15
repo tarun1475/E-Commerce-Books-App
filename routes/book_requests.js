@@ -439,8 +439,8 @@ function confirmBookOrder(req, res) {
           });
         }
         // send email to admins 
-        var from     = 'helpvevsa@gmail.com';
-        var to       = ['rohankanojia420@gmail.com',/* 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'*/];
+        var from     = 'support@vevsa.com';
+        var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
         var text     = "";
         var html     = "Hello, <br><br>"+
@@ -466,10 +466,17 @@ function confirmBookOrder(req, res) {
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"</b>";
         html += "<br><br>Cheers,<br>Vevsa Support";
-        messenger.sendEmailToUser(from, to, subject, text, html);
-        return res.send({
-          "log" : "Successfully confirmed delivery order",
-          "flag": constants.responseFlags.ACTION_COMPLETE
+        messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+          if(mailErr) {
+            return res.send({
+              "log": "There was some error in sending email to admins, request is confirmed though",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+          return res.send({
+            "log" : "Successfully confirmed delivery order",
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
         });
       });
     }
