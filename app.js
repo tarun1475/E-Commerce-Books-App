@@ -34,6 +34,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
 
 /////////////////////////////////////////////////////////////
 // APIs for HearBeat

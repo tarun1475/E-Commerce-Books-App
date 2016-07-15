@@ -265,7 +265,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) 
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
-        "JOIN tb_book_requests as requests ON books.book_req_id = requests.req_id "
+        "JOIN tb_book_requests as requests ON books.book_req_id = requests.req_id "+
         "WHERE distribution.book_id = ? ORDER BY distribution.price ";
    var qq = connection.query(minQuery, [book_id], function(minErr, minResponse) {
      logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse.length, qq.sql);
@@ -420,7 +420,7 @@ function confirmBookOrder(req, res) {
           });
         }
         // send email to admins 
-        var from     = 'Vevsa Support <support@vevsa.com>';
+        var from     = 'support@vevsa.com';
         var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
         var text     = "";

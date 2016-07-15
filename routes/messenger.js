@@ -43,7 +43,7 @@ function sendMailToUsers(handlerInfo, mailOptions, callback) {
   commandStr    += "echo 'MIME-Version: 1.0'\n";
   commandStr    += "echo ''\n";
   commandStr    += "echo '"+mailOptions.html+"'\n";
-  commandStr    += ") | sendmail -t";
+  commandStr    += ") | sendmail -t ";
   console.log("executed "+commandStr);
   child = exec(commandStr, function(error, stdout, stderr) {
     logging.trace(handlerInfo, stdout);
