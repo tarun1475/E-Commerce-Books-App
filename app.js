@@ -111,10 +111,6 @@ app.post('/books-auth/confirm_book_order'       , utils.logRequest
    , requests.confirmBookOrder
    , error);
 
-app.post('/books-auth/get_delivery_details'     , utils.logRequest
-   , utils.verifyClientToken
-   , requests.getDeliveryDetailsById
-   , error);
 
 /**
  * APIs for crontabs
@@ -179,6 +175,11 @@ app.post('/books-auth/get_deliveries'            , utils.logRequest
     , utils.verifyPanelToken
     , requests.getDeliveries
     , error);
+
+app.post('/books-auth/get_delivery_details'     , utils.logRequest
+   , utils.verifyPanelToken
+   , requests.getDeliveryDetailsById
+   , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}

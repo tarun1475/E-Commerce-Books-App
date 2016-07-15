@@ -557,8 +557,13 @@ function logDeliveryDistribution(handlerInfo, deliveryId, book_id, vendor_id, pr
  * @param token {STRING} access token
  */
 function getDeliveryDetailsById(req, res) {
-  var delivery_id     = parseInt(req.body.delivery_id);
-  getDeliveryDetailsHelper(delivery_id, function(delErr, deliveryData) {
+  var handlerInfo     = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "getDeliveryDetailsById"
+  };
+  var reqParams       = req.body;
+  var delivery_id     = parseInt(reqParams.delivery_id);
+  getDeliveryDetailsHelper(handlerInfo, delivery_id, function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
@@ -578,29 +583,44 @@ function getDeliveryDetailsById(req, res) {
  * @param deliveryId {INTEGER} delivery id
  * @param callback {FUNCTION} callback function
  */
-function getDeliveryDetailsHelper(deliveryId, callback) {
-  var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, delivery.delivery_date, "+
-                 "delivery.vendor_response_id, users.user_name, users.user_phone, vendors.vendor_name, vendors.vendor_phone "+
+function getDeliveryDetailsHelper(handlerInfo, deliveryId, callback) {
+  var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, "+
+                 "delivery.delivery_date,  users.user_name, users.user_phone, users.user_id  "+
                  "FROM tb_delivery as delivery "+
                  "JOIN tb_users as users ON delivery.user_id = users.user_id "+
-                 "JOIN tb_vendors as vendors ON vendors.vendor_id = delivery.vendor_id "+
                  "WHERE delivery.delivery_id = ?";
-  connection.query(sqlQuery, [deliveryId], function(err, deliverRes) {
+  var tt = connection.query(sqlQuery, [deliveryId], function(err, deliveryRes) {
     if(err) {
-      console.log(err);
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
     }
-    if(deliverRes.length == 0) {
+    if(deliveryRes.length == 0) {
       return callback("No data found corresponding to this delivery id", null);
     }
-    var deliveryData = deliverRes[0];
-    getVendorResponseDetails(deliveryData.vendor_response_id, function(vresErr, vResponseData) {
-      if(vresErr) {
-        return callback("There was some error in fetching vendor's response", null);
+    var deliveryData = {};
+    deliveryData.delivery_id       = deliveryRes[0].delivery_id;
+    deliveryData.user_id           = deliveryRes[0].user_id;
+    deliveryData.user_name         = deliveryRes[0].user_name;
+    deliveryData.user_phone        = deliveryRes[0].user_phone;
+    deliveryData.delivery_address  = deliveryRes[0].delivery_address;
+    deliveryData.is_urgent_delivery= deliveryRes[0].is_urgent_delivery;
+    // getting delivery details :
+    var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, "+
+      "distribution.book_price, distribution.mrp, distribution.vevsa_commission, "+
+      "users.user_name, books.book_name, books.book_stream, books.type, books.book_category, books.book_semester, "+
+      "books.is_ncert, books.book_stream, books.is_guide, books.competition_name, books.medium, books.book_author "+
+      "FROM `tb_delivery_distribution` as distribution "+
+      "JOIN tb_delivery as delivery ON delivery.delivery_id = distribution.delivery_id "+
+      "JOIN tb_users as users ON users.user_id = delivery.user_id "+
+      "JOIN tb_books as books ON books.book_id = distribution.book_id "+
+      "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
+      "WHERE distribution.delivery_id = ?"
+    var jj = connection.query(sqlQuery, [deliveryId], function(deliveryDetailsErr, deliveryDetails) {
+      if(deliveryDetailsErr) {
+        logging.logDatabaseQuery(handlerInfo, "getting delivery details(vendors)", deliveryDetailsErr, deliveryDetails, jj.sql);
       }
-      deliveryData.bookDetails = vResponseData;
-
-      return callback(null, deliveryData);
+      deliveryData.books           = deliveryDetails;
+      callback(null, deliveryData);
     });
   });
 }
