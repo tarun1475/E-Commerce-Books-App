@@ -31,7 +31,7 @@ exports.searchVendor           = searchVendor;
 function createNewVendor(req, res) {
   var reqParams     = req.body;
   var vendorName    = reqParams.vendor_name;
-  var vendorEmail   = reqParams.vendor_email;
+  var vendorEmail   = reqParams.vendor_email || "NA";
   var vendorPhone   = reqParams.vendor_phone;
   var vendorAddress = reqParams.vendor_address;
   var deviceName    = reqParams.device_name;

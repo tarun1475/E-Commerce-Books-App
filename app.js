@@ -51,6 +51,18 @@ app.get('/heartbeat', function(req, res, next) {
   });
 });
 
+// For storing data on server
+var multer          = require('multer');
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, __dirname + '/uploads/');
+    },
+    filename: function (req, file, cb) {
+        var fileName = file.originalname.replace(/[|&;$%@"<>()+,' '?]/g, "");
+        cb(null, fileName);
+    }
+});
+var upload = multer({storage: storage});
 
 app.get('/', function(req, res) {
   res.send('Vevsa.com - You save we save!');
@@ -89,6 +101,15 @@ app.post('/books-auth/login'                   , utils.logRequest
   , utils.loginUser
   , error);
 
+app.get('/books-auth/my_details'              , utils.logRequest
+  , utils.verifyClientToken
+  , users.getMyDetails
+  , error);
+
+app.get('/books-auth/my_orders'              , utils.logRequest
+  , utils.verifyClientToken
+  , users.getMyOrders
+  , error);
 /**
  * APIs related to book requests
  */
@@ -113,6 +134,14 @@ app.post('/books-auth/confirm_book_order'       , utils.logRequest
    , requests.confirmBookOrder
    , error);
 
+app.post('/books-auth/upload'                   , utils.logRequest
+   , utils.verifyClientToken
+   , upload.single('fileName'),
+   function(req, res, next) {
+     return res.send({
+       path: req.file.path
+     });
+});
 
 /**
  * APIs for crontabs

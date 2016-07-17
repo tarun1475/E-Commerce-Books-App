@@ -18,6 +18,8 @@ exports.getUserDetailsPanel               = getUserDetailsPanel;
 exports.blockUserById                     = blockUserById;
 exports.verifyUserByPhone                 = verifyUserByPhone;
 exports.searchUser                        = searchUser;
+exports.getMyDetails                      = getMyDetails;
+exports.getMyOrders                       = getMyOrders;
 
 /**
  *
@@ -83,6 +85,14 @@ function createNewAppUser(req, res) {
   });
 }
 
+/**
+ * <b> API [GET] /books-auth/get_user_requests </b> <br>
+ * API to get user requests
+ * The request query requires the following parameters :
+ * @param {STRING} token - access token of device
+ * @param {INTEGER} start_from - start index
+ * @param {INTEGER} page_size - end index
+ */
 function getRecentRequestsByUserId(req, res) {
   var handlerInfo = {
     "apiModule":"Users",
@@ -303,5 +313,116 @@ function searchUserHelper(handlerInfo, searchKey, callback) {
       return callback(err, null);
     }
     callback(null, result);
+  });
+}
+
+/**
+ * <b>API [GET] /books-auth/get_my_details </b><br>
+ * This api would provide user with his her details. Request query<br>
+ * requires the following parameters
+ * @param {STRING} token    - access token of device
+ * @param {INTEGER} edit    - [optional] if you want to edit details then sent edit = 1
+ * @param {STRING} name     - [optional] user name
+ * @param {STRING} address  - [optional] user address
+ * @param {STRING} landmark - [optional] user address landmark
+ *
+ */
+function getMyDetails(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "getMyDetails"
+  };
+  var reqParams = req.query;
+  var userId    = reqParams.user_id;
+  var toEdit    = reqParams.edit || 0;
+  var name      = reqParams.name;
+  var address   = reqParams.address;
+  var landmark  = reqParams.landmark;
+  var apiParams = [];
+  if(toEdit == 1) {
+    apiParams.push(userId, name, address, landmark);
+  }
+  if(utils.checkBlank(apiParams)) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  var sqlQuery = "", queryParams = [];
+  if(toEdit == 1) {
+    sqlQuery = "UPDATE tb_users SET user_address = ?, user_name = ?, landmark = ? WHERE user_id = ?";
+    queryParams.push(address, name, landmark, userId);
+  }
+  else {
+    sqlQuery = "SELECT user_name, user_address, landmark FROM tb_users WHERE user_id = ?";
+    queryParams.push(userId);
+  }
+  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user details", err, result, getUserDetails.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var responseData = {
+      "log": "Operation Successful",
+      "flags": constants.responseFlags.ACTION_COMPLETE,
+    };
+    if(toEdit == 0) {
+      responseData.data = result;
+    }
+    res.send(responseData);
+  });
+}
+
+/**
+ * <b> API [GET] /books-auth/my_orders </b> <br>
+ * API to get recent orders/deliveries for a particular user
+ * request query requires the following parameters:
+ * @param token {STRING} access token for user
+ * @param start_from {INTEGER} pagination start index
+ * @param page_size {INTEGER} pagination offset
+ */
+function getMyOrders(req, res) {
+  var handlerInfo = {
+    "apiModule": "users",
+    "apiHandler": "getMyOrders"
+  };
+  var reqParams = req.query;
+  var userId    = reqParams.user_id;
+  var startFrom = parseInt(reqParams.start_from);
+  var pageSize  = parseInt(reqParams.page_size);
+  if(utils.checkBlank([userId, startFrom, pageSize])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  var sqlQuery  = "SELECT delivery_id FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
+  var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var deliveryIdArr = [];
+    var deliveryDetailsObj = {};
+    for(var i = 0; i < result.length; i++) {
+      deliveryIdArr.push(result[i].delivery_id);
+    }
+    var asyncTasks = [];
+    for(var i = 0; i < deliveryIdArr.length; i++) {
+      asyncTasks.push(bookRequests.getDeliveryDetailsHelper.bind(null, handlerInfo, deliveryIdArr[i], deliveryDetailsObj));
+    }
+    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+      if(asyncErr) {
+        return res.send({
+          "log": asyncErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      var deliveryArr = Object.keys(deliveryDetailsObj).map(function(key) { return deliveryDetailsObj[key] });
+      deliveryArr.sort(function(a, b) {
+        var d1 = new Date(a.logged_on);
+        var d2 = new Date(b.logged_on);
+        return d1 < d2;
+      });
+      res.send({
+        "log": "Successfully fetched orders data",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": deliveryArr
+      });
+    });
   });
 }

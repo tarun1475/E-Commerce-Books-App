@@ -22,12 +22,14 @@ exports.getPendingRequestArr            = getPendingRequestArr;
 exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
 exports.getDeliveries                   = getDeliveries;
+exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 
 /**
  * <b>API [POST] '/req_book_auth/raise_request' </b><br>
  * API responsible for raising a book request.<br>
  * request body requires the following parameters:
  * @param {STRING} token - access token of user 
+ * @param {INTEGER} type - 0: buy, 1: Sell
  * @param {OBJECT} books - a json object of book requests
  * @param {INTEGER} book_req_category -  0 : College, 1 : School, 2 : Competitions, 3 : Novel
  * @return {JSON} response body contains log and flag indicating success/failure
@@ -41,9 +43,10 @@ function raiseBooksRequest(req, res) {
   var user_id       = reqParams.user_id;
   var books         = reqParams.books;
   var requestCat    = reqParams.book_req_category; // 0 : College, 1 : School, 2 : Competitions, 3 : Novel
+  var type          = reqParams.type || 0; // 0: buy, 1: Sell
   
-  var insertReq  = "INSERT INTO tb_book_requests (user_id) VALUES (?)";
-  var tt = connection.query(insertReq, [user_id], function(insErr, insRes) {
+  var insertReq  = "INSERT INTO tb_book_requests (user_id, type) VALUES (?, ?)";
+  var tt = connection.query(insertReq, [user_id, type], function(insErr, insRes) {
     logging.logDatabaseQuery(handlerInfo, "logging book request", insErr, insRes);
     if(insErr) {
       console.log(insErr);
@@ -259,16 +262,20 @@ function insertBookResponse(handlerInfo, response_id, vendor_id, book_id, book_p
  * @param {OBJECT} minResponseObj - an object whether minimum response would be added
  * @param {FUNCTION} callback - a callback function
  */
-function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, callback) {
-  var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, books.type, distribution.*, "+
+function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, type, callback) {
+  var orderStr = "";
+  if(type == 1) {
+    orderStr = "DESC ";
+  }
+  var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, distribution.*, "+
         "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone, requests.user_id, books.book_category "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
         "JOIN tb_book_requests as requests ON books.book_req_id = requests.req_id "+
-        "WHERE distribution.book_id = ? ORDER BY distribution.price ";
+        "WHERE distribution.book_id = ? ORDER BY distribution.price "+orderStr;
    var qq = connection.query(minQuery, [book_id], function(minErr, minResponse) {
-     logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse.length, qq.sql);
+     logging.logDatabaseQuery(handlerInfo, "getting minimum response for a book", minErr, minResponse, qq.sql);
      if(minErr) {
        return callback("There was some error in getting minimum request", null);
      }
@@ -355,8 +362,9 @@ function getMinimumBookResponseWrapper(handlerInfo, request_id, minimumResponse,
     }
     var responseObj = {};
     var asyncTasks  = [];
+    var reqType     = requestData.type;
     for(var i = 0; i < requestData.books.length; i++) {
-      asyncTasks.push(getMinimumBookResponse.bind(null, handlerInfo, requestData.books[i].book_id, responseObj));
+      asyncTasks.push(getMinimumBookResponse.bind(null, handlerInfo, requestData.books[i].book_id, responseObj, reqType));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
       if(asyncErr) {
@@ -555,7 +563,8 @@ function getDeliveryDetailsById(req, res) {
   };
   var reqParams       = req.body;
   var delivery_id     = parseInt(reqParams.delivery_id);
-  getDeliveryDetailsHelper(handlerInfo, delivery_id, function(delErr, deliveryData) {
+  var deliveryObj     = {};
+  getDeliveryDetailsHelper(handlerInfo, delivery_id, deliveryObj, function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
@@ -575,9 +584,9 @@ function getDeliveryDetailsById(req, res) {
  * @param deliveryId {INTEGER} delivery id
  * @param callback {FUNCTION} callback function
  */
-function getDeliveryDetailsHelper(handlerInfo, deliveryId, callback) {
+function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback) {
   var sqlQuery = "SELECT delivery.delivery_id, delivery.delivery_address, delivery.is_urgent_delivery, "+
-                 "delivery.delivery_date,  users.user_name, users.user_phone, users.user_id  "+
+                 "delivery.delivery_date,  users.user_name, users.user_phone, users.user_id, delivery.logged_on  "+
                  "FROM tb_delivery as delivery "+
                  "JOIN tb_users as users ON delivery.user_id = users.user_id "+
                  "WHERE delivery.delivery_id = ?";
@@ -596,6 +605,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, callback) {
     deliveryData.user_phone        = deliveryRes[0].user_phone;
     deliveryData.delivery_address  = deliveryRes[0].delivery_address;
     deliveryData.is_urgent_delivery= deliveryRes[0].is_urgent_delivery;
+    deliveryData.logged_on         = deliveryRes[0].logged_on;
     // getting delivery details :
     var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, vendors.vendor_phone, vendors.vendor_address, "+
       "distribution.book_price, distribution.mrp, distribution.vevsa_commission, "+
@@ -612,6 +622,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, callback) {
         logging.logDatabaseQuery(handlerInfo, "getting delivery details(vendors)", deliveryDetailsErr, deliveryDetails, jj.sql);
       }
       deliveryData.books           = deliveryDetails;
+      deliveryObj[deliveryId]      = deliveryData;
       callback(null, deliveryData);
     });
   });
@@ -632,8 +643,8 @@ function getPendingRequestArr(requestStatus, callback) {
 }
 
 function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, users.user_id, users.user_name, "+
-                  "users.user_address, books.*,  requests.approved_on "+
+  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, requests.status, users.user_id, users.user_name, "+
+                  "users.user_address, books.*,  requests.approved_on, requests.type "+
                   "FROM tb_book_requests as requests "+
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
                   "JOIN tb_books as books ON books.book_req_id = requests.req_id "+
@@ -655,6 +666,8 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
     curRequest.user_id       = result[0].user_id;
     curRequest.user_name     = result[0].user_name;
     curRequest.approved_on   = result[0].approved_on;
+    curRequest.type          = result[0].type;
+    curRequest.status        = result[0].status;
 
     var books = [], i = 0;
     do {
@@ -664,7 +677,6 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
       curBook.book_photograph  = result[i].book_photograph;
       curBook.book_stream      = result[i].book_stream;
       curBook.book_author      = result[i].book_author;
-      curBook.type             = result[i].type;
       curBook.medium           = result[i].medium;
       curBook.book_category    = result[i].book_category;
       curBook.publisher        = result[i].publisher;
