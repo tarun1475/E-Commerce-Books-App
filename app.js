@@ -77,6 +77,7 @@ app.get('/books-auth/send_otp'                 , utils.logRequest
 
 app.get('/books-auth/verify_otp'               , utils.logRequest
    , utils.verifyOTP
+   , users.createNewAppUser
    , error);
 
 app.get('/books-auth/get_vendor_sales'         , utils.logRequest

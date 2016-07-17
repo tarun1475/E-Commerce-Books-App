@@ -37,25 +37,19 @@ function createNewAppUser(req, res) {
     "apiModule": "users",
     "apiHandler":"createNewAppUser"
   };
-  var reqParams     = req.body;
-  var userName      = reqParams.user_name;
-  var userEmail     = reqParams.user_email;
+  var reqParams     = req.query;
   var userPhone     = reqParams.user_phone;
-  var userAddress   = reqParams.user_address;
-  var deviceName    = reqParams.device_name;
-  var osName        = reqParams.os_name;
-  var osVersion     = reqParams.os_version;
-  var userCity      = parseInt(reqParams.user_city);
+  var deviceToken   = reqParams.device_token
 
-  if(utils.checkBlank([userName, userEmail, userPhone, userAddress, deviceName, osName, osVersion, userCity])) {
+  if(utils.checkBlank([userPhone, deviceToken ])) {
     return res.send({
       "log" : "Some parameters are missing/invalid",
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
 
-  var dupQuery = "SELECT * FROM tb_users WHERE user_email = ? OR user_phone = ? ";
-  var tt = connection.query(dupQuery, [userEmail, userPhone], function(dupErr, dupData) {
+  var dupQuery = "SELECT * FROM tb_users WHERE  user_phone = ? ";
+  var tt = connection.query(dupQuery, [userPhone], function(dupErr, dupData) {
     logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
     if(dupErr) {
       return res.send({
@@ -69,10 +63,10 @@ function createNewAppUser(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var access_token = crypto.createHash("md5").update(userEmail).digest("hex");
-    var sqlQuery = "INSERT INTO tb_users (user_name, user_email, user_phone, user_address, device_name, os_name, os_version, user_city, access_token) "+
-                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    var tt = connection.query(sqlQuery, [userName, userEmail, userPhone, userAddress, deviceName, osName, osVersion, userCity, access_token], function(err, result) {
+    var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
+    var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token) "+
+                   "VALUES(?, ?, ?)";
+    var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken], function(err, result) {
       logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
       if(err) {
         return res.send({

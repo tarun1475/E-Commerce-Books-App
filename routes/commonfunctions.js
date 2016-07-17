@@ -290,7 +290,7 @@ function sendOTP(req, res) {
  * @param req {OBJECT} request query should contain session_id and otp
  * @param res {OBJECT} response would contain a json object indicating verification status
  */
-function verifyOTP(req, res) {
+function verifyOTP(req, res, next) {
   var handlerInfo = {
     "apiModule": "commonfuntions",
     "apiHandler": "verifyOTP"
@@ -310,10 +310,7 @@ function verifyOTP(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    res.send({
-      "log" : "Verified",
-      "flag": constants.responseFlags.ACTION_COMPLETE
-    });
+    next();
   });
 }
 
