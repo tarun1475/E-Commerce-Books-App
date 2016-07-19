@@ -385,11 +385,11 @@ function getMyOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-  var startFrom = parseInt(reqParams.start_from);
-  var pageSize  = parseInt(reqParams.page_size);
-  if(utils.checkBlank([userId, startFrom, pageSize])) {
+  if(utils.checkBlank([userId, reqParams.start_from, reqParams.page_size])) {
     return res.send(constants.parameterMissingResponse);
   }
+  var startFrom = parseInt(reqParams.start_from);
+  var pageSize  = parseInt(reqParams.page_size);
   var sqlQuery  = "SELECT delivery_id FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
   var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);

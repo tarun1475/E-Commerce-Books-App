@@ -7,5 +7,11 @@
     "password" : "12345",
     "database" : "vevsa_live",
     "connectionLimit" : 15
+  },
+  "elasticsearch": {
+    "host": "localhost",
+    "port": "9200",
+    "addBookUrl": "vevsa/book",
+    "searchBook": "vevsa/book/_search"
   }
 }

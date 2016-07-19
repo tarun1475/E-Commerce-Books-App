@@ -3,23 +3,24 @@
  */
 
 process.env.NODE_CONFIG_DIR = __dirname + '/config/';
-config          = require('config');
-var express     = require('express');
-var http        = require('http');
-var https       = require('https');
-var bodyParser  = require('body-parser');
-var fs          = require('fs');
-var logger      = require('morgan');
-var error       = require('./routes/error');
-var users       = require('./routes/users');
-var vendors     = require('./routes/vendors');
-var requests    = require('./routes/book_requests');
-var utils       = require('./routes/commonfunctions');
-var cron        = require('./routes/cron');
-var analytics   = require('./routes/analytics');
-var app         = express();
+config                  = require('config');
+var express             = require('express');
+var http                = require('http');
+var https               = require('https');
+var bodyParser          = require('body-parser');
+var fs                  = require('fs');
+var logger              = require('morgan');
+var error               = require('./routes/error');
+var users               = require('./routes/users');
+var vendors             = require('./routes/vendors');
+var requests            = require('./routes/book_requests');
+var utils               = require('./routes/commonfunctions');
+var cron                = require('./routes/cron');
+var analytics           = require('./routes/analytics');
+var elasticSearch       = require('./routes/elasticsearch');
+var app                 = express();
 
-connection      = undefined;
+connection              = undefined;
 require('./routes/mysqlLib');
 
 var options = {
@@ -134,6 +135,10 @@ app.post('/books-auth/confirm_book_order'       , utils.logRequest
    , requests.confirmBookOrder
    , error);
 
+app.post('/books-auth/get_books'                , utils.verifyClientToken
+   , elasticSearch.searchBook
+   , error);
+
 app.post('/books-auth/upload'                   , utils.logRequest
    , utils.verifyClientToken
    , upload.single('fileName'),
@@ -211,6 +216,10 @@ app.post('/books-auth/get_delivery_details'     , utils.logRequest
    , utils.verifyPanelToken
    , requests.getDeliveryDetailsById
    , error);
+
+app.post('/books-auth/add_book'                 , utils.verifyClientToken
+    , elasticSearch.addBookViaPanel
+    , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}
