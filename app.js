@@ -102,15 +102,21 @@ app.post('/books-auth/login'                   , utils.logRequest
   , utils.loginUser
   , error);
 
-app.get('/books-auth/my_details'              , utils.logRequest
+app.get('/books-auth/my_details'               , utils.logRequest
   , utils.verifyClientToken
   , users.getMyDetails
   , error);
 
-app.get('/books-auth/my_orders'              , utils.logRequest
+app.get('/books-auth/my_orders'                , utils.logRequest
   , utils.verifyClientToken
   , users.getMyOrders
   , error);
+
+app.get('/books-auth/delete_account'          , utils.logRequest
+  , utils.verifyClientToken
+  , users.markUserInActive
+  , error);
+
 /**
  * APIs related to book requests
  */

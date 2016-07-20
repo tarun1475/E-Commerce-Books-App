@@ -101,11 +101,11 @@ function raiseBooksRequest(req, res) {
 function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author,
   medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, callback) {
   var insertQuery = "INSERT INTO tb_books "+
-    "(book_req_id, book_name, book_stream, book_semester, type, book_author, medium, book_category, "+
+    "(book_req_id, book_name, book_stream, book_semester, book_author, medium, book_category, "+
     "class, competition_name, is_ncert, is_guide, publisher) "+
-    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   var queryParams = [
-    request_id, name, stream, semester, type, author, medium, book_category, Class,
+    request_id, name, stream, semester, author, medium, book_category, Class,
     competition_name, isNcert, isGuide, publisherName
   ];
   var tt = connection.query(insertQuery, queryParams, function(err, result) {

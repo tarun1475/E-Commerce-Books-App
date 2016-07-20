@@ -193,7 +193,7 @@ function verifyClientToken(req, res, next) {
     return next(e);
   }
   var userTable = ((userType == constants.userType.VENDORS) ? "tb_vendors" : "tb_users");
-  var checkToken = "SELECT * FROM "+userTable+" WHERE access_token = ?";
+  var checkToken = "SELECT * FROM "+userTable+" WHERE access_token = ? AND is_active = 1";
   var tt = connection.query(checkToken, [token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "geting user details ", err, result);
     if(err) {
@@ -201,7 +201,6 @@ function verifyClientToken(req, res, next) {
     }
     if(result.length == 0) {
       e = new Error('Invalid token provided!');
-      e.status = constants.responseFlags.NOT_AUTHORIZED;
       e.log = "Invalid token provided!";
       e.flag = constants.responseFlags.NOT_AUTHORIZED;
       return next(e);

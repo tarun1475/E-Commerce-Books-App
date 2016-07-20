@@ -20,6 +20,7 @@ exports.verifyUserByPhone                 = verifyUserByPhone;
 exports.searchUser                        = searchUser;
 exports.getMyDetails                      = getMyDetails;
 exports.getMyOrders                       = getMyOrders;
+exports.markUserInActive                  = markUserInActive;
 
 /**
  *
@@ -424,5 +425,39 @@ function getMyOrders(req, res) {
         "data": deliveryArr
       });
     });
+  });
+}
+
+function markUserInActive(req, res) {
+  var handlerInfo = {
+    "apiModule": "users",
+    "apiHandler": "markUserInactive"
+  };
+  var userId = req.query.user_id;
+  var regAs  = req.query.reg_as || 0;
+  changeUserActivityStatus(handlerInfo, userId, regAs, 0, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Operation successful",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function changeUserActivityStatus(handlerInfo, userId, userType, activityStatus, callback) {
+  var userTable = ["tb_users", "tb_vendors"];
+  var userIdVal    = ["user_id", "vendor_id"];
+  var sqlQuery  = "UPDATE "+userTable[userType]+ " SET is_active = ? WHERE "+userIdVal[userType]+" = ?";
+  var updateUser = connection.query(sqlQuery, [activityStatus, userId], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "updating user activity status", err, result, updateUser.sql);
+      return callback("There was some error in updating user", null);
+    }
+    callback(null, "Operation successful");
   });
 }
