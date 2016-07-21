@@ -396,8 +396,8 @@ function confirmBookOrder(req, res) {
   var responseData    = req.body.data;
   var requestId       = req.body.request_id;
   var deliveryAddress = req.body.delivery_address || req.body.user_address;
-  var userName        = req.body.user_name;
-  var userPhone       = req.body.user_phone;
+  var userName        = req.body.delivery_name || req.body.user_name;
+  var userPhone       = req.body.delivery_phone || req.body.user_phone;
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;

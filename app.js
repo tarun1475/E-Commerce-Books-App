@@ -18,6 +18,7 @@ var utils               = require('./routes/commonfunctions');
 var cron                = require('./routes/cron');
 var analytics           = require('./routes/analytics');
 var elasticSearch       = require('./routes/elasticsearch');
+var uploads             = require('./uploads');
 var app                 = express();
 
 connection              = undefined;
@@ -53,7 +54,12 @@ app.get('/heartbeat', function(req, res, next) {
 });
 
 // For storing data on server
-var multer          = require('multer');
+
+
+app.get('/', function(req, res) {
+  res.send('Vevsa.com - You save we save!');
+});
+
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, __dirname + '/uploads/');
@@ -64,10 +70,6 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({storage: storage});
-
-app.get('/', function(req, res) {
-  res.send('Vevsa.com - You save we save!');
-});
 
 /**
  * Users APIs
@@ -146,14 +148,17 @@ app.post('/books-auth/get_books'                , utils.verifyClientToken
    , error);
 
 app.post('/books-auth/upload'                   , utils.logRequest
-   , utils.verifyClientToken
-   , upload.single('fileName'),
-   function(req, res, next) {
-     return res.send({
-       path: req.file.path
-     });
+    , utils.verifyClientToken
+    , upload.single('fileName'), function(req, res, next) {
+      return res.send({
+        path: req.file.path
+  });
 });
 
+app.post('/books-auth/s3/upload'                 , utils.logRequest
+   , utils.verifyClientToken
+   , upload.single('fileName')
+   , uploads.upload);
 /**
  * APIs for crontabs
  */

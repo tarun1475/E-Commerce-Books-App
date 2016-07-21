@@ -39,7 +39,7 @@ function processPendingBookRequests(req, res) {
         async.series(asyncTasks, function(asyncErr, asyncRes) {
             if(asyncErr) {
                 // No need to handle errors in this case:
-                console.log(asyncErr);
+                logging.error(handlerInfo, "Sending push to devices", asyncErr);
             }
             // Send minimum responses as push notification to users
             var sendNotifications = [];
