@@ -428,6 +428,16 @@ function getMyOrders(req, res) {
   });
 }
 
+/**
+ * <b> API [GET] /books-auth/delete_account </b> <br>
+ * API to deactivate/delete user account : <br>
+ * This Api would simply mark user inactive and this would simply delete his account <br>
+ * and server would reject his further requests. Request query requires the following parameters: <br>
+ *
+ * @param user_id {INTEGER} user/vendor id who is using app
+ * @param reg_as  {INTEGER} [OPTIONAL] if it's a vendor app send it 1
+ * @param token   {STRING}  access token
+ */
 function markUserInActive(req, res) {
   var handlerInfo = {
     "apiModule": "users",

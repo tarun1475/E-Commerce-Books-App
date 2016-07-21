@@ -11,6 +11,22 @@ exports.searchBook         = searchBook;
 exports.addBookToIndex     = addBookToIndex;
 exports.searchBookInIndex  = searchBookInIndex;
 
+/**
+ * <b> API [POST] /books-auth/add_book </b> <br>
+ * API to input books for the elastic search db. <br>
+ * Request body requires the following parameters :
+ * @param token               {STRING} access token
+ * @param name                {STRING} Book name
+ * @param stream              {STRING}  OPTIONAL : college stream
+ * @param semester            {STRING}  OPTIONAL : college semester
+ * @param author              {STRING}  OPTIONAL : book author
+ * @param medium              {STRING}  OPTIONAL : medium
+ * @param publisher           {STRING}  OPTIONAL : publisher
+ * @param Class               {STRING}  OPTIONAL : Class
+ * @param competitionName     {STRING}  OPTIONAL : competition name
+ * @param isNcert             {INTEGER} OPTIONAL : if book is ncert
+ * @param isGuide             {INTEGER} OPTIONAL : if book is guide
+ */
 function addBookViaPanel(req, res) {
     var handlerInfo       = {
         "apiModule": "elasticSearch",
@@ -43,6 +59,12 @@ function addBookViaPanel(req, res) {
     });
 }
 
+/**
+ * <b> API [POST] /books-auth/get_books </b><br>
+ * Elastic search wrapper. This would search for books .
+ * @param token  {STRING} access token
+ * @param key    {STRING} search key
+ */
 function searchBook(req, res) {
     var handlerInfo = {
         "apiModule": "elasticSearch",
@@ -64,7 +86,6 @@ function searchBook(req, res) {
         });
     });
 }
-
 
 function addBookToIndex(handlerInfo, name, stream, semester, author, medium, publisher, Class, competitionName,
                         isNcert, isGuide, callback) {

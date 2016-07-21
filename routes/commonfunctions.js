@@ -288,6 +288,7 @@ function sendOTP(req, res) {
  * <b>API [GET] /books-auth/verify_otp</b><br>
  * @param req {OBJECT} request query should contain session_id and otp
  * @param res {OBJECT} response would contain a json object indicating verification status
+ * @param next {FUNCTION} this would be the create user middleware that is supposed to be called
  */
 function verifyOTP(req, res, next) {
   var handlerInfo = {
