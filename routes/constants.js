@@ -90,3 +90,9 @@ exports.adminPanel = {};
 //define(exports.adminPanel, "ACCESS_TOKEN"                      , "6vnZSz78C+kLxHfveUbAwgi4JwFj4zwk+AWjgEZw+K");
 define(exports.adminPanel, "ACCESS_TOKEN"                      , "27f5cc7f0fc4372148192822e1129bd7e987a9720097201d9c42d9c6829ca7be");
 
+/**
+ * Amazon S3 credentials
+ */
+exports.credentialsS3 = {};
+define(exports.credentialsS3, "accessKeyId"                    , "AKIAI4B2VIXTHFEMEWJA");
+define(exports.credentialsS3, "secretAccessKey"                , "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");

@@ -12,6 +12,7 @@
   "dependencies": {
     "apn": "^1.7.6",
     "async": "^2.0.0-rc.5",
+    "aws-sdk": "^2.4.8",
     "body-parser": "^1.15.1",
     "config": "^1.20.3",
     "crypto": "0.0.3",

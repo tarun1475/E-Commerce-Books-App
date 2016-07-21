@@ -62,7 +62,7 @@ function raiseBooksRequest(req, res) {
       asyncTasks.push(insertNewBook.bind(null, handlerInfo, request_id,
         books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].type || 0, books[i].book_author || "NA",
         books[i].medium || "English", requestCat || 0, books[i].Class || "NA", books[i].competition_name || "NA",
-        books[i].is_ncert || 0, books[i].is_guide || 0, books[i].publisher_name || "NA"));
+        books[i].is_ncert || 0, books[i].is_guide || 0, books[i].publisher_name || "NA", books[i].book_photograph || "NA"));
     }
     async.series(asyncTasks, function(err, result) {
       if(err) {
@@ -99,14 +99,14 @@ function raiseBooksRequest(req, res) {
  * @param callback {FUNCTION} a function for success/failure
  */
 function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author,
-  medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, callback) {
+  medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, photograph, callback) {
   var insertQuery = "INSERT INTO tb_books "+
     "(book_req_id, book_name, book_stream, book_semester, book_author, medium, book_category, "+
-    "class, competition_name, is_ncert, is_guide, publisher) "+
-    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "class, competition_name, is_ncert, is_guide, publisher, book_photograph) "+
+    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   var queryParams = [
     request_id, name, stream, semester, author, medium, book_category, Class,
-    competition_name, isNcert, isGuide, publisherName
+    competition_name, isNcert, isGuide, publisherName, photograph
   ];
   var tt = connection.query(insertQuery, queryParams, function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting books query", err, result, tt.sql);

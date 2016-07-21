@@ -4,14 +4,19 @@
 // Created by rohankumar on 21/07/16.
 
 var AWS                     = require('aws-sdk');
-var s3                      = new AWS.S3();
 var async                   = require('async');
 var fs                      = require('fs');
 var constants               = require('./constants');
-var utils                   = require('./commonfunction');
+var utils                   = require('./commonfunctions');
 var logging                 = require('./logging');
 var multer                  = require('multer');
 
+AWS.config.update({
+  accessKeyId: constants.credentialsS3.accessKeyId,
+  secretAccessKey: constants.credentialsS3.secretAccessKey
+});
+
+var s3                      = new AWS.S3();
 exports.uploadFileToS3      = uploadFileToS3;
 
 /**
@@ -28,10 +33,12 @@ function uploadFileToS3(req, res) {
     "apiHandler": "uploadFileToS3"
   };
   var reqParams = req.body;
-  var filePath  = reqParams.file_path;
-  var fileName  = reqParams.file_name;
-  var source    = reqParams.user_id;
+  var filePath  = req.file.path;
+  var fileName  = filePath.split('/');
+  fileName  = fileName[fileName.length -1];
+  var source    = reqParams.user_id || "NA";
   var remoteFilePath = {};
+  console.log("local filePath : "+filePath, "fileName : "+fileName);
   remoteFilePath.name = "";
   if(utils.checkBlank([filePath])) {
     return res.send({
@@ -40,8 +47,9 @@ function uploadFileToS3(req, res) {
     });
   }
   var asyncTasks = [];
+  console.log("LAUNCH ASYNC: ");
   asyncTasks.push(uploadFileToS3Helper.bind(null, handlerInfo, filePath, fileName, remoteFilePath));
-  asyncTasks.push(logUploadIntoDb.bind(null, handlerInfo, source, fileName, remoteFilePath.name));
+  asyncTasks.push(logUploadIntoDb.bind(null, handlerInfo, source, fileName, remoteFilePath));
   asyncTasks.push(unlinkUploadedFile.bind(null, handlerInfo, filePath));
   async.series(asyncTasks, function(err, result) {
     if(err) {
@@ -68,6 +76,7 @@ function uploadFileToS3(req, res) {
  * @param callback {FUNCTION} a callback function
  */
 function uploadFileToS3Helper(handlerInfo, filePath, fileName, remoteFilePath, callback) {
+  console.log("uploadFileToS3Helper()");
   var fileStream = fs.createReadStream(filePath);
   var bucketName = 'vevsabooks';
   var folderName = 'bookImages/';
@@ -76,7 +85,7 @@ function uploadFileToS3Helper(handlerInfo, filePath, fileName, remoteFilePath, c
   s3.putObject(params, function(err, data) {
     if(err) {
       logging.error(handlerInfo, 'Error in uploading to S3', err);
-      callback(err, null);
+      return callback(err, null);
     }
     var docPath = 'http://s3-ap-southeast-1.amazonaws.com/'+ bucketName + '/'+ remoteFileName;
     logging.trace(handlerInfo, 'Successfully uploaded file', docPath);
@@ -94,8 +103,9 @@ function uploadFileToS3Helper(handlerInfo, filePath, fileName, remoteFilePath, c
  * @param callback {FUNCTION} callback function
  */
 function logUploadIntoDb(handlerInfo, uploadedBy, actualFileName, fileName, callback) {
+  console.log("logUploadIntoDb()");
   var logFileQuery = "INSERT INTO tb_file_upload_logs(uploaded_by, uploaded_at, actual_filename, file_path) VALUES(?, NOW(), ?, ?)";
-  var fileLogQuery = connection.query(logFileQuery, [uploadedBy, actualFileName, fileName], function(err, result) {
+  var fileLogQuery = connection.query(logFileQuery, [uploadedBy, actualFileName, fileName.name], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "logging uploaded file into db", err, result, fileLogQuery.sql);
       return callback("There was some error in logging file", null);
@@ -105,6 +115,7 @@ function logUploadIntoDb(handlerInfo, uploadedBy, actualFileName, fileName, call
 }
 
 function unlinkUploadedFile(handlerInfo, localFilePath, callback) {
+  console.log("unlinkUploadedFile()");
   fs.exists(localFilePath, function(exists) {
     if(exists) {
       logging.trace(handlerInfo, 'File Exists. Deleting now...');

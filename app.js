@@ -10,6 +10,7 @@ var https               = require('https');
 var bodyParser          = require('body-parser');
 var fs                  = require('fs');
 var logger              = require('morgan');
+var multer              = require('multer');
 var error               = require('./routes/error');
 var users               = require('./routes/users');
 var vendors             = require('./routes/vendors');
@@ -18,7 +19,7 @@ var utils               = require('./routes/commonfunctions');
 var cron                = require('./routes/cron');
 var analytics           = require('./routes/analytics');
 var elasticSearch       = require('./routes/elasticsearch');
-var uploads             = require('./uploads');
+var uploads             = require('./routes/uploads');
 var app                 = express();
 
 connection              = undefined;
@@ -148,17 +149,18 @@ app.post('/books-auth/get_books'                , utils.verifyClientToken
    , error);
 
 app.post('/books-auth/upload'                   , utils.logRequest
-    , utils.verifyClientToken
+    //, utils.verifyClientToken
     , upload.single('fileName'), function(req, res, next) {
+      console.log("file path is : "+req.file.path);
       return res.send({
         path: req.file.path
   });
 });
 
 app.post('/books-auth/s3/upload'                 , utils.logRequest
-   , utils.verifyClientToken
+   //, utils.verifyClientToken
    , upload.single('fileName')
-   , uploads.upload);
+   , uploads.uploadFileToS3);
 /**
  * APIs for crontabs
  */
