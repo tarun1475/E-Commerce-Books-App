@@ -36,6 +36,7 @@ function checkBlank(arr)
     {
         if (arr[i] === '' || arr[i] === "" || arr[i] == undefined)
         {
+            console.log("<<<< BLANK PARAMETER AT INDEX :"+i+">>>>"+arr[i]);
             return 1;
             break;
         }
@@ -200,9 +201,8 @@ function verifyClientToken(req, res, next) {
       return res.send(constants.databaseErrorResponse);
     }
     if(result.length == 0) {
-      e = new Error('Invalid token provided!');
-      e.log = "Invalid token provided!";
-      e.flag = constants.responseFlags.NOT_AUTHORIZED;
+      e = new Error('Unauthorized! Contact Panel admin');
+      e.status = constants.responseFlags.NOT_AUTHORIZED;
       return next(e);
     }
     if(userType == 0) {
@@ -245,6 +245,11 @@ function sendOTP(req, res) {
     "apiHandler": "sendOtp"
   };
   var phone_no = req.query.phone_no;
+
+  if(checkBlank([phone_no])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+
   // Request sendotp for getting otp
   var options = {};
   options.method = 'POST';
@@ -301,7 +306,6 @@ function verifyOTP(req, res, next) {
   var tt = connection.query(sqlQuery, [otp, session_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result);
     if(err) {
-      console.log(err);
       return res.send(constants.databaseErrorResponse);
     }
     if(result.length == 0) {
@@ -310,6 +314,7 @@ function verifyOTP(req, res, next) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
+    req.query.user_phone = result[0].phone_no;
     next();
   });
 }

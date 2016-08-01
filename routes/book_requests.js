@@ -29,7 +29,7 @@ exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
  * API responsible for raising a book request.<br>
  * request body requires the following parameters:
  * @param {STRING} token - access token of user 
- * @param {INTEGER} type - 0: buy, 1: Sell
+ * @param {INTEGER} req_type - 0: buy, 1: Sell
  * @param {OBJECT} books - a json object of book requests
  * @param {INTEGER} book_req_category -  0 : College, 1 : School, 2 : Competitions, 3 : Novel
  * @return {JSON} response body contains log and flag indicating success/failure
@@ -43,8 +43,12 @@ function raiseBooksRequest(req, res) {
   var user_id       = reqParams.user_id;
   var books         = reqParams.books;
   var requestCat    = reqParams.book_req_category; // 0 : College, 1 : School, 2 : Competitions, 3 : Novel
-  var type          = reqParams.type || 0; // 0: buy, 1: Sell
+  var type          = reqParams.req_type || 0; // 0: buy, 1: Sell
   
+  if(utils.checkBlank([user_id, books, requestCat])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+
   var insertReq  = "INSERT INTO tb_book_requests (user_id, type) VALUES (?, ?)";
   var tt = connection.query(insertReq, [user_id, type], function(insErr, insRes) {
     logging.logDatabaseQuery(handlerInfo, "logging book request", insErr, insRes);
@@ -101,11 +105,11 @@ function raiseBooksRequest(req, res) {
 function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author,
   medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, photograph, callback) {
   var insertQuery = "INSERT INTO tb_books "+
-    "(book_req_id, book_name, book_stream, book_semester, book_author, medium, book_category, "+
+    "(book_req_id, book_name, book_stream, book_semester, type, book_author, medium, book_category, "+
     "class, competition_name, is_ncert, is_guide, publisher, book_photograph) "+
-    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   var queryParams = [
-    request_id, name, stream, semester, author, medium, book_category, Class,
+    request_id, name, stream, semester, type, author, medium, book_category, Class,
     competition_name, isNcert, isGuide, publisherName, photograph
   ];
   var tt = connection.query(insertQuery, queryParams, function(err, result) {
@@ -139,11 +143,8 @@ function getBookRequests(req, res) {
   var bookStatus  = reqParams.req_status;
 
 
-  if(utils.checkBlank([start_from, page_size, bookStatus])) {
-    return res.send({
-      "log": "Some parameters are missing/invalid",
-      "flag": constants.responseFlags.ACTION_FAILED
-    });
+  if(utils.checkBlank([reqParams.start_from, reqParams.page_size, bookStatus])) {
+    return res.send(constants.parameterMissingResponse);
   }
   var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? ORDER BY generated_on DESC LIMIT ?, ?";
   var jj = connection.query(sqlQuery, [bookStatus, start_from, page_size], function(err, result) {
@@ -193,6 +194,9 @@ function putBookRequestResponse(req, res) {
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
 
+  if(utils.checkBlank([vendorId, requestId, books])) {
+    return res.send(constants.parameterMissingResponse);
+  }
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
     if(dupErr) {

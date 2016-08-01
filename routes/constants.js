@@ -18,6 +18,7 @@ define(exports.responseFlags, "ACTION_FAILED"       , 144);
 define(exports.responseFlags, "ACTION_COMPLETE"     , 143);
 define(exports.responseFlags, "NOT_LOGGED_IN"       , 401);
 define(exports.responseFlags, "NOT_AUTHORIZED"      , 403);
+define(exports.responseFlags, "INTERNAL_SERVER_ERR" , 500);
 
 /**
  * Common response sent during database execution error

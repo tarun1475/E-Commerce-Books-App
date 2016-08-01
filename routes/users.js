@@ -42,9 +42,9 @@ function createNewAppUser(req, res) {
   };
   var reqParams     = req.query;
   var userPhone     = reqParams.user_phone;
-  var deviceToken   = reqParams.device_token
+  var deviceToken   = reqParams.device_token;
 
-  if(utils.checkBlank([userPhone, deviceToken ])) {
+  if(utils.checkBlank([deviceToken])) {
     return res.send({
       "log" : "Some parameters are missing/invalid",
       "flag": constants.responseFlags.ACTION_FAILED
@@ -169,7 +169,7 @@ function getUserDetailsPanelHelper(handlerInfo, user_id, callback) {
       "JOIN tb_book_requests as requests ON requests.user_id = users.user_id "+
       "WHERE users.user_id = ? AND requests.is_valid = 1";
   var getUserDetails = connection.query(sqlQuery, [user_id], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, {"event": "getting user details"}, err, result, getUserDetails.sql);
+    logging.logDatabaseQuery(handlerInfo, {"event": "getting user details"}, err, null, getUserDetails.sql);
     if(err) {
       return callback("There was some error in getting user details", null);
     }
