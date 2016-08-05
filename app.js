@@ -39,6 +39,11 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");  
+  next();
+});
+
 /////////////////////////////////////////////////////////////
 // APIs for HearBeat
 /////////////////////////////////////////////////////////////
