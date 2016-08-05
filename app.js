@@ -233,6 +233,11 @@ app.post('/books-auth/get_delivery_details'     , utils.logRequest
 app.post('/books-auth/add_book'                 , utils.verifyClientToken
     , elasticSearch.addBookViaPanel
     , error);
+
+app.get('/req_book_auth/get_all_users'         , utils.logRequest
+    , utils.verifyPanelToken
+    , users.getAllUsers
+    , error);
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}

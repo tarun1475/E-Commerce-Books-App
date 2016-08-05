@@ -21,6 +21,8 @@ exports.searchUser                        = searchUser;
 exports.getMyDetails                      = getMyDetails;
 exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
+exports.getAllUsers                       = getAllUsers;
+exports.getAllUsersFromDb                 = getAllUsersFromDb;
 
 /**
  *
@@ -469,5 +471,40 @@ function changeUserActivityStatus(handlerInfo, userId, userType, activityStatus,
       return callback("There was some error in updating user", null);
     }
     callback(null, "Operation successful");
+  });
+}
+
+function getAllUsers(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "getAllUsers"
+  };
+  var reqParams          = req.query;
+  var showSuspended      = reqParams.show_suspended || 0;
+  var userType           = reqParams.user_type || 0;
+  var userFilter         = "";
+  userFilter += " AND is_active = " + (showSuspended == 0 ? 1 : 0);
+
+  getAllUsersFromDb(handlerInfo, userType, userFilter, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    return res.send({
+      "log": "Action complete",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+}
+
+function getAllUsersFromDb(handlerInfo, userType, userFilter, callback) {
+  var tableName = (userType == constants.userType.USERS ? "tb_users ": "tb_vendors ");
+  var sqlQuery = "SELECT * FROM "+tableName+" WHERE 1=1 "+ userFilter;
+  var tt = connection.query(sqlQuery, [], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting all users ", err, null, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }
