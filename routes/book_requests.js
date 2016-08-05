@@ -44,11 +44,18 @@ function raiseBooksRequest(req, res) {
   var books         = reqParams.books;
   var requestCat    = reqParams.book_req_category; // 0 : College, 1 : School, 2 : Competitions, 3 : Novel
   var type          = reqParams.req_type || 0; // 0: buy, 1: Sell
-  
-  if(utils.checkBlank([user_id, books, requestCat])) {
-    return res.send(constants.parameterMissingResponse);
+  var bookNameFlag  = true;
+
+
+  for(var i = 0; i < books.length; i++) {
+    if(books[i].name == undefined) {
+      bookNameFlag = false;
+    }
   }
 
+  if(utils.checkBlank([user_id, books, requestCat]) || !bookNameFlag) {
+    return res.send(constants.parameterMissingResponse);
+  }
   var insertReq  = "INSERT INTO tb_book_requests (user_id, type) VALUES (?, ?)";
   var tt = connection.query(insertReq, [user_id, type], function(insErr, insRes) {
     logging.logDatabaseQuery(handlerInfo, "logging book request", insErr, insRes);
