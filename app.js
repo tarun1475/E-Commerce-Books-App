@@ -9,8 +9,10 @@ var http                = require('http');
 var https               = require('https');
 var bodyParser          = require('body-parser');
 var fs                  = require('fs');
+var cors                = require('cors');
 var logger              = require('morgan');
 var multer              = require('multer');
+var favicon             = require('serve-favicon');
 var error               = require('./routes/error');
 var users               = require('./routes/users');
 var vendors             = require('./routes/vendors');
@@ -38,6 +40,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
+app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(cors());
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");  
