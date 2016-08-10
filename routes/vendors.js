@@ -31,21 +31,21 @@ exports.searchVendor           = searchVendor;
 function createNewVendor(req, res) {
   var reqParams     = req.body;
   var vendorName    = reqParams.vendor_name;
-  var vendorEmail   = reqParams.vendor_email || "NA";
   var vendorPhone   = reqParams.vendor_phone;
   var vendorAddress = reqParams.vendor_address;
   var deviceName    = reqParams.device_name;
   var osVersion     = reqParams.os_version;
+  var deviceToken   = reqParams.device_token;
   var city          = parseInt(reqParams.vendor_city);
 
-  if(utils.checkBlank([vendorName, vendorEmail, vendorPhone, vendorAddress, deviceName, osVersion, city])) {
+  if(utils.checkBlank([vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, deviceToken])) {
     return res.send({
       "log" : "some parameters are missing/invalid",
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
-  var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_email = ? OR vendor_phone = ?";
-  connection.query(dupQuery, [vendorEmail, vendorPhone], function(dupErr, dupRes) {
+  var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
+  connection.query(dupQuery, [vendorPhone], function(dupErr, dupRes) {
     if(dupErr) {
       return res.send({
         "log" : "Server execution error",
@@ -58,10 +58,11 @@ function createNewVendor(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var access_token = crypto.createHash("md5").update(vendorEmail).digest("hex");
-    var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_email, vendor_phone, vendor_address, vendor_device_name, vendor_device_os, vendor_city, access_token) "+
-                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-    connection.query(sqlQuery, [vendorName, vendorEmail, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token], function(err, result) {
+    var access_token = crypto.createHash("md5").update(vendorPhone).digest("hex");
+    var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_phone, vendor_address, vendor_device_name," +
+        " vendor_device_os, vendor_city, access_token, device_token, date_registered) "+
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token, deviceToken], function(err, result) {
       if(err) {
         console.log(err);
         return res.send({
@@ -72,7 +73,7 @@ function createNewVendor(req, res) {
       return res.send({
         "log" : "Successfully created vendor",
         "access_token": access_token,
-        "flag": constants.responseFlags.ACTION_FAILED
+        "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });
   });

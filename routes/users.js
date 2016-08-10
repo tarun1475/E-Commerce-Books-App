@@ -69,8 +69,8 @@ function createNewAppUser(req, res) {
       });
     }
     var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
-    var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token) "+
-                   "VALUES(?, ?, ?)";
+    var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token, date_registered) "+
+                   "VALUES(?, ?, ?, DATE(NOW()))";
     var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken], function(err, result) {
       logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
       if(err) {
