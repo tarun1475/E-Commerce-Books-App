@@ -23,7 +23,7 @@ exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
 exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
-
+exports.updateDeliveryStatus            = updateDeliveryStatus;
 /**
  * <b>API [POST] '/req_book_auth/raise_request' </b><br>
  * API responsible for raising a book request.<br>
@@ -735,16 +735,25 @@ function getDeliveries(req, res) {
   };
   var reqParams = req.body;
   var dateInterval = reqParams.date_interval;
-  if(utils.checkBlank([dateInterval])) {
-    return res.send(constants.parameterMissingResponse);
+  var isUrgent = reqParams.is_urgent || -1;
+  var isDelivered = reqParams.is_delivered || -1;
+  var queryFilter = "";
+  if(dateInterval != undefined) {
+    queryFilter += " AND delivery.logged_on BETWEEN DATE('"+dateInterval.start_date+"') AND DATE('"+dateInterval.end_date+"')";
+  }
+  if(isUrgent >= 0) {
+    queryFilter += " AND delivery.is_urgent_delivery = "+isUrgent;
+  }
+  if(isDelivered >= 0) {
+    queryFilter += " AND delivery.is_delivered = "+isDelivered;
   }
   var sqlQuery = "SELECT delivery.*, users.user_name, users.user_phone, users.user_address, users.user_city " +
       "FROM `tb_delivery` as delivery " +
       "LEFT JOIN tb_users as users ON users.user_id = delivery.user_id " +
-      "WHERE delivery.logged_on BETWEEN DATE(?) AND DATE(?) " +
-      "ORDER BY delivery.`logged_on` DESC";
-  var tt = connection.query(sqlQuery, [dateInterval.start_date, dateInterval.end_date], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "getting deliveries", err, result, tt.sql);
+      "WHERE 1=1 " +queryFilter+
+      " ORDER BY delivery.`logged_on` DESC";
+  var tt = connection.query(sqlQuery, [], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting deliveries", err, null, tt.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -753,5 +762,38 @@ function getDeliveries(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE,
       "data": result
     });
+  });
+}
+
+function updateDeliveryStatus(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "updateDeliveryStatus"
+  };
+  var reqParams = req.body;
+  var deliveryId= reqParams.delivery_id;
+  var status    = reqParams.status;
+  updateDeliveryStatusHelper(handlerInfo, deliveryId, status, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Action complete",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    })
+  });
+}
+
+function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
+  var sqlQuery = "UPDATE tb_delivery SET is_delivered = ? WHERE delivery_id = ?";
+  var tt = connection.query(sqlQuery, [status, deliveryId], function(err, result) {
+    if(err) {
+      logging.error(handlerInfo, "updating book request", err, null, tt.sql);
+      return callback("There was some error in updating delivery", null);
+    }
+    callback(null, result);
   });
 }

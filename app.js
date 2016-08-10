@@ -239,6 +239,11 @@ app.post('/books-auth/get_delivery_details'     , utils.logRequest
    , requests.getDeliveryDetailsById
    , error);
 
+app.post('/books-auth/update_delivery_status'       , utils.logRequest
+   , utils.verifyPanelToken
+   , requests.updateDeliveryStatus
+   , error);
+
 app.post('/books-auth/add_book'                 , utils.verifyClientToken
     , elasticSearch.addBookViaPanel
     , error);
