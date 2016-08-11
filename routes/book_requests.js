@@ -735,16 +735,17 @@ function getDeliveries(req, res) {
   };
   var reqParams = req.body;
   var dateInterval = reqParams.date_interval;
-  var isUrgent = reqParams.is_urgent || -1;
-  var isDelivered = reqParams.is_delivered || -1;
+  var isUrgent = reqParams.is_urgent;
+  var isDelivered = reqParams.is_delivered;
   var queryFilter = "";
   if(dateInterval != undefined) {
     queryFilter += " AND delivery.logged_on BETWEEN DATE('"+dateInterval.start_date+"') AND DATE('"+dateInterval.end_date+"')";
   }
-  if(isUrgent >= 0) {
+  console.log("isUrgent : "+isUrgent+", isDelivered : "+isDelivered);
+  if(isUrgent != undefined) {
     queryFilter += " AND delivery.is_urgent_delivery = "+isUrgent;
   }
-  if(isDelivered >= 0) {
+  if(isDelivered != undefined) {
     queryFilter += " AND delivery.is_delivered = "+isDelivered;
   }
   var sqlQuery = "SELECT delivery.*, users.user_name, users.user_phone, users.user_address, users.user_city " +

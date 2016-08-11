@@ -44,6 +44,12 @@ function createNewVendor(req, res) {
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
+  if(vendorPhone.length < 10) {
+    return res.send({
+      "log": "Invalid phone number entered",
+      "flag": constants.responseFlags.ACTION_FAILED
+    });
+  }
   var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
   connection.query(dupQuery, [vendorPhone], function(dupErr, dupRes) {
     if(dupErr) {
