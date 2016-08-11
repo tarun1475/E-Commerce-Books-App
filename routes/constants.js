@@ -48,7 +48,8 @@ define(exports.deviceType, "iOS"                     , 2);
  * Android Ids for server
  */
 exports.serverAndroidIDs = {};
-define(exports.serverAndroidIDs, "PUSH_NOTIFICATION_SERVER_ID"           , "AIzaSyB4FIbJFRx17o8zBk4RtXB4qLsYcsVOQMs");
+define(exports.serverAndroidIDs, "PUSH_KEY_VENDOR_AUTH"           , "AIzaSyDAmesOOo-F0nLdP_2CaZzI8zA_dM7NZFQ");
+define(exposts.serverAndroidIDs, "PUSH_KEY_CUSTOMER_AUTH"         , "AIzaSyBhg-g1sAc57UUJqnSWdyqkFFJzTmIs7EI");
 
 /**
  * Constants for book request status
