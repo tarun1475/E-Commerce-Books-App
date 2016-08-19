@@ -53,37 +53,21 @@ function createNewAppUser(req, res) {
     });
   }
 
-  var dupQuery = "SELECT * FROM tb_users WHERE  user_phone = ? ";
-  var tt = connection.query(dupQuery, [userPhone], function(dupErr, dupData) {
-    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
-    if(dupErr) {
+  var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
+  var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token, date_registered) "+
+                 "VALUES(?, ?, ?, DATE(NOW()))";
+  var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
+    if(err) {
       return res.send({
-        "log": "Internal server error",
+        "log" : "Internal server error",
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    if(dupData.length > 0) {
-      return res.send({
-        "log": "A user already exists with this email/phone",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-    var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
-    var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token, date_registered) "+
-                   "VALUES(?, ?, ?, DATE(NOW()))";
-    var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken], function(err, result) {
-      logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-      if(err) {
-        return res.send({
-          "log" : "Internal server error",
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
-      }
-      res.send({
-        "log" : "User created successfully",
-        "access_token": access_token,
-        "flag": constants.responseFlags.ACTION_COMPLETE
-      });
+    res.send({
+      "log" : "User created successfully",
+      "access_token": access_token,
+      "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
 }

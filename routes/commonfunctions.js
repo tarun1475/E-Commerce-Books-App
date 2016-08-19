@@ -250,40 +250,57 @@ function sendOTP(req, res) {
     return res.send(constants.parameterMissingResponse);
   }
 
-  // Request sendotp for getting otp
-  var options = {};
-  options.method = 'POST';
-  options.json = true;
-  options.rejectUnauthorized = false;
-  options.url = constants.sendotp.API_LINK;
-  options.headers = {
-    'Content-Type': 'application/json',
-    'application-Key': constants.sendotp.API_KEY
-  };
-  options.body = {
-    "countryCode": "91",
-    "mobileNumber": phone_no,
-    "getGeneratedOTP": true
-  };
-  request(options, function(error, response, body) {
-    if(error || response.statusCode != 200) {
-      logging.error(handlerInfo, {event:"getting response from sendotp"}, {"error": error});
+
+  var dupQuery = "SELECT * FROM tb_users WHERE  user_phone = ? ";
+  var tt = connection.query(dupQuery, [phone_no], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
+    if(dupErr) {
       return res.send({
-        "log": "There was some error in getting otp",
+        "log": "Internal server error",
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var otp = body.response.oneTimePassword;
-    var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
-    var tt = connection.query(sqlQuery, [otp, phone_no], function(err, result) {
-      logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
-      if(err) {
-        return res.send(constants.databaseErrorResponse);
+    if(dupData.length > 0) {
+      return res.send({
+        "log": "A user already exists with this email/phone",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    // Request sendotp for getting otp
+    var options = {};
+    options.method = 'POST';
+    options.json = true;
+    options.rejectUnauthorized = false;
+    options.url = constants.sendotp.API_LINK;
+    options.headers = {
+      'Content-Type': 'application/json',
+      'application-Key': constants.sendotp.API_KEY
+    };
+    options.body = {
+      "countryCode": "91",
+      "mobileNumber": phone_no,
+      "getGeneratedOTP": true
+    };
+    request(options, function(error, response, body) {
+      if(error || response.statusCode != 200) {
+        logging.error(handlerInfo, {event:"getting response from sendotp"}, {"error": error});
+        return res.send({
+          "log": "There was some error in getting otp",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
       }
-      res.send({
-        "session_id": result.insertId,
-        "password"  : otp,
-        "flag"      : constants.responseFlags.ACTION_COMPLETE
+      var otp = body.response.oneTimePassword;
+      var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
+      var tt = connection.query(sqlQuery, [otp, phone_no], function(err, result) {
+        logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
+        if(err) {
+          return res.send(constants.databaseErrorResponse);
+        }
+        res.send({
+          "session_id": result.insertId,
+          "password"  : otp,
+          "flag"      : constants.responseFlags.ACTION_COMPLETE
+        });
       });
     });
   });

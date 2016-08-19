@@ -49,7 +49,7 @@ define(exports.deviceType, "iOS"                     , 2);
  */
 exports.serverAndroidIDs = {};
 define(exports.serverAndroidIDs, "PUSH_KEY_VENDOR_AUTH"           , "AIzaSyDAmesOOo-F0nLdP_2CaZzI8zA_dM7NZFQ");
-define(exposts.serverAndroidIDs, "PUSH_KEY_CUSTOMER_AUTH"         , "AIzaSyBhg-g1sAc57UUJqnSWdyqkFFJzTmIs7EI");
+define(exports.serverAndroidIDs, "PUSH_KEY_CUSTOMER_AUTH"         , "AIzaSyBhg-g1sAc57UUJqnSWdyqkFFJzTmIs7EI");
 
 /**
  * Constants for book request status
