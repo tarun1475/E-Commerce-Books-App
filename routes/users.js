@@ -45,8 +45,11 @@ function createNewAppUser(req, res) {
   var reqParams     = req.query;
   var userPhone     = reqParams.user_phone;
   var deviceToken   = reqParams.device_token;
+  var osVersion     = reqParams.os_version;
+  var osName        = reqParams.os_name;
+  var deviceName    = reqParams.device_name;
 
-  if(utils.checkBlank([deviceToken])) {
+  if(utils.checkBlank([deviceToken, osVersion, deviceName])) {
     return res.send({
       "log" : "Some parameters are missing/invalid",
       "flag": constants.responseFlags.ACTION_FAILED
@@ -54,9 +57,9 @@ function createNewAppUser(req, res) {
   }
 
   var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
-  var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token, date_registered) "+
-                 "VALUES(?, ?, ?, DATE(NOW()))";
-  var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken], function(err, result) {
+  var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, device_token, os_version, os_name, device_name, date_registered) "+
+                 "VALUES(?, ?, ?, ?, ?, ?, DATE(NOW()))";
+  var tt = connection.query(sqlQuery, [userPhone, access_token, deviceToken, osVersion, osName, deviceName], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     if(err) {
       return res.send({
