@@ -350,8 +350,8 @@ function getMyDetails(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
     var responseData = {
-      "log": "Operation Successful",
-      "flags": constants.responseFlags.ACTION_COMPLETE,
+      "log": "Successfully updated your details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
     };
     if(toEdit == 0) {
       responseData.data = result;
