@@ -258,6 +258,15 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
  */
 
 /*
+ * Referral apis related to some web-referral scheme
+ *
+ */
+app.get('/books-auth/email/send_otp'             , utils.sendOtpViaEmail
+    , error);
+
+app.get('/books-auth/email/verify_otp'           , utils.verifyEmailOtp
+    , error);
+/*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));
 });

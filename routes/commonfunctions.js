@@ -24,6 +24,8 @@ exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
 exports.logRequest                     = logRequest;
 exports.loginUser                      = loginUser;
+exports.sendOtpViaEmail                = sendOtpViaEmail;
+exports.verifyEmailOtp                 = verifyEmailOtp;
 /**
  * Function to check missing parameters in the API.
  * @param arr
@@ -290,9 +292,7 @@ function sendOTP(req, res) {
         });
       }
       var otp = body.response.oneTimePassword;
-      var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
-      var tt = connection.query(sqlQuery, [otp, phone_no], function(err, result) {
-        logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
+      logOtpIntoDb(handlerInfo, otp, phone_no, function(err, result) {
         if(err) {
           return res.send(constants.databaseErrorResponse);
         }
@@ -303,6 +303,17 @@ function sendOTP(req, res) {
         });
       });
     });
+  });
+}
+
+function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, callback) {
+  var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
+  var tt = connection.query(sqlQuery, [oneTimePwd, userPhone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }
 
@@ -319,9 +330,7 @@ function verifyOTP(req, res, next) {
   };
   var otp = req.query.otp;
   var session_id = req.query.session_id;
-  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
-  var tt = connection.query(sqlQuery, [otp, session_id], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result);
+  verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -336,6 +345,17 @@ function verifyOTP(req, res, next) {
   });
 }
 
+
+function verifyOtpInDb(handlerInfo, otp, sessionId, callback) {
+  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
+  var tt = connection.query(sqlQuery, [otp, sessionId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
 /**
  * This middleware would be used on the panel side for verification
  * @param req - {OBJECT} request body/query should contain the token
@@ -448,5 +468,66 @@ function updateDeviceToken(handlerInfo, userId, regAs, deviceToken, callback) {
       return callback(err, null);
     }
     callback(null, result);
+  });
+}
+
+function sendOtpViaEmail(req, res, next) {
+  var reqParams = req.query;
+  var handlerInfo = {
+    "apiModule" : "commonfunctions",
+    "apiHandler": "sendOtpViaEmail"
+  };
+  var email     = reqParams.user_email;
+  var otp       = Math.floor((Math.random()*1000000)+1);
+  var from      = 'support@vevsa.com';
+  var to        = [email];
+  var text      = "";
+  var subject   = 'Vevsa Referral Programme Registration';
+  var html      = 'Hello,<br><br>'+
+                  'In order to complete your registration, you must fill the following<br>'+
+                  'code on your registration screen: '+otp+'<br><br>'+
+                  'Thank you for registering youself for Vevsa.';
+  messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+    if(mailErr) {
+      return res.send({
+        "log": "There was some error in sending email",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
+      if(logErr) {
+        return res.send({
+          "log": "There was some error in generating otp",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      res.send({
+        "log": "Otp sent successfully",
+        "session_id": logRes.insertId,
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
+  });
+}
+
+function verifyEmailOtp(req, res, next) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var otp = reqParams.otp;
+  var session_id = reqParams.session_id;
+  verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
   });
 }
