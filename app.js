@@ -261,10 +261,13 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
  * Referral apis related to some web-referral scheme
  *
  */
-app.get('/books-auth/email/send_otp'             , utils.sendOtpViaEmail
+app.post('/books-auth/email/send_otp'             , utils.sendOtpViaEmail
     , error);
 
-app.get('/books-auth/email/verify_otp'           , utils.verifyEmailOtp
+app.post('/books-auth/email/verify_otp'           , utils.verifyEmailOtp
+    , error);
+
+app.get('/books-auth/refer'                       , utils.serverReferUserPage
     , error);
 /*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {

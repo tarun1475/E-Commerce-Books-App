@@ -12,6 +12,7 @@ var constants      = require('./constants');
 var messenger      = require('./messenger');
 var logging        = require('./logging');
 var users          = require('./users');
+var crypto         = require('crypto');
 
 exports.checkBlank                     = checkBlank;
 exports.sendIosPushNotification        = sendIosPushNotification;
@@ -26,6 +27,7 @@ exports.logRequest                     = logRequest;
 exports.loginUser                      = loginUser;
 exports.sendOtpViaEmail                = sendOtpViaEmail;
 exports.verifyEmailOtp                 = verifyEmailOtp;
+exports.serverReferUserPage            = serverReferUserPage;
 /**
  * Function to check missing parameters in the API.
  * @param arr
@@ -349,7 +351,7 @@ function verifyOTP(req, res, next) {
 function verifyOtpInDb(handlerInfo, otp, sessionId, callback) {
   var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
   var tt = connection.query(sqlQuery, [otp, sessionId], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result);
+    logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result, tt.sql);
     if(err) {
       return callback(err, null);
     }
@@ -472,41 +474,79 @@ function updateDeviceToken(handlerInfo, userId, regAs, deviceToken, callback) {
 }
 
 function sendOtpViaEmail(req, res, next) {
-  var reqParams = req.query;
+  var reqParams = req.body;
   var handlerInfo = {
     "apiModule" : "commonfunctions",
     "apiHandler": "sendOtpViaEmail"
   };
+  var userName  = reqParams.user_name;
+  var phoneNo   = reqParams.mobile_no;
+  var password  = reqParams.password;
   var email     = reqParams.user_email;
-  var otp       = Math.floor((Math.random()*1000000)+1);
-  var from      = 'support@vevsa.com';
-  var to        = [email];
-  var text      = "";
-  var subject   = 'Vevsa Referral Programme Registration';
-  var html      = 'Hello,<br><br>'+
-                  'In order to complete your registration, you must fill the following<br>'+
-                  'code on your registration screen: '+otp+'<br><br>'+
-                  'Thank you for registering youself for Vevsa.';
-  messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
-    if(mailErr) {
+  var referredBy= reqParams.referred_by || -1;
+  var getDuplicate = "SELECT * FROM tb_app_referral_programme WHERE email = ? OR phone_no = ?";
+  var tt = connection.query(getDuplicate, [email, phoneNo], function(dupErr, dupRes) {
+    logging.logDatabaseQuery(handlerInfo, "getting duplicate registration", dupErr, dupRes, tt.sql);
+    if(dupRes.length > 0) {
       return res.send({
-        "log": "There was some error in sending email",
+        "log": "A user already exists with this email/phone",
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
-      if(logErr) {
+    var otp       = Math.floor((Math.random()*1000000)+1);
+    var from      = 'support@vevsa.com';
+    var to        = [email];
+    var text      = "";
+    var subject   = 'Vevsa Referral Programme Registration';
+    var html      = 'Hello,<br><br>'+
+                    'In order to complete your registration, you must fill the following<br>'+
+                    'code on your registration screen: '+otp+'<br><br>'+
+                    'Thank you for registering youself for Vevsa.';
+    messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+      if(mailErr) {
         return res.send({
-          "log": "There was some error in generating otp",
+          "log": "There was some error in sending email",
           "flag": constants.responseFlags.ACTION_FAILED
         });
       }
-      res.send({
-        "log": "Otp sent successfully",
-        "session_id": logRes.insertId,
-        "flag": constants.responseFlags.ACTION_COMPLETE
+      logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
+        if(logErr) {
+          return res.send({
+            "log": "There was some error in generating otp",
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+        }
+        var sessionId = logRes.insertId;
+        insertAppReferralProgramme(handlerInfo, userName, email, phoneNo,
+          crypto.createHash('md5').update(password).digest('hex'), referredBy, function(logErr, logRes) {
+
+          if(logErr) {
+            return res.send({
+              "log": "Error in creating user",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+          res.send({
+            "log": "Otp sent successfully",
+            "session_id": sessionId,
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
+        });
       });
     });
+  });
+}
+
+function insertAppReferralProgramme(handlerInfo, userName, userEmail, userPhone, userPassword, referredBy, callback) {
+  var sqlQuery = "INSERT INTO tb_app_referral_programme (user_name, email, phone_no, password, referred_by) "+
+    "VALUES(?, ?, ?, ?, ?)";
+  var tt = connection.query(sqlQuery, [userName, userEmail, userPhone, userPassword, referredBy], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "logging user", err, result, tt.sql);
+    if(err) {
+      console.log(err);
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }
 
@@ -529,5 +569,70 @@ function verifyEmailOtp(req, res, next) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
+    var sqlQuery = "SELECT * FROM tb_otp WHERE session_id = ?";
+    var zz = connection.query(sqlQuery, [session_id], function(otpErr, otpData) {
+      if(otpErr) {
+        console.log(otpErr);
+        return res.send(constants.databaseErrorResponse);
+      }
+      var userEmail = otpData[0].phone_no;
+      var sharableLink = "http://books.vevsa.com:7001/books-auth/refer?ref_code="+encrypt(userEmail);
+      markUserVerifiedInDb(handlerInfo, userEmail, sharableLink, function(markErr, markResult) {
+        if(markErr) {
+          return res.send(constants.databaseErrorResponse);
+        }
+        res.send({
+          "log": "User verified",
+          "share_link": sharableLink,
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+      });
+    });
   });
+}
+
+function markUserVerifiedInDb(handlerInfo, userEmail, shareUrl, callback) {
+  var sqlQuery = "UPDATE tb_app_referral_programme SET verification_status = 1, sharable_link=? WHERE email = ?";
+  var tt = connection.query(sqlQuery, [shareUrl, userEmail], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "update verification status", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+function encrypt(text){
+  var cipher = crypto.createCipher('aes-256-ctr','vevsa');
+  var crypted = cipher.update(text,'utf8','hex');
+  crypted += cipher.final('hex');
+  return crypted;
+}
+
+function decrypt(text){
+  var decipher = crypto.createDecipher('aes-256-ctr','vevsa');
+  var dec = decipher.update(text,'hex','utf8')
+  dec += decipher.final('utf8');
+  return dec;
+}
+
+function serverReferUserPage(req, res, next) {
+  var reqParams        = req.query;
+  var handlerInfo      = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "serverReferUserPage"
+  };
+  var referralCode     = reqParams.ref_code;
+  var userEmail        = decrypt(referralCode);
+  var sqlQuery = "SELECT * FROM tb_app_referral_programme WHERE email = ?";
+  var tt = connection.query(sqlQuery, [userEmail], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting referred_by", err, result, tt.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var userId = result[0].id;
+    var referUrl = "http://vevsa.com/contest/contest.html?referral_code="+userId;
+    res.redirect(referUrl);
+  });
+
 }
