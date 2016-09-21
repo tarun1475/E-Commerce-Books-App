@@ -633,6 +633,9 @@ function serverReferUserPage(req, res, next) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
+    if(result.length == 0) {
+      return res.status(constants.responseFlags.NOT_FOUND).send("404 Not found");
+    }
     var userId = result[0].id;
     var referUrl = "http://vevsa.com/contest/contest.html?referral_code="+userId;
     res.redirect(referUrl);
