@@ -28,6 +28,9 @@ exports.loginUser                      = loginUser;
 exports.sendOtpViaEmail                = sendOtpViaEmail;
 exports.verifyEmailOtp                 = verifyEmailOtp;
 exports.serverReferUserPage            = serverReferUserPage;
+exports.loginReferralProgramme         = loginReferralProgramme;
+exports.getReferralLeaderBoard         = getReferralLeaderBoard
+
 /**
  * Function to check missing parameters in the API.
  * @param arr
@@ -518,7 +521,7 @@ function sendOtpViaEmail(req, res, next) {
         }
         var sessionId = logRes.insertId;
         insertAppReferralProgramme(handlerInfo, userName, email, phoneNo,
-          crypto.createHash('md5').update(password).digest('hex'), referredBy, function(logErr, logRes) {
+          encrypt(password), referredBy, function(logErr, logRes) {
 
           if(logErr) {
             return res.send({
@@ -634,5 +637,75 @@ function serverReferUserPage(req, res, next) {
     var referUrl = "http://vevsa.com/contest/contest.html?referral_code="+userId;
     res.redirect(referUrl);
   });
+}
 
+function loginReferralProgramme(req, res, next) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "loginReferralProgramme"
+  };
+  var mobileNo = reqParams.mobile_no;
+  var password = encrypt(reqParams.password);
+
+  loginReferralProgrammeHelper(handlerInfo, mobileNo, password, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err.message,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(result.length == 0) {
+      var err = new Error("Not Authorized");
+      err.status = constants.responseFlags.NOT_AUTHORIZED
+      return next(err);
+    }
+    res.send({
+      "log": "Login successful",
+      "data": result[0],
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function loginReferralProgrammeHelper(handlerInfo, mobileNo, password, callback) {
+  var sqlQuery = "SELECT * FROM tb_app_referral_programme WHERE phone_no = ? AND password = ?";
+  var tt = connection.query(sqlQuery, [mobileNo, password], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "authenticating...", err, result, tt.sql);
+    if(err) {
+      return callback(new Error(err), null);
+    }
+    callback(null, result);
+  });
+}
+
+function getReferralLeaderBoard(req, res, next) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "getReferralLeaderBoard"
+  };
+  getReferralLeaderBoardHelper(handlerInfo, function(err, leaderboardData) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    res.send({
+      "log": "Successfully fetched leaderboard data",
+      "flag": constants.responseFlags.ACTION_COMPETE,
+      "data": leaderboardData
+    });
+  });
+}
+
+function getReferralLeaderBoardHelper(handlerInfo, callback) {
+  var sqlQuery = "SELECT r1.referred_by, r2.user_name, r2.phone_no, r2.email, r2.sharable_link, COUNT(*) as referrals "+
+    "FROM `tb_app_referral_programme` as r1 "+
+    "JOIN tb_app_referral_programme as r2 ON r2.id = r1.referred_by AND r1.verification_status=1 "+
+    "GROUP BY r1.referred_by "+
+    "ORDER BY referrals DESC";
+  var tt = connection.query(sqlQuery, [], function(err, result) {
+    if(err) {
+      return callback(new Error(err), null);
+    }
+    callback(null, result);
+  });
 }

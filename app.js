@@ -261,14 +261,26 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
  * Referral apis related to some web-referral scheme
  *
  */
-app.post('/books-auth/email/send_otp'             , utils.sendOtpViaEmail
+app.post('/books-auth/email/send_otp'             , utils.logRequest
+    , utils.sendOtpViaEmail
     , error);
 
-app.post('/books-auth/email/verify_otp'           , utils.verifyEmailOtp
+app.post('/books-auth/email/verify_otp'           , utils.logRequest
+    , utils.verifyEmailOtp
     , error);
 
-app.get('/books-auth/refer'                       , utils.serverReferUserPage
+app.get('/books-auth/refer'                       , utils.logRequest
+    , utils.serverReferUserPage
     , error);
+
+app.post('/books-auth/referrals/login'            , utils.logRequest
+    , utils.loginReferralProgramme
+    , error);
+
+app.get('/books-auth/referrals/leaderboard'       , utils.logRequest
+    , utils.getReferralLeaderBoard
+    , error);
+
 /*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));
