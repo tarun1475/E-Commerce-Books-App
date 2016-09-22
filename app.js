@@ -281,6 +281,9 @@ app.get('/books-auth/referrals/leaderboard'       , utils.logRequest
     , utils.getReferralLeaderBoard
     , error);
 
+app.get('/books-auth/referrals/user_referrals'    , utils.logRequest
+    , utils.getUserReferrals
+    , error);
 /*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));

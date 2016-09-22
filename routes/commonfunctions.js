@@ -30,6 +30,7 @@ exports.verifyEmailOtp                 = verifyEmailOtp;
 exports.serverReferUserPage            = serverReferUserPage;
 exports.loginReferralProgramme         = loginReferralProgramme;
 exports.getReferralLeaderBoard         = getReferralLeaderBoard
+exports.getUserReferrals               = getUserReferrals;
 
 /**
  * Function to check missing parameters in the API.
@@ -706,6 +707,37 @@ function getReferralLeaderBoardHelper(handlerInfo, callback) {
     "GROUP BY r1.referred_by "+
     "ORDER BY referrals DESC";
   var tt = connection.query(sqlQuery, [], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting leaderboard", err, result, tt.sql);
+    if(err) {
+      return callback(new Error(err), null);
+    }
+    callback(null, result);
+  });
+}
+
+function getUserReferrals(req, res, next) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "getUserReferrals"
+  };
+  var reqParams = req.query;
+  var userId    = reqParams.user_id;
+  getUserReferralsHelper(handlerInfo, userId, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    return res.send({
+      "log": "Successfully fetched data",
+      "flag": constants.responseFlags.ACTION_FAILED,
+      "data": result
+    });
+  });
+}
+
+function getUserReferralsHelper(handlerInfo, userId, callback) {
+  var sqlQuery = "SELECT * FROM tb_app_referral_programme WHERE referred_by = ?";
+  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user referrals", err, result, tt.sql);
     if(err) {
       return callback(new Error(err), null);
     }
