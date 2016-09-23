@@ -488,7 +488,7 @@ function sendOtpViaEmail(req, res, next) {
   var password  = reqParams.password;
   var email     = reqParams.user_email;
   var referredBy= reqParams.referred_by || -1;
-  var getDuplicate = "SELECT * FROM tb_app_referral_programme WHERE email = ? OR phone_no = ?";
+  var getDuplicate = "SELECT * FROM tb_app_referral_programme WHERE (email = ? OR phone_no = ?) AND verification_status=1";
   var tt = connection.query(getDuplicate, [email, phoneNo], function(dupErr, dupRes) {
     logging.logDatabaseQuery(handlerInfo, "getting duplicate registration", dupErr, dupRes, tt.sql);
     if(dupRes.length > 0) {
@@ -735,7 +735,7 @@ function getUserReferrals(req, res, next) {
 }
 
 function getUserReferralsHelper(handlerInfo, userId, callback) {
-  var sqlQuery = "SELECT * FROM tb_app_referral_programme WHERE referred_by = ?";
+  var sqlQuery = "SELECT * FROM tb_app_referral_programme WHERE referred_by = ? AND verification_status=1";
   var tt = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user referrals", err, result, tt.sql);
     if(err) {
