@@ -7,5 +7,9 @@
     "password" : "12345",
     "database" : "vevsa_live",
     "connectionLimit" : 15
+  },
+  "emailRecipents" : {
+    "orderConfirmationEmail": "rohankanojia420@gmail.com"
   }
+
 }

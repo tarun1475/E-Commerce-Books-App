@@ -441,7 +441,7 @@ function confirmBookOrder(req, res) {
         }
         // send email to admins 
         var from     = 'support@vevsa.com';
-        var to       = ['rohankanojia420@gmail.com', 'tarunkumargupta14@gmail.com', 'rddhiman10@gmail.com'];
+        var to       = config.get('emailRecipents.orderConfirmationEmail').split(',');
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
         var text     = "";
         var html     = "Hello, <br><br>"+
