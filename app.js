@@ -284,6 +284,15 @@ app.get('/books-auth/referrals/leaderboard'       , utils.logRequest
 app.get('/books-auth/referrals/user_referrals'    , utils.logRequest
     , utils.getUserReferrals
     , error);
+
+/*
+ * Web APIs.
+ */
+app.post('/books-auth/create_webUser'             , utils.logRequest
+   , users.createWebUser
+   , error);
+
+
 /*
 var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
   console.log('Express server listening on port ' + app.get('port'));
