@@ -31,3 +31,7 @@ npm install
 
 NODE_ENV=development node app.js
 ```
+
+When running in cluster mode, you have to gracefully reload the server(addressing all clusters with the common alias).
+
+pm2 gracefulReload vevsa:7001
