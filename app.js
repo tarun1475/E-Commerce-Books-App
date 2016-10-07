@@ -288,6 +288,9 @@ app.get('/books-auth/referrals/user_referrals'    , utils.logRequest
 /*
  * Web APIs.
  */
+app.post('/books-auth/create_webReq'             , utils.logRequest
+   , users.createWebReq
+   , error);
 app.post('/books-auth/create_webUser'             , utils.logRequest
    , users.createWebUser
    , error);

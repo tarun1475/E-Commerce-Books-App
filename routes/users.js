@@ -24,6 +24,7 @@ exports.markUserInActive                  = markUserInActive;
 exports.getAllUsers                       = getAllUsers;
 exports.getAllUsersFromDb                 = getAllUsersFromDb;
 exports.createWebUser                     = createWebUser;
+exports.createWebReq                      = createWebReq;
 
 /**
  *
@@ -496,15 +497,24 @@ function getAllUsersFromDb(handlerInfo, userType, userFilter, callback) {
     callback(null, result);
   });
 }
+//function to rasie web request
 
-function createWebUser(req , res){
+function createWebReq(req , res){
   var handlerInfo   = {
-    "apiModule": "Webusers",
-    "apiHandler":"createWebUser"
+    "apiModule": "WebReq",
+    "apiHandler":"createWebReq"
   };
-  var reqParams     = req.body;
-  var userName     = reqParams.user_name;
+  var reqParams   = req.body;
+  var userName    = reqParams.user_name;
   var userPhone   = reqParams.user_phone;
+  var userSem     = reqParams.sem;
+  var userCollege = reqParams.college;
+  var userCollegeMedium  = reqParams.college_medium;
+  var userBranch   = reqParams.branch;
+  var userUrgent     = reqParams.urgent;
+  var userCondition    = reqParams.quality;
+  
+  
 
   if(utils.checkBlank([userName])) {
     return res.send({
@@ -514,9 +524,11 @@ function createWebUser(req , res){
   }
 
   //var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
-  var sqlQuery = "INSERT INTO tb_webUser (user_name, user_phone) "+
-                 "VALUES(?, ?)";
-  var tt = connection.query(sqlQuery, [userName, userPhone], function(err, result) {
+  var sqlQuery = "INSERT INTO web_books_request (user_name, user_phone , quality , sem , college ,
+    college_medium, branch , urgent) "+
+                 "VALUES(?, ?, ?, ? , ? , ?, ?, ? )";
+  var tt = connection.query(sqlQuery, [userName, userPhone , userCondition ,
+    userSem , userCollege , userCollegeMedium , userBranch , userUrgent], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     if(err) {
       return res.send({
