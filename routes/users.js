@@ -514,14 +514,12 @@ function createWebReq(req , res){
   var userUrgent     = reqParams.urgent;
   var userCondition    = reqParams.quality;
   
-  
-
-  
-
   //var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
-  var sqlQuery = "INSERT INTO web_books_request (user_name, user_phone , quality , sem , college ,college_medium, branch , urgent) "+
+  var sqlQuery = "INSERT INTO web_books_request (user_name, user_phone , quality , sem , college "+
+                 ",college_medium, branch , urgent) "+
                  "VALUES(?, ?, ?, ? , ? , ?, ?, ? )";
-  var tt = connection.query(sqlQuery, [userName, userPhone , userCondition , userSem , userCollege , userCollegeMedium , userBranch , userUrgent], function(err, result) {
+  var queryParams = [userName, userPhone , userCondition , userSem , userCollege , userCollegeMedium , userBranch , userUrgent];
+  var tt = connection.query(sqlQuery, queryParams, function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     if(err) {
       return res.send({
@@ -533,4 +531,5 @@ function createWebReq(req , res){
       "log" : "User created successfully",
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
+  });
 }
