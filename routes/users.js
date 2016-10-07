@@ -23,8 +23,8 @@ exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
 exports.getAllUsers                       = getAllUsers;
 exports.getAllUsersFromDb                 = getAllUsersFromDb;
-exports.createWebReq = createWebReq;
-
+//exports.createWebUser                     = createWebUser;
+exports.createWebReq                      = createWebReq;
 
 /**
  *
