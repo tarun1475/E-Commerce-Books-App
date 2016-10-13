@@ -347,16 +347,13 @@ function verifyWebOTP(req, res) {
     }
     else{
       var phone = result[0].phone_no;
-      InsertWebuserInDb(handlerInfo, phone, pass, function(err, response){
-        if(err) {
-          return res.send(constants.databaseErrorResponse);
-        }
-      });
+      var pass = result[0].pass;
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
-        "action": response
+        "pass": pass,
+        "phone": phone
       });
     }
   });
@@ -388,7 +385,7 @@ function verifyOTP(req, res, next) {
     req.query.user_phone = result[0].phone_no;
     next();
   });
-}
+}/*
 function InsertWebuserInDb(handlerInfo, phone, pass, callback){
   var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, date_registered) "+
                  "VALUES(?, ?, DATE(NOW()))";
@@ -399,7 +396,7 @@ function InsertWebuserInDb(handlerInfo, phone, pass, callback){
     }
     callback(null, result);
   });
-}
+}*/
 
 function verifyOtpInDb(handlerInfo, otp, pass, callback) {
   var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND pass = ?";
