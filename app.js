@@ -99,6 +99,11 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
 app.get('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
+   
+app.get('/books-auth/verify_web_otp'               , utils.logRequest
+   , utils.verifyWebOTP
+   , users.createNewAppUser
+   , error);
 
 app.get('/books-auth/verify_otp'               , utils.logRequest
    , utils.verifyOTP
