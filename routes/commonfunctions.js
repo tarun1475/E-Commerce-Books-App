@@ -253,7 +253,8 @@ function sendOTP(req, res) {
     "apiModule": "commonfunctions",
     "apiHandler": "sendOtp"
   };
-  var phone_no = req.query.phone_no;
+  var phone_no = req.body.phone_no;
+  var pass = req.body.pass;
 
   if(checkBlank([phone_no])) {
     return res.send(constants.parameterMissingResponse);
@@ -299,23 +300,24 @@ function sendOTP(req, res) {
         });
       }
       var otp = body.response.oneTimePassword;
-      logOtpIntoDb(handlerInfo, otp, phone_no, function(err, result) {
+      logOtpIntoDb(handlerInfo, otp, phone_no, pass, function(err, result) {
         if(err) {
           return res.send(constants.databaseErrorResponse);
         }
         res.send({
           "session_id": result.insertId,
           "password"  : otp,
-          "flag"      : constants.responseFlags.ACTION_COMPLETE
+          "pass": pass,
+          "flag": constants.responseFlags.ACTION_COMPLETE
         });
       });
     });
   });
 }
 
-function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, callback) {
-  var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no) VALUES( ?, ?)";
-  var tt = connection.query(sqlQuery, [oneTimePwd, userPhone], function(err, result) {
+function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, pass, callback) {
+  var sqlQuery = "INSERT INTO tb_otp (one_time_password, phone_no , pass) VALUES( ?, ? , ?)";
+  var tt = connection.query(sqlQuery, [oneTimePwd, userPhone , pass], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting otp into database", err, result, tt.sql);
     if(err) {
       return callback(err, null);
@@ -344,6 +346,7 @@ function verifyWebOTP(req, res) {
       });
     }
     else{
+
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
