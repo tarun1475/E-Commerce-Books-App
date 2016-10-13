@@ -392,9 +392,9 @@ function InsertWebuserInDb(handlerInfo, phone, pass){
                  "VALUES(?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-    return req.send{
+    return res.send({
       "result":result
-    }
+    });
     });
 }
 
