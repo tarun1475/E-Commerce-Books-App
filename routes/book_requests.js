@@ -108,7 +108,7 @@ function raiseBooksRequest(req, res) {
  * @param isGuide {INTEGER} if book is a helper book
  * @param publisherName {STRING} publisher name
  * @param callback {FUNCTION} a function for success/failure
- */ @param competition_name {STRING} Competitive exam
+ */
 function insertNewBook(handlerInfo, request_id, name, stream, semester, vcondition, author,
   medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, photograph, callback) {
   var insertQuery = "INSERT INTO tb_books "+
