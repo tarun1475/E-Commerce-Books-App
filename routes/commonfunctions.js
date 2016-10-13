@@ -348,7 +348,7 @@ function verifyWebOTP(req, res) {
     else{
       var phone = result[0].phone_no;
       var pass = result[0].pass;
-      InsertWebuserInDb(handlerInfo, phone, pass);
+      InsertWebuserInDb(handlerInfo, phone, encrypt(pass));
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -392,6 +392,9 @@ function InsertWebuserInDb(handlerInfo, phone, pass){
                  "VALUES(?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
+    return req.send{
+      "result":result
+    }
     });
 }
 
