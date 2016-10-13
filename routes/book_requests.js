@@ -71,7 +71,7 @@ function raiseBooksRequest(req, res) {
 
     for(var i = 0; i < books.length; i++) {
       asyncTasks.push(insertNewBook.bind(null, handlerInfo, request_id,
-        books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].type || 0, books[i].book_author || "NA",
+        books[i].name, books[i].stream || "NA" , books[i].semester || -1 , books[i].vcondition || 0, books[i].book_author || "NA",
         books[i].medium || "English", requestCat || 0, books[i].Class || "NA", books[i].competition_name || "NA",
         books[i].is_ncert || 0, books[i].is_guide || 0, books[i].publisher_name || "NA", books[i].book_photograph || "NA"));
     }
@@ -98,7 +98,7 @@ function raiseBooksRequest(req, res) {
  * @param name {STRING} name of book
  * @param stream {STRING} stream of book
  * @param semester {INTEGER} semester
- * @param type {INTEGER} 0->Old, 1->New
+ * @param vcondition {INTEGER} 0->Old, 1->New
  * @param author {STRING} book author
  * @param medium {STRING} English/Hindi/Punjabi
  * @param book_category {INTEGER}  0 : College, 1 : School, 2 : Competitions, 3 : Novel
@@ -108,15 +108,15 @@ function raiseBooksRequest(req, res) {
  * @param isGuide {INTEGER} if book is a helper book
  * @param publisherName {STRING} publisher name
  * @param callback {FUNCTION} a function for success/failure
- */
-function insertNewBook(handlerInfo, request_id, name, stream, semester, type, author,
+ */ @param competition_name {STRING} Competitive exam
+function insertNewBook(handlerInfo, request_id, name, stream, semester, vcondition, author,
   medium, book_category, Class, competition_name, isNcert, isGuide, publisherName, photograph, callback) {
   var insertQuery = "INSERT INTO tb_books "+
-    "(book_req_id, book_name, book_stream, book_semester, type, book_author, medium, book_category, "+
+    "(book_req_id, book_name, book_stream, book_semester, vcondition, book_author, medium, book_category, "+
     "class, competition_name, is_ncert, is_guide, publisher, book_photograph) "+
     " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   var queryParams = [
-    request_id, name, stream, semester, type, author, medium, book_category, Class,
+    request_id, name, stream, semester, vcondition, author, medium, book_category, Class,
     competition_name, isNcert, isGuide, publisherName, photograph
   ];
   var tt = connection.query(insertQuery, queryParams, function(err, result) {
@@ -299,7 +299,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, type, call
        bookObj.book_stream = minResponse[0].book_stream;
        bookObj.book_author = minResponse[0].book_author;
        bookObj.book_semester = minResponse[0].book_semester;
-       bookObj.type = minResponse[0].type;
+       bookObj.vcondition = minResponse[0].vcondition;
        bookObj.is_available = 0;
        bookObj.book_category = minResponse[0].book_category;
        bookObj.msg = "Sorry, this book is not available right now";
@@ -688,7 +688,7 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
       curBook.book_photograph  = result[i].book_photograph;
       curBook.book_stream      = result[i].book_stream;
       curBook.book_author      = result[i].book_author;
-      curBook.type             = result[i].type;
+      curBook.vcondition        = result[i].vcondition;
       curBook.medium           = result[i].medium;
       curBook.book_category    = result[i].book_category;
       curBook.publisher        = result[i].publisher;
