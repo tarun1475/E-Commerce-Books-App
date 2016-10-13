@@ -96,7 +96,7 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
    , users.getRecentRequestsByUserId
    , error);
 
-app.get('/books-auth/send_otp'                 , utils.logRequest
+app.post('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
    
