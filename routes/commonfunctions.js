@@ -348,6 +348,7 @@ function verifyWebOTP(req, res) {
     else{
       var phone = result[0].phone_no;
       var pass = result[0].pass;
+      InsertWebuserInDb(handlerInfo, phone, pass);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -385,18 +386,14 @@ function verifyOTP(req, res, next) {
     req.query.user_phone = result[0].phone_no;
     next();
   });
-}/*
-function InsertWebuserInDb(handlerInfo, phone, pass, callback){
+}
+function InsertWebuserInDb(handlerInfo, phone, pass){
   var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, date_registered) "+
                  "VALUES(?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-    if(err) {
-      return callback(err, null);
-    }
-    callback(null, result);
-  });
-}*/
+    });
+}
 
 function verifyOtpInDb(handlerInfo, otp, pass, callback) {
   var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND pass = ?";
