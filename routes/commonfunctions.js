@@ -21,6 +21,7 @@ exports.sendNotification               = sendNotification;
 exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
 exports.sendOTP                        = sendOTP;
+exports.verifyWebOTP                   = verifyWebOTP;
 exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
 exports.logRequest                     = logRequest;
@@ -320,6 +321,35 @@ function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, callback) {
       return callback(err, null);
     }
     callback(null, result);
+  });
+}
+/*
+  function to verify OTP
+*/
+function verifyWebOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfuntions",
+    "apiHandler": "verifyWebOTP"
+  };
+  var otp = req.query.otp;
+  var session_id = req.query.session_id;
+  verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    else{
+      return res.send({
+        "log" : "Verified",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": result
+      });
+    }
   });
 }
 
