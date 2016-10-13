@@ -334,8 +334,8 @@ function verifyWebOTP(req, res) {
     "apiHandler": "verifyWebOTP"
   };
   var otp = req.query.otp;
-  var session_id = req.query.session_id;
-  verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
+  var pass = req.query.pass;
+  verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -385,9 +385,9 @@ function verifyOTP(req, res, next) {
 }
 
 
-function verifyOtpInDb(handlerInfo, otp, sessionId, callback) {
-  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
-  var tt = connection.query(sqlQuery, [otp, sessionId], function(err, result) {
+function verifyOtpInDb(handlerInfo, otp, pass, callback) {
+  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND pass = ?";
+  var tt = connection.query(sqlQuery, [otp, pass], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result, tt.sql);
     if(err) {
       return callback(err, null);
