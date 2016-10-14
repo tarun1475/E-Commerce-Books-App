@@ -387,10 +387,12 @@ function verifyOTP(req, res, next) {
     next();
   });
 }
+//function to insert new user into tb_user from website
 function InsertWebuserInDb(handlerInfo, phone, pass){
-  var sqlQuery = "INSERT INTO tb_users (user_phone, access_token, date_registered) "+
-                 "VALUES(?, ?, DATE(NOW()))";
-  var tt = connection.query(sqlQuery, [phone, pass], function(err, result) {
+  var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
+  var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token, date_registered) "+
+                 "VALUES(?,?, ?, DATE(NOW()))";
+  var tt = connection.query(sqlQuery, [phone, pass ,access_token ], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
 }
