@@ -348,7 +348,8 @@ function verifyWebOTP(req, res) {
     else{
       var phone = result[0].phone_no;
       var pass = result[0].pass;
-      InsertWebuserInDb(handlerInfo, phone, encrypt(pass));
+      var access_token = crypto.createHash("md5").update(phone).digest("hex");
+      InsertWebuserInDb(handlerInfo, phone, encrypt(pass) , access_token);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -373,6 +374,7 @@ function verifyOTP(req, res, next) {
   };
   var otp = req.query.otp;
   var session_id = req.query.session_id;
+
   verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -388,8 +390,7 @@ function verifyOTP(req, res, next) {
   });
 }
 //function to insert new user into tb_user from website
-function InsertWebuserInDb(handlerInfo, phone, pass){
-  var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
+function InsertWebuserInDb(handlerInfo, phone, pass,access_token){
   var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token, date_registered) "+
                  "VALUES(?,?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token ], function(err, result) {
