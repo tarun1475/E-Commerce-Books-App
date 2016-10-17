@@ -355,7 +355,8 @@ function verifyWebOTP(req, res) {
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
         "pass": pass,
-        "phone": phone
+        "phone": phone,
+        "access_token":access_token
       });
     }
   });
@@ -393,7 +394,7 @@ function verifyOTP(req, res, next) {
 function InsertWebuserInDb(handlerInfo, phone, pass,access_token){
   var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token, date_registered) "+
                  "VALUES(?,?, ?, DATE(NOW()))";
-  var tt = connection.query(sqlQuery, [phone, pass ,access_token ], function(err, result) {
+  var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
 }
