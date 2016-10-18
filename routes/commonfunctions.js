@@ -509,7 +509,7 @@ function loginWebUser(req, res, next) {
 }
 
 function loginWebUserHelper(handlerInfo, mobileNo, password, callback) {
-  var sqlQuery = "SELECT * FROM tb_users WHERE phone_no = ? AND password = ?";
+  var sqlQuery = "SELECT * FROM tb_users WHERE user_phone = ? AND user_pass = ?";
   var tt = connection.query(sqlQuery, [mobileNo, password], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "authenticating...", err, result, tt.sql);
     if(err) {
