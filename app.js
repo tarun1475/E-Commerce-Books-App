@@ -118,6 +118,9 @@ app.get('/books-auth/get_vendor_sales'         , utils.logRequest
 app.post('/books-auth/login'                   , utils.logRequest
   , utils.loginUser
   , error);
+app.post('/books-auth/login_web_user'                   , utils.logRequest
+  , utils.loginWebUser
+  , error);
 
 app.get('/books-auth/my_details'               , utils.logRequest
   , utils.verifyClientToken
