@@ -26,6 +26,7 @@ exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
 exports.logRequest                     = logRequest;
 exports.loginUser                      = loginUser;
+exports.loginWebUser                   = loginWebUser;
 exports.sendOtpViaEmail                = sendOtpViaEmail;
 exports.verifyEmailOtp                 = verifyEmailOtp;
 exports.serverReferUserPage            = serverReferUserPage;
@@ -470,6 +471,54 @@ function logRequest(req, res, next) {
     next();
   });
 }
+/**
+ * <b>API [POST] /books-auth/login_web_user </b><br>
+ * API for logging user in
+ * @param req - request body should contain phone_no and password
+ * @param res - response object would return flag and access_token
+ * @returns  @type {{log: string, flag: number, access_token: string}}
+ */
+
+function loginWebUser(req, res, next) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "loginReferralProgramme"
+  };
+  var mobileNo = reqParams.mobile_no;
+  var password = encrypt(reqParams.password);
+
+  loginWebUserHelper(handlerInfo, mobileNo, password, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err.message,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(result.length == 0) {
+      var err = new Error("Not Authorized");
+      err.status = constants.responseFlags.NOT_AUTHORIZED
+      return next(err);
+    }
+    res.send({
+      "log": "Login successful",
+      "data": result[0],
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function loginWebUserHelper(handlerInfo, mobileNo, password, callback) {
+  var sqlQuery = "SELECT * FROM tb_users WHERE phone_no = ? AND password = ?";
+  var tt = connection.query(sqlQuery, [mobileNo, password], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "authenticating...", err, result, tt.sql);
+    if(err) {
+      return callback(new Error(err), null);
+    }
+    callback(null, result);
+  });
+}
+
 
 /**
  * <b>API [POST] /books-auth/login </b><br>
