@@ -687,6 +687,7 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
       curBook.book_name        = result[i].book_name;
       curBook.book_photograph  = result[i].book_photograph;
       curBook.book_stream      = result[i].book_stream;
+      curBook.book_semester    = result[i].book_semester;
       curBook.book_author      = result[i].book_author;
       curBook.vcondition        = result[i].vcondition;
       curBook.medium           = result[i].medium;
