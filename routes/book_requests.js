@@ -148,7 +148,7 @@ function getBookRequests(req, res) {
   var start_from  = parseInt(reqParams.start_from);
   var page_size   = parseInt(reqParams.page_size);
   var bookStatus  = reqParams.req_status;
-  var vendorId    = reqParams.vendor_id;
+  var vendorId    = 10;
 
 
   if(utils.checkBlank([reqParams.start_from, reqParams.page_size, bookStatus])) {
