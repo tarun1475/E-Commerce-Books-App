@@ -148,7 +148,6 @@ function getBookRequests(req, res) {
   var start_from  = parseInt(reqParams.start_from);
   var page_size   = parseInt(reqParams.page_size);
   var bookStatus  = reqParams.req_status;
-  var vendorId    = 10;
 
 
   if(utils.checkBlank([reqParams.start_from, reqParams.page_size, bookStatus])) {
@@ -162,9 +161,6 @@ function getBookRequests(req, res) {
     }
     var requestArr = [];
     for(var i = 0; i < result.length; i++) {
-      checkVendorSent(handlerinfo,vendorId,function(venErr,venRes){
-          alert(venRes.request_id);  
-      });
       requestArr.push(result[i].req_id);
     }
     getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, requestDetails) {
@@ -187,17 +183,7 @@ function getBookRequests(req, res) {
     });
   });
 }
-//function to check vendor sent rates or not
-function checkVendorSent(handlerinfo,vendorId,callback){
-  var sqlQuery = "SELECT * FROM tb_books_response WHERE vendor_id = ?";
-  var tt = connection.query(sqlQuery, [vendorId], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "authenticating...", err, result, tt.sql);
-    if(err) {
-      return callback(new Error(err), null);
-    }
-    callback(null, result);
-  });
-}
+
 
 /**
  * [POST] '/req_book_auth/put_response'<br>
