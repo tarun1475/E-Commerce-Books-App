@@ -163,8 +163,7 @@ function getBookRequests(req, res) {
     var requestArr = [];
     for(var i = 0; i < result.length; i++) {
       checkVendorSent(handlerinfo,vendorId,function(venErr,venRes){
-          if(venRes.request_id != null)
-            continue;
+          alert(venRes.request_id);  
       });
       requestArr.push(result[i].req_id);
     }
