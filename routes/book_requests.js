@@ -237,7 +237,6 @@ function putBookRequestResponse(req, res) {
         }
         return res.send({
           "log" : "Successfully logged book request response",
-          "vendor_id":vendorId,
           "flag": constants.responseFlags.ACTION_COMPLETE
         });
       });
