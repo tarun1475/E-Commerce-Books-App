@@ -417,6 +417,7 @@ function confirmBookOrder(req, res) {
   var reqStatus       = req.body.request_status;
   var isUrgent        = req.body.is_urgent;
   var userId          = req.body.user_id;
+  var totPrice        = req.body.tPrice;
   // only process available books:
   var tmp = responseData.slice();
   responseData = [];
@@ -470,7 +471,7 @@ function confirmBookOrder(req, res) {
           html += "</tr>";
         }
         html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totalPrice+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totPrice+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"<br>"+userPhone+"</b>";
