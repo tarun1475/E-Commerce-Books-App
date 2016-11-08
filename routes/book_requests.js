@@ -415,7 +415,7 @@ function confirmBookOrder(req, res) {
   var userName        = req.body.delivery_name || req.body.user_name;
   var userPhone       = req.body.delivery_phone || req.body.user_phone;
   var reqStatus       = req.body.request_status;
-  var isUrgent        = req.body.is_urgent;
+  var isUrgent        = parseInt(req.body.is_urgent);
   var userId          = req.body.user_id;
   var totPrice        = req.body.tPrice;
   // only process available books:
@@ -438,7 +438,7 @@ function confirmBookOrder(req, res) {
       var  urgentDeliveryCharges = 30;
       for(var i = 0; i < responseData.length; i++)
         totalPrice += responseData[i].price;
-      if(isUrgent == 1) {
+      if(isUrgent === 1) {
        totPrice = totPrice + urgentDeliveryCharges;
       }
       else  urgentDeliveryCharges = 0 ;
