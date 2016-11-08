@@ -417,7 +417,7 @@ function confirmBookOrder(req, res) {
   var reqStatus       = req.body.request_status;
   var isUrgent        = parseInt(req.body.is_urgent);
   var userId          = req.body.user_id;
-  var totPrice        = req.body.tPrice;
+  var totPrice        = parseInt(req.body.tPrice);
   // only process available books:
   var tmp = responseData.slice();
   responseData = [];
