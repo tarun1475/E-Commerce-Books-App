@@ -147,14 +147,19 @@ function getBookRequests(req, res) {
   var reqParams   = req.body;
   var start_from  = parseInt(reqParams.start_from);
   var page_size   = parseInt(reqParams.page_size);
+  var vendorId    = reqParams.vendor_id;
   var bookStatus  = reqParams.req_status;
 
 
-  if(utils.checkBlank([reqParams.start_from, reqParams.page_size, bookStatus])) {
+  if(utils.checkBlank([reqParams.start_from, vendorId, reqParams.page_size, bookStatus])) {
     return res.send(constants.parameterMissingResponse);
   }
-  var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? ORDER BY generated_on DESC LIMIT ?, ?";
-  var jj = connection.query(sqlQuery, [bookStatus, start_from, page_size], function(err, result) {
+  var sqlQuery = "SELECT req_id FROM tb_book_requests " +
+      "WHERE status = ? AND req_id NOT IN(" +
+      "  SELECT request_id FROM `tb_books_response` WHERE vendor_id = ? GROUP BY request_id " +
+      ")" +
+      "ORDER BY generated_on DESC LIMIT ?, ?";
+  var jj = connection.query(sqlQuery, [bookStatus, vendorId, start_from, page_size], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
@@ -627,10 +632,11 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
       "JOIN tb_users as users ON users.user_id = delivery.user_id "+
       "JOIN tb_books as books ON books.book_id = distribution.book_id "+
       "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
-      "WHERE distribution.delivery_id = ?"
+      "WHERE distribution.delivery_id = ?";
     var jj = connection.query(sqlQuery, [deliveryId], function(deliveryDetailsErr, deliveryDetails) {
       if(deliveryDetailsErr) {
         logging.logDatabaseQuery(handlerInfo, "getting delivery details(vendors)", deliveryDetailsErr, deliveryDetails, jj.sql);
+        return callback(deliveryDetailsErr, null);
       }
       deliveryData.books           = deliveryDetails;
       deliveryObj[deliveryId]      = deliveryData;
