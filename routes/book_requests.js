@@ -484,6 +484,7 @@ function confirmBookOrder(req, res) {
           }
           return res.send({
             "log" : "Successfully confirmed delivery order",
+            "Emails": config.get('emailRecipents.orderConfirmationEmail').split(','),
             "flag": constants.responseFlags.ACTION_COMPLETE
           });
         });
