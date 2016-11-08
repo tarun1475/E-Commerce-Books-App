@@ -437,7 +437,7 @@ function confirmBookOrder(req, res) {
       var totalPrice = 0;
       for(var i = 0; i < responseData.length; i++)
         totalPrice += responseData[i].price;
-      var urgentDeliveryCharges = (isUrgent == 1 ? constants.deliveryCharges.URGENT_DELIVERY : 0);
+      if(isUrgent == 1) totPrice += 30;
       totPrice += urgentDeliveryCharges;
       deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
