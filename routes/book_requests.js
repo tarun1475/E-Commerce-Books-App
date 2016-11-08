@@ -438,6 +438,7 @@ function confirmBookOrder(req, res) {
       for(var i = 0; i < responseData.length; i++)
         totalPrice += responseData[i].price;
       var urgentDeliveryCharges = (isUrgent == 1 ? constants.deliveryCharges.URGENT_DELIVERY : 0);
+      totPrice += urgentDeliveryCharges;
       deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
           return res.send({
@@ -471,7 +472,7 @@ function confirmBookOrder(req, res) {
           html += "</tr>";
         }
         html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+(totPrice+urgentDeliveryCharges)+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totPrice+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"<br>"+userPhone+"</b>";
