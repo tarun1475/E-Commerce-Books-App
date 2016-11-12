@@ -688,6 +688,7 @@ function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
     curRequest.generated_on  = result[0].generated_on;
     curRequest.user_id       = result[0].user_id;
     curRequest.user_name     = result[0].user_name;
+    curRequest.user_phone    = result[0].user_phone;
     curRequest.approved_on   = result[0].approved_on;
     curRequest.type          = result[0].type;
     curRequest.status        = result[0].status;
