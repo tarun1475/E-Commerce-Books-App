@@ -383,17 +383,17 @@ function getMyOrders(req, res) {
   }
   var startFrom = parseInt(reqParams.start_from);
   var pageSize  = parseInt(reqParams.page_size);
-  var sqlQuery  = "SELECT delivery_id FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
+  var sqlQuery  = "SELECT request_id FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
   var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    var deliveryIdArr = [];
-    var deliveryDetailsObj = {};
+    var reqIdArr = [];
+    //var deliveryDetailsObj = {};
     for(var i = 0; i < result.length; i++) {
-      deliveryIdArr.push(result[i].delivery_id);
-    }
+      reqIdArr.push(result[i].request_id);
+    }/*
     var asyncTasks = [];
     for(var i = 0; i < deliveryIdArr.length; i++) {
       asyncTasks.push(bookRequests.getDeliveryDetailsHelper.bind(null, handlerInfo, deliveryIdArr[i], deliveryDetailsObj));
@@ -410,13 +410,12 @@ function getMyOrders(req, res) {
         var d1 = new Date(a.logged_on);
         var d2 = new Date(b.logged_on);
         return d1 < d2;
-      });
+      });*/
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data": deliveryArr
+        "data": reqIdArr
       });
-    });
   });
 }
 
