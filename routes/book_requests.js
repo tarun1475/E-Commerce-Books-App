@@ -666,7 +666,7 @@ function getPendingRequestArr(requestStatus, callback) {
 }
 
 function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
-  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, requests.status, users.user_id, users.user_name, "+
+  var sqlQuery  = "SELECT requests.req_id, requests.generated_on, requests.status, users.user_id, users.user_name ,users.user_phone, "+
                   "users.user_address, books.*,  requests.approved_on, requests.type "+
                   "FROM tb_book_requests as requests "+
                   "JOIN tb_users as users ON users.user_id = requests.user_id "+
