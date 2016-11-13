@@ -435,13 +435,12 @@ function confirmBookOrder(req, res) {
     }
     if(reqStatus == constants.bookRequestStatus.APPROVED) { 
       var totalPrice = 0;
-      var  urgentDeliveryCharges = 30;
+      var urgentDeliveryCharges = 0;
       for(var i = 0; i < responseData.length; i++)
         totalPrice += responseData[i].price;
       if(isUrgent === 1) {
-       totPrice = totPrice + urgentDeliveryCharges;
+       urgentDeliveryCharges = 30;
       }
-      else  urgentDeliveryCharges = 0 ;
       deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
           return res.send({
