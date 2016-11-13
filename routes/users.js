@@ -383,16 +383,20 @@ function getMyOrders(req, res) {
   }
   var startFrom = parseInt(reqParams.start_from);
   var pageSize  = parseInt(reqParams.page_size);
-  var sqlQuery  = "SELECT request_id FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
+  var sqlQuery  = "SELECT request_id,is_urgent_delivery FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
   var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
     var reqIdArr = [];
+    var urgentIdArr = [];
     //var deliveryDetailsObj = {};
     for(var i = 0; i < result.length; i++) {
       reqIdArr.push(result[i].request_id);
+    }
+    for(var i = 0; i < result.length; i++) {
+      urgentIdArr.push(result[i].is_urgent_delivery);
     }/*
     var asyncTasks = [];
     for(var i = 0; i < deliveryIdArr.length; i++) {
@@ -414,7 +418,8 @@ function getMyOrders(req, res) {
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data": reqIdArr
+        "data": reqIdArr,
+        "urgent": urgentIdArr
       });
   });
 }
