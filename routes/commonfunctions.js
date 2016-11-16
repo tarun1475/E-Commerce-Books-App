@@ -301,7 +301,7 @@ function sendOTP(req, res) {
         });
       }
       var otp = body.response.oneTimePassword;
-      logOtpIntoDb(handlerInfo, otp, phone_no, encrypt(pass), function(err, result) {
+      logOtpIntoDb(handlerInfo, otp, phone_no,pass, function(err, result) {
         if(err) {
           return res.send(constants.databaseErrorResponse);
         }
@@ -350,7 +350,7 @@ function verifyWebOTP(req, res) {
       var phone = result[0].phone_no;
       var pass = result[0].pass;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
-      InsertWebuserInDb(handlerInfo, phone, pass , access_token);
+      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
