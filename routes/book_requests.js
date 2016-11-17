@@ -145,21 +145,19 @@ function getBookRequests(req, res) {
     "apiHandler": "getBookRequests"
   };
   var reqParams   = req.body;
- // var start_from  = parseInt(reqParams.start_from);
- // var page_size   = parseInt(reqParams.page_size);
+ var start_from  = parseInt(reqParams.start_from);
+  var page_size   = parseInt(reqParams.page_size);
   var vendorId    = reqParams.vendor_id;
   var bookStatus  = reqParams.req_status;
-
-
-  if(utils.checkBlank([ vendorId, bookStatus])) {
+  if(utils.checkBlank([reqParams.start_from, vendorId, reqParams.page_size, bookStatus])) {
     return res.send(constants.parameterMissingResponse);
   }
   var sqlQuery = "SELECT req_id FROM tb_book_requests " +
       "WHERE status = ? AND req_id NOT IN(" +
       "  SELECT request_id FROM `tb_books_response` WHERE vendor_id = ? GROUP BY request_id " +
       ")" +
-      "ORDER BY generated_on DESC ";
-  var jj = connection.query(sqlQuery, [bookStatus, vendorId], function(err, result) {
+      "ORDER BY generated_on DESC LIMIT ?, ? ";
+  var jj = connection.query(sqlQuery, [bookStatus, vendorId, start_from, page_size], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
