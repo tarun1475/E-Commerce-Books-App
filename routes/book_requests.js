@@ -151,7 +151,7 @@ function getBookRequests(req, res) {
   var bookStatus  = reqParams.req_status;
 
 
-  if(utils.checkBlank([reqParams.start_from, vendorId, reqParams.page_size, bookStatus])) {
+  if(utils.checkBlank([ vendorId, bookStatus])) {
     return res.send(constants.parameterMissingResponse);
   }
   var sqlQuery = "SELECT req_id FROM tb_book_requests " +
