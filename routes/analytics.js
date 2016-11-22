@@ -25,18 +25,17 @@ function checkResponse(req, res) {
     "apiModule" : "bookRequests",
     "apiHandler": "checkResponse"
   };
-  var reqParams      = req.body;
-  var reqId          = reqParams.req_id;
+  var status          =  4;
 
-   var checkRes = "SELECT * FROM tb_books_response WHERE  request_id = ?";
-  connection.query(checkRes, [reqId], function(ResErr, checkRes) {
+   var checkRes = "SELECT status,request_id FROM tb_books_response WHERE  status = ?";
+  connection.query(checkRes, [status], function(ResErr, checkRes) {
     if(ResErr) {
        return res.send({
           "status": -1
         });
     }
     return res.send({
-          "status": checkRes[0].status
+          "data": checkRes 
         });
 
   });
