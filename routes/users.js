@@ -44,11 +44,16 @@ function checkVersion(req, res) {
   };
   var reqParams     = req.query;
   var version       = reqParams.app_version;
-  if(version == "1"){
+  if(version == 1){
     res.send({
       "log" : "Version matched",
       "version": appVersion,
       "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  }
+  else{
+    res.send({
+      "log" : "Version Not matched! Update Required"
     });
   }
 
