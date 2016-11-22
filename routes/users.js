@@ -12,6 +12,8 @@ var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
+
+exports.checkVersion                      = checkVersion;
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 exports.getUserDetailsPanel               = getUserDetailsPanel;
@@ -25,6 +27,39 @@ exports.getAllUsers                       = getAllUsers;
 exports.getAllUsersFromDb                 = getAllUsersFromDb;
 //exports.createWebUser                     = createWebUser;
 exports.createWebReq                      = createWebReq;
+
+
+/**
+ *
+ * [POST] '/books-auth/check_version'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function checkVersion(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"checkVersion"
+  };
+  var reqParams     = req.query;
+  var version       = reqParams.app_version;
+  var appVersion    = "1";
+  if(appVersion === version){
+    res.send({
+      "log" : "Version matched",
+      "version": appVersion,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  }
+  else{
+    res.send({
+      "log" : "Version Not matched! Update Required"
+    });
+  }
+
+}
+
 
 /**
  *
