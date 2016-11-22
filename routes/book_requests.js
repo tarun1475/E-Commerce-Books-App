@@ -210,11 +210,7 @@ function putBookRequestResponse(req, res) {
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
   }
-  updateStatusResponse(handlerInfo,requestId,status,function(err, responseData){
-    if(err){
-    res.send(constants.databaseErrorResponse);
-    }
-  });
+
   
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
@@ -255,16 +251,7 @@ function putBookRequestResponse(req, res) {
     });
   });
 }
-function updateStatusResponse(handlerInfo,requestId,status,callback){
-     var statusQuery = "UPDATE tb_book_requests SET res_status = ? WHERE req_id = ? ";
-   var tt = connection.query(sqlQuery, [status,requestId], function(err, result) {
-    if(err) {
-      logging.error(handlerInfo, "logging book response into db", err, result);
-      return callback("There was some error in logging vendor response", null);
-    }
-    callback(null, "successfully logged status response");
-  });
-}
+
 /**
  * Function to insert book responses in database. Helper function to putBookResponse
  * @param handlerInfo {OBJECT} handler info for logging
