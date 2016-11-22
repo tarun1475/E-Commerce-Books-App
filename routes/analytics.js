@@ -28,7 +28,7 @@ function checkResponse(req, res) {
   var reqParams      = req.body;
   var reqId          = reqParams.req_id;
 
-   var checkRes = "SELECT status FROM tb_books_response WHERE  request_id = ?";
+   var checkRes = "SELECT * FROM tb_books_response WHERE  request_id = ?";
   connection.query(checkRes, [reqId], function(ResErr, checkRes) {
     if(ResErr) {
       return res.send(constants.databaseErrorResponse);
