@@ -43,11 +43,11 @@ function checkVersion(req, res) {
     "apiHandler":"checkVersion"
   };
   var reqParams     = req.query;
-  var version       = reqParams.app_version;
-  if(version == 1){
+  var version       = parseInt(reqParams.app_version);
+  if(version === 1){
     res.send({
       "log" : "Version matched",
-      "version": appVersion,
+      "version": 1,
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   }
