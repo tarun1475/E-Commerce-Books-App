@@ -231,7 +231,6 @@ app.post('/books-auth/report'                    , utils.logRequest
     , analytics.getOverallReportPanel
     , error);
 app.post('/books-auth/check_response'              , utils.logRequest
-    , utils.verifyPanelToken
     , analytics.checkResponse
     , error);
 app.post('/books-auth/get_requests'              , utils.logRequest
