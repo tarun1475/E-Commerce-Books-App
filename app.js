@@ -84,6 +84,10 @@ var upload = multer({storage: storage});
 /**
  * Users APIs
  */
+app.post('/books-auth/check_version'             , utils.logRequest
+   , users.checkVersion
+   , error);
+   
 app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
    , error);
