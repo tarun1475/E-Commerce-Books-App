@@ -205,22 +205,23 @@ function putBookRequestResponse(req, res) {
   var books          = reqParams.books;
   var status         = reqParams.bookStatus;
   
-    var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
+ 
+
+  if(utils.checkBlank([vendorId, requestId, books])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+     var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
     var tt = connection.query(reqQuery, [ status], function(statusErr, statusRes) {
       if(statusErr) {
         logging.logDatabaseQuery(handlerInfo, "inserting book response", statusErr, statusRes, tt.sql);
         return res.send(constants.databaseErrorResponse);
       }
-      return res.send({
+       res.send({
           "log" : "Successfully logged status response",
           "flag": constants.responseFlags.ACTION_COMPLETE
         });
 
 });
-
-  if(utils.checkBlank([vendorId, requestId, books])) {
-    return res.send(constants.parameterMissingResponse);
-  }
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
     if(dupErr) {
