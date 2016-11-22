@@ -34,9 +34,7 @@ function checkResponse(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
     return res.send({
-          "log" : "Successfully fetched response status",
-          "flag": constants.responseFlags.ACTION_COMPLETE,
-          "status": checkRes
+          "status": checkRes[0].status
         });
 
   });
