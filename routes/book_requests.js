@@ -203,6 +203,7 @@ function putBookRequestResponse(req, res) {
   var vendorId       = reqParams.vendor_id;
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
+  var status         = reqParams.bookStatus;
 
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
@@ -218,8 +219,8 @@ function putBookRequestResponse(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id) VALUES(?, ?) ";
-    var tt = connection.query(reqQuery, [vendorId, requestId], function(reqErr, insRes) {
+    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id, status) VALUES(?, ?, ?) ";
+    var tt = connection.query(reqQuery, [vendorId, requestId , status], function(reqErr, insRes) {
       if(reqErr) {
         logging.logDatabaseQuery(handlerInfo, "inserting book response", reqErr, insRes, tt.sql);
         return res.send(constants.databaseErrorResponse);
@@ -246,7 +247,6 @@ function putBookRequestResponse(req, res) {
     });
   });
 }
-
 /**
  * Function to insert book responses in database. Helper function to putBookResponse
  * @param handlerInfo {OBJECT} handler info for logging
