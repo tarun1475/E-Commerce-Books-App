@@ -52,7 +52,7 @@ function checkVersion(req, res) {
     });
   }
   else{
-    retrun res.send({
+    return res.send({
       "log" : "Version Not matched! Update Required",
       "version": version
     });
