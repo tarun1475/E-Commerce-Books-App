@@ -210,7 +210,7 @@ function putBookRequestResponse(req, res) {
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
   }
-  updateStatusResponse(handlerInfo,status,function(err, responseData){
+  updateStatusResponse(handlerInfo,requestId,status,function(err, responseData){
     if(err){
     res.send(constants.databaseErrorResponse);
     }
@@ -255,9 +255,9 @@ function putBookRequestResponse(req, res) {
     });
   });
 }
-function updateStatusResponse(handlerInfo,status,callback){
-     var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
-   var tt = connection.query(sqlQuery, [status], function(err, result) {
+function updateStatusResponse(handlerInfo,requestId,status,callback){
+     var statusQuery = "UPDATE tb_book_requests SET res_status = ? WHERE req_id = ? ";
+   var tt = connection.query(sqlQuery, [status,requestId], function(err, result) {
     if(err) {
       logging.error(handlerInfo, "logging book response into db", err, result);
       return callback("There was some error in logging vendor response", null);
