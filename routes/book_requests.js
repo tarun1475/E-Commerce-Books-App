@@ -210,15 +210,12 @@ function putBookRequestResponse(req, res) {
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
   }
-     var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
-    var tt = connection.query(reqQuery, [ status], function(statusErr, statusRes) {
-      if(statusErr) {
-        logging.logDatabaseQuery(handlerInfo, "inserting book response", statusErr, statusRes, tt.sql);
-        return res.send(constants.databaseErrorResponse);
-      }
-     
-
-});
+  updateStatusResponse(handlerInfo,status,function(err, responseData){
+    if(err){
+    res.send(constants.databaseErrorResponse);
+    }
+  });
+  
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
     if(dupErr) {
@@ -256,6 +253,16 @@ function putBookRequestResponse(req, res) {
         });
       });
     });
+  });
+}
+function updateStatusResponse(handlerInfo,status,callback){
+     var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
+   var tt = connection.query(sqlQuery, [status], function(err, result) {
+    if(err) {
+      logging.error(handlerInfo, "logging book response into db", err, result);
+      return callback("There was some error in logging vendor response", null);
+    }
+    callback(null, "successfully logged status response");
   });
 }
 /**
