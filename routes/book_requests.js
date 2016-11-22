@@ -204,6 +204,18 @@ function putBookRequestResponse(req, res) {
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
   var status         = reqParams.bookStatus;
+  
+    var statusQuery = "INSERT INTO tb_book_requests (res_status) VALUES(?) ";
+    var tt = connection.query(reqQuery, [ status], function(statusErr, statusRes) {
+      if(statusErr) {
+        logging.logDatabaseQuery(handlerInfo, "inserting book response", statusErr, statusRes, tt.sql);
+        return res.send(constants.databaseErrorResponse);
+      }
+      return res.send(
+        "log":"Successfully updated the status."
+        );
+
+});
 
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
