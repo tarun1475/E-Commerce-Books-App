@@ -31,7 +31,9 @@ function checkResponse(req, res) {
    var checkRes = "SELECT * FROM tb_books_response WHERE  request_id = ?";
   connection.query(checkRes, [reqId], function(ResErr, checkRes) {
     if(ResErr) {
-      return res.send(constants.databaseErrorResponse);
+       return res.send({
+          "status": -1
+        });
     }
     return res.send({
           "status": checkRes[0].status
