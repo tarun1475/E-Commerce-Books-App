@@ -216,10 +216,7 @@ function putBookRequestResponse(req, res) {
         logging.logDatabaseQuery(handlerInfo, "inserting book response", statusErr, statusRes, tt.sql);
         return res.send(constants.databaseErrorResponse);
       }
-       res.send({
-          "log" : "Successfully logged status response",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
+     
 
 });
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
