@@ -44,7 +44,7 @@ function checkVersion(req, res) {
   };
   var reqParams     = req.query;
   var version       = reqParams.app_version;
-  var appVersion    = "1";
+  var appVersion    = 1;
   if(appVersion === version){
     res.send({
       "log" : "Version matched",
