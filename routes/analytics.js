@@ -8,10 +8,39 @@ var logging = require('./logging');
 var constants = require('./constants');
 var bookRequests = require('./book_requests');
 
+exports.checkResponse         = checkResponse;
 exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
 exports.getVendorEngagements  = getVendorEngagements;
 
+
+/**
+ * [POST] '/books-auth/check_response'<br>
+ * API responsible for check response status. 
+ * @param {INTEGER} req_id - request id of book request
+ */
+
+function checkResponse(req, res) {
+  var handlerInfo    = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "checkResponse"
+  };
+  var reqParams      = req.body;
+  var reqId          = reqParams.req_id;
+
+   var checkRes = "SELECT status FROM tb_books_response WHERE  request_id = ?";
+  connection.query(checkRes, [reqId], function(ResErr, checkRes) {
+    if(ResErr) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    return res.send({
+          "log" : "Successfully fetched response status",
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "status": checkRes
+        });
+
+  });
+}
 /**
  * <b>API [POST] /books-auth/report </b> <br>
  * API to get overall report regarding sales and requests
