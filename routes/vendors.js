@@ -58,7 +58,6 @@ function createNewVendor(req, res) {
         "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });
-  });
 }
 
 
