@@ -548,7 +548,7 @@ function verifyVendorOTP(req, res) {
         "pass": pass,
         "phone": phone,
         "access_token":access_token,
-        "vendor_id":venRes.vendor_id
+        "vendor_id":venRes[0].vendor_id
       });
       }
       });
