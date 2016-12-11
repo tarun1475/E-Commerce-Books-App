@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
-app.use(favicon(__dirname + '/public/favicon.ico'));
+//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(cors());
 
 app.use(function (req, res, next) {
@@ -103,9 +103,11 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
 app.post('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
-
 app.post('/books-auth/send_vendor_otp'                 , utils.logRequest
    , utils.sendVendorOTP
+   , error);
+app.get('/books-auth/verify_vendor_otp'               , utils.logRequest
+   , utils.verifyVendorOTP
    , error);
    
 app.get('/books-auth/verify_web_otp'               , utils.logRequest
