@@ -137,6 +137,11 @@ app.get('/books-auth/my_details'               , utils.logRequest
   , users.getMyDetails
   , error);
 
+app.get('/books-auth/get_vendor_details'               , utils.logRequest
+  , utils.verifyClientToken
+  , vendors.getVendorDetails
+  , error);
+
 
 app.get('/books-auth/my_orders'                , utils.logRequest
   , utils.verifyClientToken
