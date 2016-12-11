@@ -31,7 +31,7 @@ exports.searchVendor           = searchVendor;
 function getVendorDetails(req, res) {
   var handlerInfo = {
     "apiModule": "Users",
-    "apiHandler": "getMyDetails"
+    "apiHandler": "getVendorDetails"
   };
   var reqParams = req.query;
   var vendorId  = reqParams.vendor_id;
