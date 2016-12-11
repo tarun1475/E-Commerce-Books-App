@@ -539,9 +539,10 @@ function verifyVendorOTP(req, res) {
       var phone = result[0].phone_no;
       var pass = result[0].pass;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
-      InsertVendorInDb(handlerInfo, phone,encrypt(pass) , access_token,function(venErr,venRes){
+      InsertVendorInDb(handlerInfo, phone,encrypt(pass) , access_token);
+      getVendorId(handlerInfo, phone, function(venErr,venRes){
         if(venRes){
-        res.send({
+          return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
@@ -550,11 +551,25 @@ function verifyVendorOTP(req, res) {
         "access_token":access_token,
         "vendor_id":venRes[0].vendor_id
       });
-      }
+
+        }
       });
+      
     }
   });
 }
+//function to get the vendorId
+function getVendorId(handlerInfo, phone, callback) {
+  var sqlQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
+  var tt = connection.query(sqlQuery, [phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendorId", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
 /*
   function to verify OTP
 */
@@ -638,16 +653,12 @@ function UpdateVendorInDb(handlerInfo, phone, pass){
   });
 }
 //function to insert new vendor into tb_vendors 
-function InsertVendorInDb(handlerInfo, phone, pass,access_token,callback){
+function InsertVendorInDb(handlerInfo, phone, pass,access_token){
   var sqlQuery = "INSERT INTO tb_vendors (vendor_phone,vendor_pass, access_token, date_registered) "+
                  "VALUES(?,?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-    
-    if(err) {
-      return callback(err, null);
-    }
-    callback(null, result);
+  
     });
 }
 //function to insert new user into tb_user from website
