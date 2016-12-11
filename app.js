@@ -88,7 +88,7 @@ app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);
 app.post('/books-auth/get_books_by_id'             , utils.logRequest
-   , requests.getBooksDetailsById
+   , bookRequests.getBooksDetailsById
    , error);
    
 app.post('/books-auth/create_user'             , utils.logRequest
