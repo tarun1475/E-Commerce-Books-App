@@ -11,7 +11,7 @@ var async     = require('async');
 var messenger = require('./messenger');
 var logging   = require('./logging');
 
-exports.getBookDetailsById              = getBookDetailsById;
+
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.putBookRequestResponse          = putBookRequestResponse;
@@ -26,35 +26,7 @@ exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 exports.updateDeliveryStatus            = updateDeliveryStatus;
 
-/**
- * <b>API [POST] '/req_book_auth/get_books_by_id' </b><br>
- * API responsible for getting book to the respective id.<br>
- * request body requires the following parameters: 
- * @param {INTEGER} book_id
 
-*/
-function getBookDetailsById(req, res) {
-  var handlerInfo   = {
-    "apiModule" : "bookRequests",
-    "apiHandler": "getBookDetailsById"
-  };
-  var bookId = req.body.book_id;
-  var sqlQuery = "SELECT * FROM tb_books WHERE book_id = ? ";
-   var tt = connection.query(sqlQuery, [bookId], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "getting books details", err, result, tt.sql);
-     if(err) {
-      return res.send({
-        "log": "server execution error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-      }
-      res.send({
-        "log": "successfully fetched books",
-        "flag": constants.responseFlags.ACTION_COMPLETE,
-        "books":result
-      });
-});
-}
 
 /*
  * <b>API [POST] '/req_book_auth/raise_request' </b><br>
