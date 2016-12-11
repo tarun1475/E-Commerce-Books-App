@@ -10,6 +10,7 @@ var constants = require('./constants');
 var crypto    = require('crypto');
 var logging   = require('./logging');
 exports.createNewVendor        = createNewVendor;
+exports.getVendorDetails       = getVendorDetails;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
@@ -33,9 +34,9 @@ function createNewVendor(req, res) {
   var vendorName    = reqParams.vendor_name;
   var vendorPhone   = reqParams.vendor_phone;
   var vendorAddress = reqParams.vendor_address;
-  var deviceName    = reqParams.device_name;
-  var osVersion     = reqParams.os_version;
-  var deviceToken   = reqParams.device_token;
+  //var deviceName    = reqParams.device_name;
+  //var osVersion     = reqParams.os_version;
+  //var deviceToken   = reqParams.device_token;
   var city          = parseInt(reqParams.vendor_city);
 
   if(utils.checkBlank([vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, deviceToken])) {
@@ -82,6 +83,60 @@ function createNewVendor(req, res) {
         "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });
+  });
+}
+
+/**
+ * <b>API [GET] /books-auth/get_vendor_details </b><br>
+ * This api would provide vendor with his her details. Request query<br>
+ * requires the following parameters
+ * @param {STRING} token    - access token of device
+ * @param {INTEGER} edit    - [optional] if you want to edit details then sent edit = 1
+ * @param {STRING} name     - [optional] user name
+ * @param {STRING} address  - [optional] user address
+ * @param {STRING} landmark - [optional] user address landmark
+ *
+ */
+function getVendorDetails(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "getMyDetails"
+  };
+  var reqParams = req.query;
+  var vendorId  = reqParams.vendor_id;
+  var toEdit    = reqParams.edit || 0;
+  var name      = reqParams.name;
+  var address   = reqParams.address;
+  var city      = reqParams.city;
+  var apiParams = [];
+  if(toEdit == 1) {
+    apiParams.push(userId, name, address, city);
+  }
+  if(utils.checkBlank(apiParams)) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  var sqlQuery = "", queryParams = [];
+  if(toEdit == 1) {
+    sqlQuery = "UPDATE tb_vendors SET vendor_address = ?, vendor_name = ?, vendor_city = ? WHERE vendor_id = ?";
+    queryParams.push(address, name, city, vendorId);
+  }
+  else {
+    sqlQuery = "SELECT vendor_name, vendor_address, vendor_city FROM tb_vendors WHERE vendor_id = ?";
+    queryParams.push(vendorId);
+  }
+  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user details", err, result, getUserDetails.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var responseData = {
+      "log": "Successfully updated your details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+    };
+    if(toEdit == 0) {
+      responseData.data = result;
+    }
+    res.send(responseData);
   });
 }
 
