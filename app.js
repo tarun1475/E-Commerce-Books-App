@@ -156,7 +156,7 @@ app.post('/books-auth/vendor_orders'                , utils.logRequest
   , vendors.vendorOrders
   , error);
 app.post('/books-auth/get_books_by_id'                , utils.logRequest
-  , vendors.getBooksDetailsById
+  , vendors.getBookDetailsById
   , error);
 
 app.post('/books-auth/my_orders'                , utils.logRequest
