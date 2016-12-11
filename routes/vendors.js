@@ -9,65 +9,79 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var crypto    = require('crypto');
 var logging   = require('./logging');
-//exports.createNewVendor        = createNewVendor;
-exports.getVendorDetails       = getVendorDetails;
+exports.createNewVendor        = createNewVendor;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
 exports.searchVendor           = searchVendor;
 
-
 /**
- * <b>API [GET] /books-auth/get_vendor_details </b><br>
- * This api would provide vendor with his her details. Request query<br>
- * requires the following parameters
- * @param {STRING} token    - access token of device
- * @param {INTEGER} edit    - [optional] if you want to edit details then sent edit = 1
- * @param {STRING} name     - [optional] user name
- * @param {STRING} address  - [optional] user address
- * @param {STRING} landmark - [optional] user address landmark
- *
+ * <b>API [POST] '/books-auth/create_vendor' </b><br>
+ * 
+ * API to create a new vendor
+ * @param {string} vendor_name - Name of the vendor
+ * @param {string} vendor_email - Email of vendor
+ * @param {string} vendor_phone - Phone number of vendor
+ * @param {string} vendor_address - address of the vendor
+ * @param {string} device_name - Name of the device
+ * @param {string} os_version - OS version
+ * @param {integer} vendor_city - city of vendor, 1 for chandigarh
+ * @return {JSON} response body contains access_token
  */
-function getVendorDetails(req, res) {
-  var handlerInfo = {
-    "apiModule": "Users",
-    "apiHandler": "getVendorDetails"
-  };
-  var reqParams = req.query;
-  var vendorId  = reqParams.vendor_id;
-  var toEdit    = reqParams.edit || 0;
-  var name      = reqParams.name;
-  var address   = reqParams.address;
-  var city      = reqParams.city;
-  var apiParams = [];
-  if(toEdit == 1) {
-    apiParams.push(vendorId, name, address, city);
+function createNewVendor(req, res) {
+  var reqParams     = req.body;
+  var vendorName    = reqParams.vendor_name;
+  var vendorPhone   = reqParams.vendor_phone;
+  var vendorAddress = reqParams.vendor_address;
+  //var deviceName    = reqParams.device_name;
+  //var osVersion     = reqParams.os_version;
+  //var deviceToken   = reqParams.device_token;
+  var city          = parseInt(reqParams.vendor_city);
+
+  if(utils.checkBlank([vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, deviceToken])) {
+    return res.send({
+      "log" : "some parameters are missing/invalid",
+      "flag": constants.responseFlags.ACTION_FAILED
+    });
   }
-  if(utils.checkBlank(apiParams)) {
-    return res.send(constants.parameterMissingResponse);
+  if(vendorPhone.length < 10) {
+    return res.send({
+      "log": "Invalid phone number entered",
+      "flag": constants.responseFlags.ACTION_FAILED
+    });
   }
-  var sqlQuery = "", queryParams = [];
-  if(toEdit == 1) {
-    sqlQuery = "UPDATE tb_vendors SET vendor_address = ?, vendor_name = ?, vendor_city = ? WHERE vendor_id = ?";
-    queryParams.push(address, name, city, vendorId);
-  }
-  else {
-    sqlQuery = "SELECT vendor_name, vendor_address, vendor_city FROM tb_vendors WHERE vendor_id = ?";
-    queryParams.push(vendorId);
-  }
-  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "getting user details", err, result, getUserDetails.sql);
-    if(err) {
-      return res.send(constants.databaseErrorResponse);
+  var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
+  connection.query(dupQuery, [vendorPhone], function(dupErr, dupRes) {
+    if(dupErr) {
+      return res.send({
+        "log" : "Server execution error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
     }
-    var responseData = {
-      "log": "Successfully updated your details",
-      "flag": constants.responseFlags.ACTION_COMPLETE,
-    };
-    if(toEdit == 0) {
-      responseData.data = result;
+    if(dupRes.length > 0) {
+      return res.send({
+        "log" : "A vendor already exists with this email/phone",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
     }
-    res.send(responseData);
+    var access_token = crypto.createHash("md5").update(vendorPhone).digest("hex");
+    var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_phone, vendor_address, vendor_device_name," +
+        " vendor_device_os, vendor_city, access_token, device_token, date_registered) "+
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token, deviceToken], function(err, result) {
+      if(err) {
+        console.log(err);
+        return res.send({
+          "log": "Server execution error",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      return res.send({
+        "log" : "Successfully created vendor",
+        "access_token": access_token,
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
   });
 }
 
