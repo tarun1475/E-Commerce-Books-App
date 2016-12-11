@@ -525,7 +525,6 @@ function verifyVendorOTP(req, res) {
   };
   var otp = req.query.otp;
   var pass = req.query.pass;
-  var vendorId = "";
   verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -541,16 +540,17 @@ function verifyVendorOTP(req, res) {
       var pass = result[0].pass;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
       InsertVendorInDb(handlerInfo, phone,encrypt(pass) , access_token,function(venErr,venRes){
-         vendorId = venRes.vendor_id;
-      });
-      return res.send({
+        if(venRes){
+        res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
         "pass": pass,
         "phone": phone,
         "access_token":access_token,
-        "vendor_id":vendorId
+        "vendor_id":venRes.vendor_id
+      });
+      }
       });
     }
   });
@@ -643,6 +643,10 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token,callback){
                  "VALUES(?,?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
+    
+    if(err) {
+      return callback(err, null);
+    }
     callback(null, result);
     });
 }
