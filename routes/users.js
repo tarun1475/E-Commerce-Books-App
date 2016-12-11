@@ -345,7 +345,7 @@ function searchUserHelper(handlerInfo, searchKey, callback) {
     callback(null, result);
   });
 }
-
+//function to fetch or update vendor details
 function getVendorDetails(req, res) {
   var handlerInfo = {
     "apiModule": "Vendors",
