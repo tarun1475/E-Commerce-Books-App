@@ -32,44 +32,20 @@ exports.searchVendor           = searchVendor;
 function createNewVendor(req, res) {
   var reqParams     = req.body;
   var vendorName    = reqParams.vendor_name;
-  var vendorPhone   = reqParams.vendor_phone;
   var vendorAddress = reqParams.vendor_address;
-  //var deviceName    = reqParams.device_name;
-  //var osVersion     = reqParams.os_version;
-  //var deviceToken   = reqParams.device_token;
-  var city          = parseInt(reqParams.vendor_city);
+  var city = reqParams.vendor_city;
 
-  if(utils.checkBlank([vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, deviceToken])) {
+  if(utils.checkBlank([vendorName, vendorAddress, city])) {
     return res.send({
       "log" : "some parameters are missing/invalid",
       "flag": constants.responseFlags.ACTION_FAILED
     });
   }
-  if(vendorPhone.length < 10) {
-    return res.send({
-      "log": "Invalid phone number entered",
-      "flag": constants.responseFlags.ACTION_FAILED
-    });
-  }
-  var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
-  connection.query(dupQuery, [vendorPhone], function(dupErr, dupRes) {
-    if(dupErr) {
-      return res.send({
-        "log" : "Server execution error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-    if(dupRes.length > 0) {
-      return res.send({
-        "log" : "A vendor already exists with this email/phone",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-    var access_token = crypto.createHash("md5").update(vendorPhone).digest("hex");
-    var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_phone, vendor_address, vendor_device_name," +
-        " vendor_device_os, vendor_city, access_token, device_token, date_registered) "+
-                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, DATE(NOW()))";
-    connection.query(sqlQuery, [vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token, deviceToken], function(err, result) {
+
+    var sqlQuery = "INSERT INTO tb_vendors (vendor_name,  vendor_address, vendor_city," +
+        "date_registered) "+
+                   "VALUES(?, ?, ?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendorName,  vendorAddress,  city], function(err, result) {
       if(err) {
         console.log(err);
         return res.send({
@@ -79,7 +55,6 @@ function createNewVendor(req, res) {
       }
       return res.send({
         "log" : "Successfully created vendor",
-        "access_token": access_token,
         "flag": constants.responseFlags.ACTION_COMPLETE
       });
     });
