@@ -159,7 +159,7 @@ app.post('/books-auth/get_books_by_id'                , utils.logRequest
   , vendors.getBookDetailsById
   , error);
 
-app.post('/books-auth/my_orders'                , utils.logRequest
+app.get('/books-auth/my_orders'                , utils.logRequest
   , utils.verifyClientToken
   , users.getMyOrders
   , error);
