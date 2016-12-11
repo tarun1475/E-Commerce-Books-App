@@ -87,9 +87,7 @@ var upload = multer({storage: storage});
 app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);
-app.post('/books-auth/get_books_by_id'             , utils.logRequest
-   , bookRequests.getBooksDetailsById
-   , error);
+
    
 app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
@@ -172,6 +170,9 @@ app.get('/books-auth/delete_account'          , utils.logRequest
 /**
  * APIs related to book requests
  */
+app.post('/req_book_auth/get_books_by_id'             , utils.logRequest
+   , requests.getBooksDetailsById
+   , error);
 app.post('/req_book_auth/raise_request'        , utils.logRequest
    , utils.verifyClientToken
    , requests.raiseBooksRequest
