@@ -5,10 +5,12 @@
 ////////////////////////////////////////////////////////////////////
 // MODULE DEPENDENCIES
 ///////////////////////////////////////////////////////////////////
-var utils     = require('./commonfunctions');
-var constants = require('./constants');
-var crypto    = require('crypto');
-var logging   = require('./logging');
+var crypto         = require('crypto');
+var async          = require('async');
+var utils          = require('./commonfunctions');
+var constants      = require('./constants');
+var bookRequests   = require('./book_requests');
+var logging        = require('./logging');
 
 exports.createNewVendor        = createNewVendor;
 exports.vendorOrders            = vendorOrders;
