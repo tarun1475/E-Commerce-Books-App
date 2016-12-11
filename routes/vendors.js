@@ -99,8 +99,8 @@ function createNewVendor(req, res) {
  */
 function getVendorDetails(req, res) {
   var handlerInfo = {
-    "apiModule": "Users",
-    "apiHandler": "getMyDetails"
+    "apiModule": "Vendors",
+    "apiHandler": "getVendorDetails"
   };
   var reqParams = req.query;
   var vendorId  = reqParams.vendor_id;
