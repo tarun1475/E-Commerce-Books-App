@@ -41,7 +41,7 @@ function getVendorDetails(req, res) {
   var city      = reqParams.city;
   var apiParams = [];
   if(toEdit == 1) {
-    apiParams.push(userId, name, address, city);
+    apiParams.push(vendorId, name, address, city);
   }
   if(utils.checkBlank(apiParams)) {
     return res.send(constants.parameterMissingResponse);
