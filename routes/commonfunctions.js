@@ -20,9 +20,11 @@ exports.sendAndroidPushNotification    = sendAndroidPushNotification;
 exports.sendNotification               = sendNotification;
 exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
+exports.forgotVendorPass               = forgotVendorPass;
 exports.sendOTP                        = sendOTP;
 exports.sendVendorOTP                  = sendVendorOTP;
 exports.verifyVendorOTP                = verifyVendorOTP;
+exports.verifyForgotVendorOTP          = verifyForgotVendorOTP;
 exports.verifyWebOTP                   = verifyWebOTP;
 exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
@@ -245,8 +247,83 @@ function verifyClientToken(req, res, next) {
     next();
   });
 }
+
 /**
- * <b>API [GET] /books-auth/send_vendor_otp</b><br>
+ * <b>API [POST] /books-auth/forgot_vendor_pass</b><br>
+ * @param req {OBJECT} request object should contain phone_no
+ * @param res {OBJECT} response would contain session id
+ */
+function forgotVendorPass(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "forgotVendorPass"
+  };
+  var phone_no = req.body.phone_no;
+  var pass     = req.body.pass;
+
+  if(checkBlank([phone_no])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+
+
+  var dupQuery = "SELECT * FROM tb_vendors WHERE  vendor_phone = ? ";
+  var tt = connection.query(dupQuery, [phone_no], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
+    if(dupErr) {
+      return res.send({
+        "log": "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(dupData.length > 0) {
+    // Request sendotp for getting otp
+    var options = {};
+    options.method = 'POST';
+    options.json = true;
+    options.rejectUnauthorized = false;
+    options.url = constants.sendotp.API_LINK;
+    options.headers = {
+      'Content-Type': 'application/json',
+      'application-Key': constants.sendotp.API_KEY
+    };
+    options.body = {
+      "countryCode": "91",
+      "mobileNumber": phone_no,
+      "getGeneratedOTP": true
+    };
+    request(options, function(error, response, body) {
+      if(error || response.statusCode != 200) {
+        logging.error(handlerInfo, {event:"getting response from sendotp"}, {"error": error});
+        return res.send({
+          "log": "There was some error in getting otp",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      var otp = body.response.oneTimePassword;
+      logOtpIntoDb(handlerInfo, otp, phone_no,pass, function(err, result) {
+        if(err) {
+          return res.send(constants.databaseErrorResponse);
+        }
+        res.send({
+          "session_id": result.insertId,
+          "password"  : otp,
+          "pass": pass,
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+      });
+    });
+  });
+}//request forgot otp ends here.
+ else{
+      res.send({
+        "log": "A vendor does not with this phone",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+ }
+}
+
+/**
+ * <b>API [POST] /books-auth/send_vendor_otp</b><br>
  * @param req {OBJECT} request object should contain phone_no
  * @param res {OBJECT} response would contain session id
  */
@@ -404,6 +481,41 @@ function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, pass, callback) {
 /*
   function to verify Vendor OTP
 */
+function verifyForgotVendorOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfuntions",
+    "apiHandler": "verifyForgotVendorOTP"
+  };
+  var otp = req.query.otp;
+  var pass = req.query.pass;
+  verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    else{
+      var phone = result[0].phone_no;
+      var pass = result[0].pass;
+      //var access_token = crypto.createHash("md5").update(phone).digest("hex");
+      UpdateVendorInDb(handlerInfo, phone,encrypt(pass));
+      return res.send({
+        "log" : "Updates",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": result,
+        "pass": pass,
+        "phone": phone
+      });
+    }
+  });
+}
+/*
+  function to verify Vendor OTP
+*/
 function verifyVendorOTP(req, res) {
   var handlerInfo = {
     "apiModule": "commonfuntions",
@@ -501,6 +613,13 @@ function verifyOTP(req, res, next) {
     req.query.user_phone = result[0].phone_no;
     next();
   });
+}
+//function to update vendor into tb_vendors 
+function UpdateVendorInDb(handlerInfo, phone, pass){
+  var sqlQuery = "UPDATE tb_vendors SET vendor_pass = ? WHERE vendor_phone = ?";
+  var tt = connection.query(sqlQuery, [pass ,phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
+    });
 }
 //function to insert new vendor into tb_vendors 
 function InsertVendorInDb(handlerInfo, phone, pass,access_token){
