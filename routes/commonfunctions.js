@@ -21,6 +21,7 @@ exports.sendNotification               = sendNotification;
 exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
 exports.sendOTP                        = sendOTP;
+exports.sendVendorOTP                  = sendVendorOTP;
 exports.verifyWebOTP                   = verifyWebOTP;
 exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
@@ -243,6 +244,79 @@ function verifyClientToken(req, res, next) {
     next();
   });
 }
+
+/**
+ * <b>API [GET] /books-auth/send_vendor_otp</b><br>
+ * @param req {OBJECT} request object should contain phone_no
+ * @param res {OBJECT} response would contain session id
+ */
+function sendVendorOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "sendVendorOtp"
+  };
+  var phone_no = req.body.phone_no;
+  var pass = req.body.pass;
+
+  if(checkBlank([phone_no])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+
+
+  var dupQuery = "SELECT * FROM tb_vendors WHERE  vendor_phone = ? ";
+  var tt = connection.query(dupQuery, [phone_no], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
+    if(dupErr) {
+      return res.send({
+        "log": "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(dupData.length > 0) {
+      return res.send({
+        "log": "A vendor already exists with this phone",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    // Request sendotp for getting otp
+    var options = {};
+    options.method = 'POST';
+    options.json = true;
+    options.rejectUnauthorized = false;
+    options.url = constants.sendotp.API_LINK;
+    options.headers = {
+      'Content-Type': 'application/json',
+      'application-Key': constants.sendotp.API_KEY
+    };
+    options.body = {
+      "countryCode": "91",
+      "mobileNumber": phone_no,
+      "getGeneratedOTP": true
+    };
+    request(options, function(error, response, body) {
+      if(error || response.statusCode != 200) {
+        logging.error(handlerInfo, {event:"getting response from sendotp"}, {"error": error});
+        return res.send({
+          "log": "There was some error in getting otp",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      var otp = body.response.oneTimePassword;
+      logOtpIntoDb(handlerInfo, otp, phone_no,pass, function(err, result) {
+        if(err) {
+          return res.send(constants.databaseErrorResponse);
+        }
+        res.send({
+          "session_id": result.insertId,
+          "password"  : otp,
+          "pass": pass,
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+      });
+    });
+  });
+}
+
 
 /**
  * <b>API [GET] /books-auth/send_otp</b><br>
