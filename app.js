@@ -152,7 +152,7 @@ app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , error);
 
 
-app.get('/books-auth/vendor_orders'                , utils.logRequest
+app.post('/books-auth/vendor_orders'                , utils.logRequest
   , vendors.vendorOrders
   , error);
 
