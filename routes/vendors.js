@@ -86,17 +86,7 @@ function createNewVendor(req, res) {
   });
 }
 
-/**
- * <b>API [GET] /books-auth/get_vendor_details </b><br>
- * This api would provide vendor with his her details. Request query<br>
- * requires the following parameters
- * @param {STRING} token    - access token of device
- * @param {INTEGER} edit    - [optional] if you want to edit details then sent edit = 1
- * @param {STRING} name     - [optional] user name
- * @param {STRING} address  - [optional] user address
- * @param {STRING} landmark - [optional] user address landmark
- *
- */
+
 function getVendorDetails(req, res) {
   var handlerInfo = {
     "apiModule": "Vendors",
