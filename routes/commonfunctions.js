@@ -312,15 +312,16 @@ function forgotVendorPass(req, res) {
         });
       });
     });
-  });
-}//request forgot otp ends here.
- else{
+  }
+  else{
       res.send({
         "log": "A vendor does not with this phone",
         "flag": constants.responseFlags.ACTION_FAILED
       });
  }
+  });
 }
+ 
 
 /**
  * <b>API [POST] /books-auth/send_vendor_otp</b><br>
