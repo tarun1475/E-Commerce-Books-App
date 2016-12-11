@@ -136,10 +136,7 @@ app.get('/books-auth/my_details'               , utils.logRequest
   , utils.verifyClientToken
   , users.getMyDetails
   , error);
-app.get('/books-auth/get_vendor_details'               , utils.logRequest
-  , utils.verifyClientToken
-  , users.getVendorDetails
-  , error);
+
 
 app.get('/books-auth/my_orders'                , utils.logRequest
   , utils.verifyClientToken
