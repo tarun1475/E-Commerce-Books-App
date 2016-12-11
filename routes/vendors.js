@@ -9,82 +9,13 @@ var utils     = require('./commonfunctions');
 var constants = require('./constants');
 var crypto    = require('crypto');
 var logging   = require('./logging');
-exports.createNewVendor        = createNewVendor;
+//exports.createNewVendor        = createNewVendor;
 exports.getVendorDetails       = getVendorDetails;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
 exports.searchVendor           = searchVendor;
 
-/**
- * <b>API [POST] '/books-auth/create_vendor' </b><br>
- * 
- * API to create a new vendor
- * @param {string} vendor_name - Name of the vendor
- * @param {string} vendor_email - Email of vendor
- * @param {string} vendor_phone - Phone number of vendor
- * @param {string} vendor_address - address of the vendor
- * @param {string} device_name - Name of the device
- * @param {string} os_version - OS version
- * @param {integer} vendor_city - city of vendor, 1 for chandigarh
- * @return {JSON} response body contains access_token
- */
-function createNewVendor(req, res) {
-  var reqParams     = req.body;
-  var vendorName    = reqParams.vendor_name;
-  var vendorPhone   = reqParams.vendor_phone;
-  var vendorAddress = reqParams.vendor_address;
-  //var deviceName    = reqParams.device_name;
-  //var osVersion     = reqParams.os_version;
-  //var deviceToken   = reqParams.device_token;
-  var city          = parseInt(reqParams.vendor_city);
-
-  if(utils.checkBlank([vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, deviceToken])) {
-    return res.send({
-      "log" : "some parameters are missing/invalid",
-      "flag": constants.responseFlags.ACTION_FAILED
-    });
-  }
-  if(vendorPhone.length < 10) {
-    return res.send({
-      "log": "Invalid phone number entered",
-      "flag": constants.responseFlags.ACTION_FAILED
-    });
-  }
-  var dupQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
-  connection.query(dupQuery, [vendorPhone], function(dupErr, dupRes) {
-    if(dupErr) {
-      return res.send({
-        "log" : "Server execution error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-    if(dupRes.length > 0) {
-      return res.send({
-        "log" : "A vendor already exists with this email/phone",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-    var access_token = crypto.createHash("md5").update(vendorPhone).digest("hex");
-    var sqlQuery = "INSERT INTO tb_vendors (vendor_name, vendor_phone, vendor_address, vendor_device_name," +
-        " vendor_device_os, vendor_city, access_token, device_token, date_registered) "+
-                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, DATE(NOW()))";
-    connection.query(sqlQuery, [vendorName, vendorPhone, vendorAddress, deviceName, osVersion, city, access_token, deviceToken], function(err, result) {
-      if(err) {
-        console.log(err);
-        return res.send({
-          "log": "Server execution error",
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
-      }
-      return res.send({
-        "log" : "Successfully created vendor",
-        "access_token": access_token,
-        "flag": constants.responseFlags.ACTION_COMPLETE
-      });
-    });
-  });
-}
 
 /**
  * <b>API [GET] /books-auth/get_vendor_details </b><br>
