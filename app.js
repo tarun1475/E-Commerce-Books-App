@@ -106,6 +106,12 @@ app.post('/books-auth/send_otp'                 , utils.logRequest
 app.post('/books-auth/send_vendor_otp'                 , utils.logRequest
    , utils.sendVendorOTP
    , error);
+app.post('/books-auth/forgot_vendor_pass'                 , utils.logRequest
+   , utils.forgotVendorPass
+   , error);
+app.get('/books-auth/verify_forgot_vendor_otp'               , utils.logRequest
+   , utils.verifyForgotVendorOTP
+   , error);
 app.get('/books-auth/verify_vendor_otp'               , utils.logRequest
    , utils.verifyVendorOTP
    , error);
