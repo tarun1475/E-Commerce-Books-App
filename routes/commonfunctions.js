@@ -22,6 +22,7 @@ exports.sendNotificationToDevice       = sendNotificationToDevice;
 exports.verifyClientToken              = verifyClientToken;
 exports.sendOTP                        = sendOTP;
 exports.sendVendorOTP                  = sendVendorOTP;
+exports.verifyVendorOTP                = verifyVendorOTP;
 exports.verifyWebOTP                   = verifyWebOTP;
 exports.verifyOTP                      = verifyOTP;
 exports.verifyPanelToken               = verifyPanelToken;
@@ -244,7 +245,6 @@ function verifyClientToken(req, res, next) {
     next();
   });
 }
-
 /**
  * <b>API [GET] /books-auth/send_vendor_otp</b><br>
  * @param req {OBJECT} request object should contain phone_no
@@ -316,6 +316,7 @@ function sendVendorOTP(req, res) {
     });
   });
 }
+
 
 
 /**
@@ -401,6 +402,42 @@ function logOtpIntoDb(handlerInfo, oneTimePwd, userPhone, pass, callback) {
   });
 }
 /*
+  function to verify Vendor OTP
+*/
+function verifyVendorOTP(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfuntions",
+    "apiHandler": "verifyVendorOTP"
+  };
+  var otp = req.query.otp;
+  var pass = req.query.pass;
+  verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    else{
+      var phone = result[0].phone_no;
+      var pass = result[0].pass;
+      var access_token = crypto.createHash("md5").update(phone).digest("hex");
+      InsertVendorInDb(handlerInfo, phone,encrypt(pass) , access_token);
+      return res.send({
+        "log" : "Verified",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": result,
+        "pass": pass,
+        "phone": phone,
+        "access_token":access_token
+      });
+    }
+  });
+}
+/*
   function to verify OTP
 */
 function verifyWebOTP(req, res) {
@@ -464,6 +501,14 @@ function verifyOTP(req, res, next) {
     req.query.user_phone = result[0].phone_no;
     next();
   });
+}
+//function to insert new vendor into tb_vendors 
+function InsertVendorInDb(handlerInfo, phone, pass,access_token){
+  var sqlQuery = "INSERT INTO tb_vendors (vendor_phone,vendor_pass, access_token, date_registered) "+
+                 "VALUES(?,?, ?, DATE(NOW()))";
+  var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
+    });
 }
 //function to insert new user into tb_user from website
 function InsertWebuserInDb(handlerInfo, phone, pass,access_token){
