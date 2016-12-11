@@ -51,7 +51,7 @@ function vendorOrders(req, res) {
   });
 }
 function getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size,callback){
-   var sqlQuery = "SELECT delivery_id FROM tb_delivery_distribution WHERE vendor_id = ?  ORDER BY generated_on DESC LIMIT ?, ?";
+   var sqlQuery = "SELECT delivery_id FROM tb_delivery_distribution WHERE vendor_id = ?  ORDER BY logged_on DESC LIMIT ?, ?";
    var tt = connection.query(sqlQuery, [vendorId,start_from, page_size], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
