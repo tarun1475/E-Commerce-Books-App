@@ -618,10 +618,20 @@ function verifyOTP(req, res, next) {
 }
 //function to update vendor into tb_vendors 
 function UpdateVendorInDb(handlerInfo, phone, pass){
-  var sqlQuery = "UPDATE tb_vendors SET vendor_pass = ? WHERE vendor_phone = ?";
-  var tt = connection.query(sqlQuery, [pass ,phone], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-    });
+  var sqlQuery = "", queryParams = [];
+    sqlQuery = "UPDATE tb_vendors SET vendor_pass = ? WHERE vendor_phone = ?";
+    queryParams.push(pass,phone);
+  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user details", err, result, getUserDetails.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var responseData = {
+      "log": "Successfully updated your details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+    };
+    res.send(responseData);
+  });
 }
 //function to insert new vendor into tb_vendors 
 function InsertVendorInDb(handlerInfo, phone, pass,access_token){
