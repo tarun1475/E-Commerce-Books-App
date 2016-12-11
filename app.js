@@ -137,6 +137,9 @@ app.post('/books-auth/login'                   , utils.logRequest
 app.post('/books-auth/login_web_user'                   , utils.logRequest
   , utils.loginWebUser
   , error);
+app.post('/books-auth/login_vendor'                   , utils.logRequest
+  , utils.loginVendor
+  , error);
 
 app.get('/books-auth/my_details'               , utils.logRequest
   , utils.verifyClientToken
