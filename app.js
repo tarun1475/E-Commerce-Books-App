@@ -88,7 +88,6 @@ app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);
 
-   
 app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
    , error);
@@ -153,8 +152,11 @@ app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , error);
 
 
-app.get('/books-auth/vendor_orders'                , utils.logRequest
+app.post('/books-auth/vendor_orders'                , utils.logRequest
   , vendors.vendorOrders
+  , error);
+app.post('/books-auth/get_books_by_id'                , utils.logRequest
+  , vendors.getBooksDetailsById
   , error);
 
 app.post('/books-auth/my_orders'                , utils.logRequest
@@ -170,9 +172,7 @@ app.get('/books-auth/delete_account'          , utils.logRequest
 /**
  * APIs related to book requests
  */
-app.post('/req_book_auth/get_books_by_id'             , utils.logRequest
-   , requests.getBooksDetailsById
-   , error);
+
 app.post('/req_book_auth/raise_request'        , utils.logRequest
    , utils.verifyClientToken
    , requests.raiseBooksRequest
