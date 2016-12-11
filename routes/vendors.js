@@ -12,8 +12,9 @@ var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
+exports.getBookDetailsById     = getBookDetailsById;
 exports.createNewVendor        = createNewVendor;
-exports.vendorOrders            = vendorOrders;
+exports.vendorOrders           = vendorOrders;
 exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
@@ -44,7 +45,7 @@ function vendorOrders(req, res) {
       });
     }
     res.send({
-      "log": "Successfully blocked/unblocked user",
+      "log": "Successfully fetched deliveries",
       "date": result,
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
@@ -60,6 +61,35 @@ function getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size,callba
      
       callback(null, result);
 
+});
+}
+/**
+ * <b>API [POST] '/req_book_auth/get_books_by_id' </b><br>
+ * API responsible for getting book to the respective id.<br>
+ * request body requires the following parameters: 
+ * @param {INTEGER} book_id
+
+*/
+function getBookDetailsById(req, res) {
+  var handlerInfo   = {
+    "apiModule" : "Users",
+    "apiHandler": "getBookDetailsById"
+  };
+  var bookId = req.body.book_id;
+  var sqlQuery = "SELECT * FROM tb_books WHERE book_id = ? ";
+   var tt = connection.query(sqlQuery, [bookId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting books details", err, result, tt.sql);
+     if(err) {
+      return res.send({
+        "log": "server execution error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+      }
+      res.send({
+        "log": "successfully fetched books",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "books":result
+      });
 });
 }
 /**
