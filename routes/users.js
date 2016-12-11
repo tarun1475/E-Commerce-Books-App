@@ -21,6 +21,7 @@ exports.blockUserById                     = blockUserById;
 exports.verifyUserByPhone                 = verifyUserByPhone;
 exports.searchUser                        = searchUser;
 exports.getMyDetails                      = getMyDetails;
+exports.getVendorDetails                  = getVendorDetails;
 exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
 exports.getAllUsers                       = getAllUsers;
@@ -344,6 +345,50 @@ function searchUserHelper(handlerInfo, searchKey, callback) {
     callback(null, result);
   });
 }
+
+function getVendorDetails(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "getVendorDetails"
+  };
+  var reqParams = req.query;
+  var vendorId  = reqParams.vendor_id;
+  var toEdit    = reqParams.edit || 0;
+  var name      = reqParams.name;
+  var address   = reqParams.address;
+  var city      = reqParams.city;
+  var apiParams = [];
+  if(toEdit == 1) {
+    apiParams.push(vendorId, name, address, city);
+  }
+  if(utils.checkBlank(apiParams)) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  var sqlQuery = "", queryParams = [];
+  if(toEdit == 1) {
+    sqlQuery = "UPDATE tb_vendors SET vendor_address = ?, vendor_name = ?, vendor_city = ? WHERE vendor_id = ?";
+    queryParams.push(address, name, city, vendorId);
+  }
+  else {
+    sqlQuery = "SELECT vendor_name, vendor_address, vendor_city FROM tb_vendors WHERE vendor_id = ?";
+    queryParams.push(vendorId);
+  }
+  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user details", err, result, getUserDetails.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var responseData = {
+      "log": "Successfully updated your details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+    };
+    if(toEdit == 0) {
+      responseData.data = result;
+    }
+    res.send(responseData);
+  });
+}
+
 
 /**
  * <b>API [GET] /books-auth/get_my_details </b><br>
