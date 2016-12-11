@@ -1,343 +1,301 @@
-/*
- * Module dependencies.
+/**
+ * @module Vendors
  */
 
-process.env.NODE_CONFIG_DIR = __dirname + '/config/';
-config                  = require('config');
-var express             = require('express');
-var http                = require('http');
-var https               = require('https');
-var bodyParser          = require('body-parser');
-var fs                  = require('fs');
-var cors                = require('cors');
-var logger              = require('morgan');
-var multer              = require('multer');
-var favicon             = require('serve-favicon');
-var error               = require('./routes/error');
-var users               = require('./routes/users');
-var vendors             = require('./routes/vendors');
-var requests            = require('./routes/book_requests');
-var utils               = require('./routes/commonfunctions');
-var cron                = require('./routes/cron');
-var analytics           = require('./routes/analytics');
-var elasticSearch       = require('./routes/elasticsearch');
-var uploads             = require('./routes/uploads');
-var app                 = express();
+////////////////////////////////////////////////////////////////////
+// MODULE DEPENDENCIES
+///////////////////////////////////////////////////////////////////
+var utils     = require('./commonfunctions');
+var constants = require('./constants');
+var crypto    = require('crypto');
+var logging   = require('./logging');
 
-connection              = undefined;
-require('./routes/mysqlLib');
+exports.createNewVendor        = createNewVendor;
+exports.vendorOrders            = vendorOrders;
+exports.blockVendorById        = blockVendorById;
+exports.getVendorDetailsPanel  = getVendorDetailsPanel;
+exports.getVendorSales         = getVendorSales;
+exports.searchVendor           = searchVendor;
 
-var options = {
-  key : fs.readFileSync(__dirname + '/certs/vevsa.com.key.pem'),
-  cert: fs.readFileSync(__dirname + '/certs/vevsa.com.crt.pem')
-};
+/**
+ * <b>API [POST] /books-auth/vendor_orders </b> <br>
+ * API to fetch vendor orders
+ * @param vendor_id 
+ * @return {JSON} - Response body contains log and flag
+ */
+function vendorOrders(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "vendorOrders"
+  };
+  var vendorId = req.body.vendor_id;
+  var start_from = req.body.start_from;
+  var page_size = req.body.page_size;
+  if(utils.checkBlank([vendorId])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully blocked/unblocked user",
+      "date": result,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+function getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size,callback){
+   var sqlQuery = "SELECT delivery_id FROM tb_delivery_distribution WHERE vendor_id = ?  ORDER BY generated_on DESC LIMIT ?, ?";
+   var tt = connection.query(sqlQuery, [vendorId,start_from, page_size], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
+     if(err) {
+        return callback("There was some error in getting delivery details", null);
+      }
+     
+      callback(null, result);
 
-// all environments
-app.set('port', process.env.PORT || config.get('port') || 4013);
-app.use(logger('dev'));
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(bodyParser.json());
-app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(cors());
-
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");  
-  next();
 });
+}
+/**
+ * <b>API [POST] '/books-auth/create_vendor' </b><br>
+ * 
+ * API to create a new vendor
+ * @param {string} vendor_name - Name of the vendor
+ * @param {string} vendor_email - Email of vendor
+ * @param {string} vendor_phone - Phone number of vendor
+ * @param {string} vendor_address - address of the vendor
+ * @param {string} device_name - Name of the device
+ * @param {string} os_version - OS version
+ * @param {integer} vendor_city - city of vendor, 1 for chandigarh
+ * @return {JSON} response body contains access_token
+ */
+function createNewVendor(req, res) {
+  var reqParams     = req.body;
+  var vendorName    = reqParams.vendor_name;
+  var vendorAddress = reqParams.vendor_address;
+  var city = reqParams.vendor_city;
 
-/////////////////////////////////////////////////////////////
-// APIs for HearBeat
-/////////////////////////////////////////////////////////////
-// API to check if connection is alive or not
-app.get('/heartbeat', function(req, res, next) {
-  connection.query(
-    'SELECT 1 FROM DUAL WHERE 1 = 1', function(err, result) {
+  if(utils.checkBlank([vendorName, vendorAddress, city])) {
+    return res.send({
+      "log" : "some parameters are missing/invalid",
+      "flag": constants.responseFlags.ACTION_FAILED
+    });
+  }
+
+    var sqlQuery = "INSERT INTO tb_vendors (vendor_name,  vendor_address, vendor_city," +
+        "date_registered) "+
+                   "VALUES(?, ?, ?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendorName,  vendorAddress,  city], function(err, result) {
+      if(err) {
+        console.log(err);
+        return res.send({
+          "log": "Server execution error",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      return res.send({
+        "log" : "Successfully created vendor",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
+}
+
+
+/**
+ * <b>API [POST] /books-auth/block/vendor </b> <br>
+ * API to block vendor
+ * @param token - {STRING} access token
+ * @param status - {INTEGER} 1 -> block, 0 -> unblock
+ * @return {JSON} - Response body contains log and flag
+ */
+function blockVendorById(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "blockUserById"
+  };
+  var userId = req.body.vendor_id;
+  var userStatus = req.body.status;
+  if(utils.checkBlank([userId])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  updateVendorAccountStatus(handlerInfo, userId, userStatus, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully blocked/unblocked user",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
+function updateVendorAccountStatus(handlerInfo, vendorId, status, callback) {
+  if(status != constants.userAccountStatus.BLOCKED && status != constants.userAccountStatus.UNBLOCKED) {
+    return callback("Invalid account status provided", null);
+  }
+  var sqlQuery = "UPDATE tb_vendors SET is_blocked = ? WHERE vendor_id = ?";
+  var tt = connection.query(sqlQuery, [status, vendorId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "block/unblock user by id", err, result, tt.sql);
+    if(err) {
+      return callback("There was some error in updating vendor", null);
+    }
+    if(result.affectedRows == 0) {
+      return callback("Invalid user id provided", null);
+    }
+    callback(null, "successfully updated user account")
+  });
+}
+
+/**
+ * <b>API [POST] /books-auth/get/details_vendor</b> <br>
+ * API to get vendor details
+ * @param token - {STRING} access token
+ * @param vendor_id - {INTERGER} vendor id
+ * @return {JSON} - Response body contains vendor detail
+ */
+function getVendorDetailsPanel(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "getVendorDetailsPanel"
+  };
+  var reqParams = req.body;
+  var vendorId = parseInt(reqParams.vendor_id || 0);
+  var deliveryPagination = reqParams.deliveryPagination;
+  getVendorDetails(handlerInfo, vendorId, deliveryPagination, function(err, result) {
+    if(err) {
+      return res.send({
+        "log": err,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched vendor details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+}
+
+function getVendorDetails(handlerInfo, vendor_id, deliveryPagination, callback) {
+  var sqlQuery = "SELECT vendor_id, vendor_name, vendor_phone, vendor_email, vendor_address, vendor_device_name, " +
+      "vendor_device_os, vendor_city " +
+      "FROM tb_vendors " +
+      "WHERE vendor_id = ?";
+  var tt = connection.query(sqlQuery, [vendor_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
+    if(err) {
+      return callback("There was some error in getting vendor details", null);
+    }
+    var responseData = {};
+    responseData.vendor_id         = result[0].vendor_id;
+    responseData.vendor_name       = result[0].vendor_name;
+    responseData.vendor_phone      = result[0].vendor_phone;
+    responseData.vendor_email      = result[0].vendor_email;
+    responseData.vendor_address    = result[0].vendor_address;
+    responseData.vendor_device_name= result[0].vendor_device_name;
+    responseData.vendor_device_os  = result[0].vendor_device_os;
+    responseData.vendor_city       = result[0].vendor_city;
+    var getDeliveryQuery = "SELECT deliveryDistribution.delivery_id, deliveryDistribution.book_id, " +
+        "deliveryDistribution.book_price, deliveryDistribution.mrp, deliveryDistribution.vevsa_commission, " +
+        "books.book_name, books.book_stream, books.book_semester, books.type, books.book_author, " +
+        "books.book_category, books.publisher, deliveryDistribution.logged_on, " +
+        "books.class, books.competition_name, books.is_ncert, books.is_guide " +
+        "FROM `tb_delivery_distribution` as deliveryDistribution " +
+        "JOIN tb_books as books ON books.book_id = deliveryDistribution.book_id " +
+        "WHERE deliveryDistribution.vendor_id = ? " +
+        "ORDER BY deliveryDistribution.logged_on DESC " +
+        "LIMIT ?, ?";
+    var jj = connection.query(getDeliveryQuery, [vendor_id, deliveryPagination.start_from, deliveryPagination.page_size], function(delErr, deliveriesData) {
+      logging.logDatabaseQuery(handlerInfo, "getting deliveries for a vendor", delErr, deliveriesData, jj.sql);
+      if(delErr) {
+        return callback("There was some error in getting delivery details", null);
+      }
+      responseData.recent_deliveries = deliveriesData;
+      callback(null, responseData);
+    });
+  });
+}
+
+/**
+ * <b>API [POST] /books-auth/get_vendor_sales </b> <br>
+ * API to get sales by day of a particular vendor
+ * @param token - {STRING} access token
+ * @return {JSON} - Response body contains log and flag
+ */
+function getVendorSales(req, res) {
+  var handlerInfo = {
+    "apiModule": "vendors",
+    "apiHandler": "getVendorSales"
+  };
+  var reqParams = req.query;
+  var vendorId = reqParams.vendor_id;
+
+  var sqlQuery = "SELECT distribution.logged_on,SUM(distribution.vevsa_commission) as total_vevsa_commission, "+
+    "SUM(distribution.mrp) as total_sales FROM ( "+
+    "SELECT vendor_id, mrp, vevsa_commission, DATE(logged_on)as logged_on FROM tb_delivery_distribution "+
+    ") as distribution "+
+    "WHERE distribution.vendor_id = ? "+
+    "GROUP BY distribution.logged_on"
+  var rr = connection.query(sqlQuery, [vendorId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendor sales", err, result, rr.sql);
     if(err) {
       console.log(err);
-      return res.status(500).send('Internal server Error!');
+      return res.send(constants.databaseErrorResponse);
     }
-    res.send('Vevsa.com - You save we save!');
+    res.send({
+      "log": "Successfully fetched sales information from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
   });
-});
+}
 
-// For storing data on server
-
-
-app.get('/', function(req, res) {
-  res.send('Vevsa.com - You save we save!');
-});
-
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, __dirname + '/uploads/');
-    },
-    filename: function (req, file, cb) {
-        var fileName = file.originalname.replace(/[|&;$%@"<>()+,' '?]/g, "");
-        cb(null, fileName);
+/**
+ * <b> API [GET] books-auth/searchVendor</b><br>
+ * @param req {OBJECT} request query should contain token and key for search
+ * @param res {OBJECT} response would return the result
+ */
+function searchVendor(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "searchVendor"
+  };
+  var reqParams = req.query;
+  var searchKey = reqParams.key;
+  searchVendorHelper(handlerInfo, searchKey, function (err, result) {
+    if (err) {
+      return res.send(constants.databaseErrorResponse);
     }
-});
-var upload = multer({storage: storage});
-
-/**
- * Users APIs
- */
-app.post('/books-auth/check_version'             , utils.logRequest
-   , users.checkVersion
-   , error);
-   
-app.post('/books-auth/create_user'             , utils.logRequest
-   , users.createNewAppUser
-   , error);
-
-app.post('/books-auth/create_vendor'           , utils.logRequest
-   , vendors.createNewVendor
-   , error);
-
-app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
-   , users.getRecentRequestsByUserId
-   , error);
-
-app.post('/books-auth/send_otp'                 , utils.logRequest
-   , utils.sendOTP
-   , error);
-app.post('/books-auth/send_vendor_otp'                 , utils.logRequest
-   , utils.sendVendorOTP
-   , error);
-app.post('/books-auth/forgot_vendor_pass'                 , utils.logRequest
-   , utils.forgotVendorPass
-   , error);
-app.get('/books-auth/verify_forgot_vendor_otp'               , utils.logRequest
-   , utils.verifyForgotVendorOTP
-   , error);
-app.get('/books-auth/verify_vendor_otp'               , utils.logRequest
-   , utils.verifyVendorOTP
-   , error);
-   
-app.get('/books-auth/verify_web_otp'               , utils.logRequest
-   , utils.verifyWebOTP
-   , users.createNewAppUser
-   , error);
-
-app.get('/books-auth/verify_otp'               , utils.logRequest
-   , utils.verifyOTP
-   , users.createNewAppUser
-   , error);
-
-app.get('/books-auth/get_vendor_sales'         , utils.logRequest
-  , utils.verifyClientToken
-  , vendors.getVendorSales
-  , error);
-
-app.post('/books-auth/login'                   , utils.logRequest
-  , utils.loginUser
-  , error);
-app.post('/books-auth/login_web_user'                   , utils.logRequest
-  , utils.loginWebUser
-  , error);
-app.post('/books-auth/login_vendor'                   , utils.logRequest
-  , utils.loginVendor
-  , error);
-
-app.get('/books-auth/my_details'               , utils.logRequest
-  , utils.verifyClientToken
-  , users.getMyDetails
-  , error);
-
-app.get('/books-auth/get_vendor_details'               , utils.logRequest
-  , utils.verifyClientToken
-  , users.getVendorDetails
-  , error);
-
-
-app.get('/books-auth/vendor_orders'                , utils.logRequest
-  , vendors.vendorOrders
-  , error);
-
-app.post('/books-auth/my_orders'                , utils.logRequest
-  , utils.verifyClientToken
-  , users.getMyOrders
-  , error);
-
-app.get('/books-auth/delete_account'          , utils.logRequest
-  , utils.verifyClientToken
-  , users.markUserInActive
-  , error);
-
-/**
- * APIs related to book requests
- */
-app.post('/req_book_auth/raise_request'        , utils.logRequest
-   , utils.verifyClientToken
-   , requests.raiseBooksRequest
-   , error);
-
-app.post('/req_book_auth/get_pending_requests'  , utils.logRequest
-   , utils.verifyClientToken
-   , requests.getBookRequests
-   , error);
-
-app.post('/req_book_auth/put_response'          , utils.logRequest
-   , utils.verifyClientToken
-   , requests.putBookRequestResponse
-   , error);
-
-
-app.post('/books-auth/confirm_book_order'       , utils.logRequest
-   , utils.verifyClientToken
-   , requests.confirmBookOrder
-   , error);
-
-app.post('/books-auth/get_books'                , utils.verifyClientToken
-   , elasticSearch.searchBook
-   , error);
-
-app.post('/books-auth/upload'                   , utils.logRequest
-    //, utils.verifyClientToken
-    , upload.single('fileName'), function(req, res, next) {
-      console.log("file path is : "+req.file.path);
+    if (result.length == 0) {
       return res.send({
-        path: req.file.path
+        "log": "Invalid vendor ",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched data from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
   });
-});
+}
 
-app.post('/books-auth/s3/upload'                 , utils.logRequest
-   //, utils.verifyClientToken
-   , upload.single('fileName')
-   , uploads.uploadFileToS3);
-/**
- * APIs for crontabs
- */
-app.get('/req_book_auth/process_pending_req'     , utils.logRequest
-   , cron.processPendingBookRequests
-   , error);
-
-app.post('/books-auth/get_minimum_response'      , utils.logRequest
-    , requests.getMinimumPriceResponse
-    , error);
-
-/**
- * Panel related apis
- */
-app.post('/books-auth/get/details_user'          , utils.logRequest
-    , utils.verifyPanelToken
-    , users.getUserDetailsPanel
-    , error);
-
-app.post('/books-auth/get/details_vendor'        , utils.logRequest
-    , utils.verifyPanelToken
-    , vendors.getVendorDetailsPanel
-    , error);
-
-app.get('/books-auth/searchUser'               , utils.logRequest
-    , utils.verifyPanelToken
-    , users.searchUser
-    , error);
-
-app.get('/books-auth/searchVendor'              , utils.logRequest
-    , utils.verifyPanelToken
-    , vendors.searchVendor
-    , error);
-
-app.post('/books-auth/block/user'                , utils.logRequest
-    , utils.verifyPanelToken
-    , users.blockUserById
-    , error);
-
-app.post('/books-auth/block/vendor'              , utils.logRequest
-    , utils.verifyPanelToken
-    , vendors.blockVendorById
-    , error);
-
-app.post('/books-auth/report'                    , utils.logRequest
-    , utils.verifyPanelToken
-    , analytics.getOverallReportPanel
-    , error);
-app.post('/books-auth/check_response'              , utils.logRequest
-    , analytics.checkResponse
-    , error);
-app.post('/books-auth/get_requests'              , utils.logRequest
-    , utils.verifyPanelToken
-    , analytics.getOverallRequests
-    , error);
-
-app.post('/books-auth/get_vendors_engagement'    , utils.logRequest
-    , utils.verifyPanelToken
-    , analytics.getVendorEngagements
-    , error);
-
-app.post('/books-auth/get_deliveries'            , utils.logRequest
-    , utils.verifyPanelToken
-    , requests.getDeliveries
-    , error);
-
-app.post('/books-auth/get_delivery_details'     , utils.logRequest
-   , utils.verifyPanelToken
-   , requests.getDeliveryDetailsById
-   , error);
-
-app.post('/books-auth/update_delivery_status'       , utils.logRequest
-   , utils.verifyPanelToken
-   , requests.updateDeliveryStatus
-   , error);
-
-app.post('/books-auth/add_book'                 , utils.verifyClientToken
-    , elasticSearch.addBookViaPanel
-    , error);
-
-app.get('/req_book_auth/get_all_users'         , utils.logRequest
-    , utils.verifyPanelToken
-    , users.getAllUsers
-    , error);
-/**
- * To change the port, please edit the configuration file
- * @type {https.Server}
- */
-
-/*
- * Referral apis related to some web-referral scheme
- *
- */
-app.post('/books-auth/email/send_otp'             , utils.logRequest
-    , utils.sendOtpViaEmail
-    , error);
-
-app.post('/books-auth/email/verify_otp'           , utils.logRequest
-    , utils.verifyEmailOtp
-    , error);
-
-app.get('/books-auth/refer'                       , utils.logRequest
-    , utils.serverReferUserPage
-    , error);
-
-app.post('/books-auth/referrals/login'            , utils.logRequest
-    , utils.loginReferralProgramme
-    , error);
-
-app.get('/books-auth/referrals/leaderboard'       , utils.logRequest
-    , utils.getReferralLeaderBoard
-    , error);
-
-app.get('/books-auth/referrals/user_referrals'    , utils.logRequest
-    , utils.getUserReferrals
-    , error);
-
-/*
- * Web APIs.
- */
-app.post('/books-auth/create_webReq'             , utils.logRequest
-   , users.createWebReq
-   , error);
-
-
-/*
-var httpServer = https.createServer(options, app).listen(app.get('port'), function()  {
-  console.log('Express server listening on port ' + app.get('port'));
-});
-*/
-
-var httpServer = http.createServer(app).listen(app.get('port'), function()  {
-  console.log('Express server listening on port ' + app.get('port'));
-});
+function searchVendorHelper(handlerInfo, searchKey, callback) {
+  var sqlQuery = "SELECT * FROM tb_vendors " +
+      "WHERE vendor_id = ? OR vendor_name LIKE '%"+searchKey+"%' OR vendor_email LIKE '%"+searchKey+"%' " +
+      "OR vendor_address LIKE '%"+searchKey+"%' ";
+  var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
