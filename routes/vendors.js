@@ -32,12 +32,10 @@ function vendorOrders(req, res) {
     "apiHandler": "vendorOrders"
   };
   var vendorId = req.body.vendor_id;
-  var start_from = req.body.start_from;
-  var page_size = req.body.page_size;
   if(utils.checkBlank([vendorId])) {
     return res.send(constants.parameterMissingResponse);
   }
-  getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size, function(err, result) {
+  getDeliveriesOfVendor(handlerInfo, vendorId, function(err, result) {
     if(err) {
       return res.send({
         "log": err,
@@ -51,9 +49,9 @@ function vendorOrders(req, res) {
     });
   });
 }
-function getDeliveriesOfVendor(handlerInfo, vendorId,start_from,page_size,callback){
+function getDeliveriesOfVendor(handlerInfo, vendorId,callback){
    var sqlQuery = "SELECT * FROM tb_delivery_distribution WHERE vendor_id = ?  ORDER BY logged_on DESC LIMIT ?, ?";
-   var tt = connection.query(sqlQuery, [vendorId,start_from, page_size], function(err, result) {
+   var tt = connection.query(sqlQuery, [vendorId,0, 5], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
         return callback("There was some error in getting delivery details", null);
