@@ -268,8 +268,8 @@ function getVendorSales(req, res) {
   var vendorId = reqParams.vendor_id;
 
   var sqlQuery = "SELECT distribution.logged_on,SUM(distribution.vevsa_commission) as total_vevsa_commission, "+
-    "SUM(distribution.mrp) as total_sales FROM ( "+
-    "SELECT vendor_id, mrp, vevsa_commission, DATE(logged_on)as logged_on FROM tb_delivery_distribution "+
+    "SUM(distribution.book_price) as total_sales FROM ( "+
+    "SELECT vendor_id, book_price, vevsa_commission, DATE(logged_on)as logged_on FROM tb_delivery_distribution "+
     ") as distribution "+
     "WHERE distribution.vendor_id = ? "+
     "GROUP BY distribution.logged_on"
