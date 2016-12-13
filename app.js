@@ -151,6 +151,9 @@ app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , users.getVendorDetails
   , error);
 
+app.get('/books-auth/fetch_numbers'               , utils.logRequest
+  , vendors.fetchVendorNumbers
+  , error);
 
 app.post('/books-auth/vendor_orders'                , utils.logRequest
   , vendors.vendorOrders
