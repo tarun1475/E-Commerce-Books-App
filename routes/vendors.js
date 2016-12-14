@@ -34,7 +34,7 @@ function vendorResponses(req , res){
     "apiHandler": "vendorResponses"
   };
   var dateInterval = req.body.date_interval;
-  var sqlQuery = "SELECT * FROM tb_books_response ORDER BY logged_on DESC AND DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
+  var sqlQuery = "SELECT * FROM tb_books_response AND DATE(logged_on) BETWEEN DATE(?) AND DATE(?)  ORDER BY logged_on DESC";
    var tt = connection.query(sqlQuery,[dateInterval.start_date,dateInterval.end_date], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor responses", err, result, tt.sql);
      if(err) {
@@ -63,7 +63,7 @@ function vendorResponses(req , res){
 });
 }
 function bindVendorRates(handlerInfo,dateInterval,callback){
-  var sqlQuery = "SELECT * FROM tb_books_overall_distribution  ORDER BY logged_on DESC AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?) ";
+  var sqlQuery = "SELECT * FROM tb_books_overall_distribution  AND DATE(logged_on) BETWEEN DATE(?) AND DATE(?) ORDER BY logged_on DESC ";
    var tt = connection.query(sqlQuery,[dateInterval.start_date,dateInterval.end_date], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
