@@ -33,20 +33,45 @@ function vendorResponses(req , res){
     "apiModule": "Users",
     "apiHandler": "vendorResponses"
   };
-  var sqlQuery = "SELECT * FROM tb_books_response";
+  var sqlQuery = "SELECT * FROM tb_books_response ORDER BY logged_on DESC";
    var tt = connection.query(sqlQuery, function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor responses", err, result, tt.sql);
      if(err) {
         return res.send({
-          "log":"There was some error in getting delivery details",
+          "log":"There was some error in getting  details",
           "flag":constants.responseFlags.ACTION_FAILED
         });
-      }
-     res.send({
+      } 
+    for(i=0 ; i< result.data.length ; i++){
+      bindVendorRates(handlerInfo,function(resErr,resRes){
+        if(resErr){
+          return res.send({
+          "log":resErr
+        });
+        }
+
+        res.send({
           "log":"successfully fetched responses",
           "flag":constants.responseFlags.ACTION_COMPLETE,
+          "responses":resRes,
           "data":result
         });
+
+      });
+    }
+     
+
+});
+}
+function bindVendorRates(handlerInfo,callback){
+  var sqlQuery = "SELECT * FROM tb_books_overall_distribution  ORDER BY logged_on DESC ";
+   var tt = connection.query(sqlQuery, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
+     if(err) {
+        return callback("There was some error in getting delivery details", null);
+      }
+     
+      callback(null, result);
 
 });
 }
