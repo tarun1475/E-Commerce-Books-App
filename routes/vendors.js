@@ -12,6 +12,7 @@ var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
+exports.vendorResponses        = vendorResponses;
 exports.fetchVendorNumbers     = fetchVendorNumbers;
 exports.getBookDetailsById     = getBookDetailsById;
 exports.createNewVendor        = createNewVendor;
@@ -21,6 +22,34 @@ exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
 exports.searchVendor           = searchVendor;
 
+/**
+ * <b>API [GET] /books-auth/response_details </b> <br>
+ * API to fetch vendor responses to request ids numbers
+ * @param doesnt require any parameter. 
+ * @return {JSON} - Response body contains log and flag
+ */
+function vendorResponses(req , res){
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "vendorResponses"
+  };
+  var sqlQuery = "SELECT * FROM tb_books_response";
+   var tt = connection.query(sqlQuery, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting vendor responses", err, result, tt.sql);
+     if(err) {
+        return res.send({
+          "log":"There was some error in getting delivery details",
+          "flag":constants.responseFlags.ACTION_FAILED
+        });
+      }
+     res.send({
+          "log":"successfully fetched responses",
+          "flag":constants.responseFlags.ACTION_COMPLETE,
+          "data":result
+        });
+
+});
+}
 /**
  * <b>API [GET] /books-auth/fetch_numbers </b> <br>
  * API to fetch vendor mobile numbers
