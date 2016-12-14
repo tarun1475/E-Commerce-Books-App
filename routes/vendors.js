@@ -33,8 +33,9 @@ function vendorResponses(req , res){
     "apiModule": "Users",
     "apiHandler": "vendorResponses"
   };
-  var sqlQuery = "SELECT * FROM tb_books_response ORDER BY logged_on DESC";
-   var tt = connection.query(sqlQuery, function(err, result) {
+  var dateInterval = req.query.date_interval;
+  var sqlQuery = "SELECT * FROM tb_books_response ORDER BY logged_on DESC AND DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
+   var tt = connection.query(sqlQuery,[dateInterval.start_date,dateInterval.end_date], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor responses", err, result, tt.sql);
      if(err) {
         return res.send({
@@ -42,10 +43,11 @@ function vendorResponses(req , res){
           "flag":constants.responseFlags.ACTION_FAILED
         });
       } 
-      bindVendorRates(handlerInfo,function(resErr,resRes){
+      bindVendorRates(handlerInfo,dateInterval,function(resErr,resRes){
         if(resErr){
           return res.send({
-          "log":resErr
+          "log":resErr,
+          "flag":constants.responseFlags.ACTION_FAILED
         });
         }
 
@@ -58,13 +60,11 @@ function vendorResponses(req , res){
 
       });
     
-     
-
 });
 }
-function bindVendorRates(handlerInfo,callback){
-  var sqlQuery = "SELECT * FROM tb_books_overall_distribution  ORDER BY logged_on DESC ";
-   var tt = connection.query(sqlQuery, function(err, result) {
+function bindVendorRates(handlerInfo,dateInterval,callback){
+  var sqlQuery = "SELECT * FROM tb_books_overall_distribution  ORDER BY logged_on DESC AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?) ";
+   var tt = connection.query(sqlQuery,[dateInterval.start_date,dateInterval.end_date], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
         return callback("There was some error in getting delivery details", null);
