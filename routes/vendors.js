@@ -23,7 +23,7 @@ exports.getVendorSales         = getVendorSales;
 exports.searchVendor           = searchVendor;
 
 /**
- * <b>API [GET] /books-auth/response_details </b> <br>
+ * <b>API [POST] /books-auth/response_details </b> <br>
  * API to fetch vendor responses to request ids numbers
  * @param doesnt require any parameter. 
  * @return {JSON} - Response body contains log and flag
@@ -33,7 +33,7 @@ function vendorResponses(req , res){
     "apiModule": "Users",
     "apiHandler": "vendorResponses"
   };
-  var dateInterval = req.query.date_interval;
+  var dateInterval = req.body.date_interval;
   var sqlQuery = "SELECT * FROM tb_books_response ORDER BY logged_on DESC AND DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
    var tt = connection.query(sqlQuery,[dateInterval.start_date,dateInterval.end_date], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor responses", err, result, tt.sql);
