@@ -150,7 +150,9 @@ app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , utils.verifyClientToken
   , users.getVendorDetails
   , error);
-
+app.get('/books-auth/response_details'          , utils.logRequest
+    , vendors.vendorResponses
+    , error);
 app.get('/books-auth/fetch_numbers'               , utils.logRequest
   , vendors.fetchVendorNumbers
   , error);
