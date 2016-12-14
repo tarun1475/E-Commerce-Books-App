@@ -42,7 +42,6 @@ function vendorResponses(req , res){
           "flag":constants.responseFlags.ACTION_FAILED
         });
       } 
-    for(i=0 ; i< result.data.length ; i++){
       bindVendorRates(handlerInfo,function(resErr,resRes){
         if(resErr){
           return res.send({
@@ -58,7 +57,7 @@ function vendorResponses(req , res){
         });
 
       });
-    }
+    
      
 
 });
