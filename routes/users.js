@@ -411,21 +411,24 @@ function getMyDetails(req, res) {
   var toEdit    = reqParams.edit || 0;
   var name      = reqParams.name;
   var address   = reqParams.address;
-  var landmark  = reqParams.landmark;
+  var stream    = reqParams.stream;
+  var sem       = reqParams.sem ;
+  var college   = reqParams.college;
+
   var apiParams = [];
   if(toEdit == 1) {
-    apiParams.push(userId, name, address, landmark);
+    apiParams.push(userId, name, address,stream,college);
   }
   if(utils.checkBlank(apiParams)) {
     return res.send(constants.parameterMissingResponse);
   }
   var sqlQuery = "", queryParams = [];
   if(toEdit == 1) {
-    sqlQuery = "UPDATE tb_users SET user_address = ?, user_name = ?, landmark = ? WHERE user_id = ?";
-    queryParams.push(address, name, landmark, userId);
+    sqlQuery = "UPDATE tb_users SET user_address = ?, user_name = ?,user_college = ?,user_stream = ?,user_sem = ?  WHERE user_id = ?";
+    queryParams.push(address, name, college,stream,sem, userId);
   }
   else {
-    sqlQuery = "SELECT user_name, user_address, landmark FROM tb_users WHERE user_id = ?";
+    sqlQuery = "SELECT user_name, user_address, user_college,user_stream,user_sem FROM tb_users WHERE user_id = ?";
     queryParams.push(userId);
   }
   var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
