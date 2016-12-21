@@ -76,7 +76,7 @@ function searchBook(req, res) {
     };
     var reqParams = req.body;
     var searchKey = reqParams.key;
-    searchBookInIndex(handlerInfo, searchKey, function(err, result) {
+    searchBookIndex(handlerInfo, searchKey, function(err, result) {
         if(err) {
             return res.send({
                 "log": err,
@@ -90,7 +90,17 @@ function searchBook(req, res) {
         });
     });
 }
-
+function searchBookIndex(handlerInfo, searchKey, callback) {
+    var string = '%'+searchkey+'%';
+ var sqlQuery = "SELECT book_name FROM tb_books WHERE book_name LIKE ?";
+  var tt = connection.query(sqlQuery, [string], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
+     if(err) {
+            return callback(err, null);
+        }
+        return callback(null, result);
+    });
+}
 function addBookToIndex(handlerInfo, name, stream, semester, author, medium, publisher, Class, competitionName,
                         isNcert, isGuide, callback) {
     var reqUrl = ("http://"+config.get('elasticsearch.host')+":"+config.get('elasticsearch.port')
