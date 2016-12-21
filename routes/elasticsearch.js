@@ -91,9 +91,8 @@ function searchBook(req, res) {
     });
 }
 function searchBookIndex(handlerInfo, searchKey, callback) {
-    var string = '%'+searchkey+'%';
- var sqlQuery = "SELECT book_name FROM tb_books WHERE book_name LIKE ?";
-  var tt = connection.query(sqlQuery, [string], function(err, result) {
+ var sqlQuery = "SELECT book_name FROM tb_books WHERE book_name LIKE '%"+searchKey+"%'";
+  var tt = connection.query(sqlQuery, function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
             return callback(err, null);
