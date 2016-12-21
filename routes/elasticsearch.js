@@ -2,9 +2,13 @@
  * @module elasticsearch
  */
 
-var request   = require('request');
-var logging   = require('./logging');
-var constants = require('./constants');
+var request      = require('request');
+var logging      = require('./logging');
+var constants    = require('./constants');
+var crypto       = require('crypto');
+var async        = require('async');
+var utils        = require('./commonfunctions');
+var bookRequests = require('./book_requests');
 
 exports.addBookViaPanel    = addBookViaPanel;
 exports.searchBook         = searchBook;
