@@ -317,7 +317,7 @@ function forgotUserPass(req, res) {
   }
   else{
       res.send({
-        "log": "A user does not with this phone",
+        "log": "A user does not exist with this phone",
         "flag": constants.responseFlags.ACTION_FAILED
       });
  }
@@ -391,7 +391,7 @@ function forgotVendorPass(req, res) {
   }
   else{
       res.send({
-        "log": "A vendor does not with this phone",
+        "log": "A vendor does not exist with this phone",
         "flag": constants.responseFlags.ACTION_FAILED
       });
  }
