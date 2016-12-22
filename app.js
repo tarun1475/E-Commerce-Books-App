@@ -103,6 +103,12 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
 app.post('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
+app.post('/books-auth/forgot_user_pass'                 , utils.logRequest
+   , utils.forgotUserPass
+   , error);
+app.get('/books-auth/verify_forgot_user_otp'               , utils.logRequest
+   , utils.verifyForgotUserOTP
+   , error);
 app.post('/books-auth/send_vendor_otp'                 , utils.logRequest
    , utils.sendVendorOTP
    , error);
