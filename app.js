@@ -103,6 +103,9 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
 app.post('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
+app.post('/books-auth/send_push'                 , utils.logRequest
+   , utils.sendPush
+   , error);
 app.post('/books-auth/forgot_user_pass'                 , utils.logRequest
    , utils.forgotUserPass
    , error);
