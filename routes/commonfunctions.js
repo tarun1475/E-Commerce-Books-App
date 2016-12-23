@@ -739,17 +739,16 @@ function verifyWebOTP(req, res) {
       var phone = result[0].phone_no;
       var pass = result[0].pass;
       var cryption  = phone + pass;
-      var device_token = crypto.createHash("md5").update(cryption).digest("hex");
+     // var device_token = crypto.createHash("md5").update(cryption).digest("hex");
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
-      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,device_token);
+      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
         "pass": pass,
         "phone": phone,
-        "access_token":access_token,
-        "device_token":device_token
+        "access_token":access_token
 
       });
     }
@@ -811,9 +810,9 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token){
 }
 
 //function to insert new user into tb_user from website
-function InsertWebuserInDb(handlerInfo, phone, pass,access_token,device_token){
+function InsertWebuserInDb(handlerInfo, phone, pass,access_token){
   var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,device_token, date_registered) "+
-                 "VALUES(?,?, ?,?, DATE(NOW()))";
+                 "VALUES(?,?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token,device_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
