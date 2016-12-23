@@ -23,6 +23,7 @@ exports.verifyClientToken              = verifyClientToken;
 exports.forgotVendorPass               = forgotVendorPass;
 exports.forgotUserPass                 = forgotUserPass;
 exports.sendOTP                        = sendOTP;
+exports.sendPush                       = sendPush;
 exports.sendVendorOTP                  = sendVendorOTP;
 exports.verifyVendorOTP                = verifyVendorOTP;
 exports.verifyForgotVendorOTP          = verifyForgotVendorOTP;
@@ -130,7 +131,24 @@ function sendIosPushNotification(iosDeviceToken, message, flag, payload) {
   apnsConnection.on('transmissionError', log('transmissionError'));
   apnsConnection.on('cacheTooSmall', log('cacheTooSmall'));
 }
+/**
+ * <b>API [POST] /books-auth/send_push</b><br>
+ * @param device_token {string} request object should contain device_token
+ * @param message {string} response would contain message
+ */
+function sendPush(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "sendPush"
+  };
+  var device_token = req.body.device_token;
+  var message     = "Hii!!";
 
+  if(checkBlank([device_token])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+  sendAndroidPushNotification(device_token, message);
+}
 /**
  * Send push notification to android device
  * @param deviceToken
