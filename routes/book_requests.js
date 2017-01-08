@@ -557,7 +557,10 @@ function deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isU
     var deliveryId = result.insertId;
     var asyncTasks = [];
     for(var i = 0; i < responseData.length; i++) {
-      var vevsaComission = (responseData[i].price - (responseData[i].mrp*0.5));
+     if(responseData[i].vcondition == 1)
+      var vevsaComission = (responseData[i].price * .05);
+      else
+       var vevsaComission = (responseData[i].price * .20);
       asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId, responseData[i].book_id, responseData[i].vendor_id, 
         responseData[i].price, responseData[i].mrp, vevsaComission));
     }
