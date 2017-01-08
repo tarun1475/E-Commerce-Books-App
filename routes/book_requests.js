@@ -469,7 +469,6 @@ function confirmBookOrder(req, res) {
                        "<th align=center>Fetched from Vender</th>"+
                        "<th align=center>Price</th>"+
                        "<th align=center>Category</th>"+
-                       "<th align=center>Condition</th>"+
                        "<th align=center>Vevsa Comission</th></tr>";
                       
         var bookCategory = ["College", "School", "Competition", "Novel"];
@@ -479,7 +478,10 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
-          html += ("<td align=center> Rs."+responseData[i].vcondition+"</td>");
+          if(responseData[i].vcondition == 1){
+            html += ("<td align=center> Rs."+parseInt(responseData[i].price * .05)+"</td>");
+          }
+          else
           html += ("<td align=center> Rs."+parseInt(responseData[i].price * .20)+"</td>");
           html += "</tr>";
         }
