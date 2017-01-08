@@ -478,10 +478,10 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
-          if(responseData[i].vcondition == "1"){
+          if(responseData[i].vcondition === 1){
             html += ("<td align=center> Rs."+parseInt(responseData[i].price * .05)+"</td>");
           }
-          else{
+          else if(responseData[i].vcondition === 0){
              html += ("<td align=center> Rs."+parseInt(responseData[i].price * .20)+"</td>");
           }
           html += "</tr>";
