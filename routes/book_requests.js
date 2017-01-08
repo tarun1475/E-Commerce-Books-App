@@ -290,7 +290,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, type, call
   if(type == 1) {
     orderStr = "DESC ";
   }
-  var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester, distribution.*, "+
+  var minQuery = "SELECT books.book_name, books.book_stream, books.book_author, books.book_semester,books.vcondition, distribution.*, "+
         "vendors.vendor_name, vendors.vendor_address, vendors.vendor_phone, requests.user_id, books.book_category "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_books as books ON books.book_id = distribution.book_id "+
