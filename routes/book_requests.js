@@ -478,11 +478,14 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
-          if(responseData[i].vcondition == 1){
-            html += ("<td align=center> Rs."+parseInt(responseData[i].price * .05)+"</td>");
+          if((responseData[i].book_category == 2 || responseData[i].book_category ==3) && responseData[i].vcondition == 1 ){
+            html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .10)+"</td>");
+          }
+          else if(responseData[i].vcondition == 1){
+            html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .05)+"</td>");
           }
           else
-          html += ("<td align=center> Rs."+parseInt(responseData[i].price * .20)+"</td>");
+          html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .10)+"</td>");
           html += "</tr>";
         }
         html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
@@ -557,10 +560,13 @@ function deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isU
     var deliveryId = result.insertId;
     var asyncTasks = [];
     for(var i = 0; i < responseData.length; i++) {
-     if(responseData[i].vcondition == 1)
-      var vevsaComission = parseInt(responseData[i].price * .05);
+      if((responseData[i].book_category == 2 || responseData[i].book_category ==3) && responseData[i].vcondition == 1 ){
+        var vevsaComission = (responseData[i].mrp * .10);
+      }
+      else if(responseData[i].vcondition == 1)
+      var vevsaComission = (responseData[i].mrp * .05);
       else
-       var vevsaComission = parseInt(responseData[i].price * .20);
+       var vevsaComission = (responseData[i].mrp * .10); 
       asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId, responseData[i].book_id, responseData[i].vendor_id, 
         responseData[i].price, responseData[i].mrp, vevsaComission));
     }
