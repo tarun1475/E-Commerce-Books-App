@@ -467,8 +467,10 @@ function confirmBookOrder(req, res) {
                        "<tr><th align=center>Book Name</th>"+
                        "<th align=center>Book Author</th>"+
                        "<th align=center>Fetched from Vender</th>"+
+                       "<th align=center>Mrp</th>"+
                        "<th align=center>Price</th>"+
                        "<th align=center>Category</th>"+
+                       "<th align=center>Condition</th>"+
                        "<th align=center>Vevsa Comission</th></tr>";
                       
         var bookCategory = ["College", "School", "Competition", "Novel"];
@@ -476,8 +478,10 @@ function confirmBookOrder(req, res) {
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
           html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
+          html += ("<td align=center> Rs."+responseData[i].mrp+"</td>");
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
+          html += ("<td align=center> Rs."+responseData[i].vcondition+"</td>");
           if((responseData[i].book_category == 2 || responseData[i].book_category ==3) && responseData[i].vcondition == 1 ){
             html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .10)+"</td>");
           }
