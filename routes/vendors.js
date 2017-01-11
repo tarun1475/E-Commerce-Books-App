@@ -133,7 +133,7 @@ function vendorOrders(req, res) {
 }
 function getDeliveriesOfVendor(handlerInfo, vendorId,callback){
    var sqlQuery = "SELECT * FROM tb_delivery_distribution WHERE vendor_id = ?  ORDER BY logged_on DESC LIMIT ?, ?";
-   var tt = connection.query(sqlQuery, [vendorId,0, 5], function(err, result) {
+   var tt = connection.query(sqlQuery, [vendorId,0, 100], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
      if(err) {
         return callback("There was some error in getting delivery details", null);
