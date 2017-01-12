@@ -482,10 +482,11 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center> Rs."+responseData[i].price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
           html += ("<td align=center> "+bookCondition[responseData[i].vcondition]+"</td>");
+
           if((responseData[i].book_category == 2 || responseData[i].book_category ==3) && responseData[i].vcondition == 1 ){
             html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .10)+"</td>");
           }
-          else if(responseData[i].vcondition == 1){
+          else if(responseData[i].vcondition == 1 || (responseData[i].price/responseData[i].mrp) > .7){
             html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .05)+"</td>");
           }
           else
@@ -567,7 +568,7 @@ function deliverBooksToUser(handlerInfo, requestId, userId, deliveryAddress, isU
       if((responseData[i].book_category == 2 || responseData[i].book_category ==3) && responseData[i].vcondition == 1 ){
         var vevsaComission = (responseData[i].mrp * .10);
       }
-      else if(responseData[i].vcondition == 1)
+      else if(responseData[i].vcondition == 1 || (responseData[i].price/responseData[i].mrp) > .7)
       var vevsaComission = (responseData[i].mrp * .05);
       else
        var vevsaComission = (responseData[i].mrp * .10); 
