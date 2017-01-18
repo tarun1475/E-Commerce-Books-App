@@ -314,7 +314,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, type, call
        bookObj.vcondition = minResponse[0].vcondition;
        bookObj.is_available = 0;
        bookObj.book_category = minResponse[0].book_category;
-       bookObj.msg = "Sorry, this book is not available right now";
+       bookObj.msg = "Sorry, this book is not available right now. Book will be available soon, Please wait.";
        minResponseObj[book_id] = bookObj;
        return callback(null, null);
      }
