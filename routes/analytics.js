@@ -183,7 +183,7 @@ function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, call
         for(var i = 0; i < result.length; i++) {
             requestArr.push(result[i].req_id);
         }
-        bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
+        bookRequests.getMinimumBookResponseWrapper(handlerInfo, requestArr,[], function(reqErr, reqArr) {
           if(reqErr) {
             return callback(reqErr, null);
           }
