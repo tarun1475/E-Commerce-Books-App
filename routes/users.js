@@ -44,7 +44,7 @@ function checkVersion(req, res) {
     "apiHandler":"checkVersion"
   };
   var version       = parseInt( req.body.app_version);
-  var appVersion    = 5;
+  var appVersion    = 6;
   if(version === appVersion){
     res.send({
       "log" : "Version matched",
