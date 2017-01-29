@@ -467,7 +467,7 @@ function getMyOrders(req, res) {
   }
   var startFrom = parseInt(reqParams.start_from);
   var pageSize  = parseInt(reqParams.page_size);
-  var sqlQuery  = "SELECT request_id,is_urgent_delivery FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
+  var sqlQuery  = "SELECT request_id,is_urgent_delivery,is_delivered FROM tb_delivery WHERE user_id = ? ORDER BY logged_on DESC LIMIT ?, ?";
   var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
@@ -475,13 +475,14 @@ function getMyOrders(req, res) {
     }
     var reqIdArr = [];
     var urgentIdArr = [];
+    var isDeliveredArr = [];
     //var deliveryDetailsObj = {};
     for(var i = 0; i < result.length; i++) {
       reqIdArr.push(result[i].request_id);
-    }
-    for(var i = 0; i < result.length; i++) {
       urgentIdArr.push(result[i].is_urgent_delivery);
-    }/*
+      isDeliveredArr.push(result[i].is_delivered);
+    }
+    /*
     var asyncTasks = [];
     for(var i = 0; i < deliveryIdArr.length; i++) {
       asyncTasks.push(bookRequests.getDeliveryDetailsHelper.bind(null, handlerInfo, deliveryIdArr[i], deliveryDetailsObj));
@@ -503,11 +504,11 @@ function getMyOrders(req, res) {
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": reqIdArr,
-        "urgent": urgentIdArr
+        "urgent": urgentIdArr,
+        "delivery_status": isDeliveredArr
       });
   });
 }
-
 /**
  * <b> API [GET] /books-auth/delete_account </b> <br>
  * API to deactivate/delete user account : <br>
