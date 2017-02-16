@@ -87,6 +87,9 @@ var upload = multer({storage: storage});
 app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);
+app.get('/books-auth/vevsa_money'             , utils.logRequest
+   , users.vevsaMoney
+   , error);
 
 app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
