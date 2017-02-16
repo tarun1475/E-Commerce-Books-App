@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.vevsaMoney                        = vevsaMoney;
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
 exports.getUserDetailsPanel               = getUserDetailsPanel;
@@ -58,6 +59,41 @@ function checkVersion(req, res) {
       "version": version
     });
   }
+
+
+}
+
+/**
+ *
+ * [POST] '/books-auth/vevsa_money'<br> 
+ * API to check the vevsa money from wallet, <br>Request body requires following parameters:
+ * @param {string} user_id - id of the user
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function vevsaMoney(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"vevsaMoney"
+  };
+  var userId = req.query.user_id;
+  var sqlQuery = "SELECT vevsa_money from tb_users WHERE user_id = ?";
+  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching money from wallet", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "Vevsa Money fetched successfully",
+      "vevsa_money": result,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
+
 
 
 }
