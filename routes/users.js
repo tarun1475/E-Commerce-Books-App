@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.vevsaPro                          = vevsaPro;
 exports.vevsaMoney                        = vevsaMoney;
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
@@ -62,6 +63,38 @@ function checkVersion(req, res) {
 
 
 }
+
+/**
+ *
+ * [POST] '/books-auth/vevsa_pro'<br> 
+ * API to check the vevsa pro status from users, <br>Request body requires following parameters:
+ * @param {string} user_id - id of the user
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function vevsaPro(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"vevsaPro"
+  };
+  var userId = req.query.user_id;
+  var sqlQuery = "SELECT vevsa_pro from tb_users WHERE user_id = ?";
+  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching status of pro customer or not", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "Vevsa Pro Customer details status fetched successfully.",
+      "vevsa_pro": result,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+
 
 /**
  *
