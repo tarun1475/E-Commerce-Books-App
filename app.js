@@ -90,6 +90,9 @@ app.post('/books-auth/check_version'             , utils.logRequest
 app.get('/books-auth/vevsa_money'             , utils.logRequest
    , users.vevsaMoney
    , error);
+app.get('/books-auth/vevsa_pro'             , utils.logRequest
+   , users.vevsaPro
+   , error);
 
 app.post('/books-auth/create_user'             , utils.logRequest
    , users.createNewAppUser
