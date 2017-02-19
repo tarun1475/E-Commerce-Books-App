@@ -89,7 +89,7 @@ function vevsaPro(req, res) {
     }
     res.send({
       "log" : "Vevsa Pro Customer details status fetched successfully.",
-      "vevsa_pro": result,
+      "vevsa_pro": result[0].vevsa_pro,
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
