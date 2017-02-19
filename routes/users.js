@@ -121,7 +121,7 @@ function vevsaMoney(req, res) {
     }
     res.send({
       "log" : "Vevsa Money fetched successfully",
-      "vevsa_money": result,
+      "vevsa_money": result[0].vevsa_money,
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
