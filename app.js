@@ -87,10 +87,10 @@ var upload = multer({storage: storage});
 app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);
-app.post('/books-auth/vevsa_money'             , utils.logRequest
+app.get('/books-auth/vevsa_money'             , utils.logRequest
    , users.vevsaMoney
    , error);
-app.post('/books-auth/vevsa_pro'             , utils.logRequest
+app.get('/books-auth/vevsa_pro'             , utils.logRequest
    , users.vevsaPro
    , error);
 
