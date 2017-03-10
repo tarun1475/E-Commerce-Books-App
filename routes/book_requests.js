@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.putBookRequestSuperVendorResponse = putBookRequestSuperVendorResponse;
 exports.putBookRequestResponse          = putBookRequestResponse;
 exports.getMinimumPriceResponse         = getMinimumPriceResponse;
 exports.confirmBookOrder                = confirmBookOrder;
@@ -186,6 +187,64 @@ function getBookRequests(req, res) {
         "log": "Successfully fetched pending book requests",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": requestDetails
+      });
+    });
+  });
+}
+/**
+ * [POST] '/req_book_auth/put_super_vendor_response'<br>
+ * API responsible for submitting a request's response from a particular vendor.<br>
+ * @param {STRING} token - access token
+ * @param {INTEGER} req_id - request id of book request
+ * @param {ARRAY} books - An Array of objects 
+ */
+function putBookRequestSuperVendorResponse(req, res) {
+  var handlerInfo    = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "putBookRequestSuperVendorResponse"
+  };
+  var reqParams      = req.body;
+  var vendorId       = reqParams.vendor_id;
+  var requestId      = reqParams.req_id;
+  var books          = reqParams.books;
+  var status         = reqParams.bookStatus;
+  
+ 
+
+  if(utils.checkBlank([vendorId, requestId, books])) {
+    return res.send(constants.parameterMissingResponse);
+  }
+
+  
+  var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
+  connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
+    if(dupErr) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var reqQuery = "INSERT INTO tb_books_response (vendor_id, request_id, status) VALUES(?, ?, ?) ";
+    var tt = connection.query(reqQuery, [vendorId, requestId , status], function(reqErr, insRes) {
+      if(reqErr) {
+        logging.logDatabaseQuery(handlerInfo, "inserting book response", reqErr, insRes, tt.sql);
+        return res.send(constants.databaseErrorResponse);
+      }
+      var responseId = insRes.insertId;
+      var asyncTasks = [];
+      for(var i = 0; i < books.length; i++) {
+        console.log("is_available : ", books[i].is_available);
+        asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id,
+          books[i].price || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
+      }
+      async.series(asyncTasks, function(error, result) {
+        if(error) {
+          return res.send({
+            "log" :error,
+            "flag":constants.responseFlags.ACTION_FAILED
+          });
+        }
+        return res.send({
+          "log" : "Successfully logged book request response",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
       });
     });
   });
