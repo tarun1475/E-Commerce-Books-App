@@ -202,6 +202,10 @@ app.post('/req_book_auth/get_pending_requests'  , utils.logRequest
    , utils.verifyClientToken
    , requests.getBookRequests
    , error);
+app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
+   , utils.verifyClientToken
+   , requests.putBookRequestSuperVendorResponse
+   , error);
 
 app.post('/req_book_auth/put_response'          , utils.logRequest
    , utils.verifyClientToken
