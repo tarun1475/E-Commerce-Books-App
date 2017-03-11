@@ -366,6 +366,7 @@ function getMinimumBookResponse(handlerInfo, book_id, minResponseObj, type, call
      }
      if(minResponse[0].is_available == 0) {
        var bookObj = {};
+       bookObj.book_id = minResponse[0].book_id;
        bookObj.book_name = minResponse[0].book_name;
        bookObj.book_stream = minResponse[0].book_stream;
        bookObj.book_author = minResponse[0].book_author;
