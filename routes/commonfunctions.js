@@ -724,7 +724,7 @@ function verifyWebOTP(req, res) {
   };
   var otp = req.query.otp;
   var pass = req.query.pass;
-  var refer_by = req.query.refer_by;
+  var refer_by = req.query.refer_by || 0 ;
   verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
