@@ -714,7 +714,6 @@ function getVendorId(handlerInfo, phone, callback) {
     callback(null, result);
   });
 }
-
 /*
   function to verify OTP
 */
@@ -725,6 +724,7 @@ function verifyWebOTP(req, res) {
   };
   var otp = req.query.otp;
   var pass = req.query.pass;
+  var refer_code = req.query.refer_code;
   verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -739,21 +739,24 @@ function verifyWebOTP(req, res) {
       var phone = result[0].phone_no;
       var pass = result[0].pass;
       var cryption  = phone + pass;
-     // var device_token = crypto.createHash("md5").update(cryption).digest("hex");
+      var sharableCode = 'http://vevsa.com/vevap/register.html?refer_code='+phone;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
-      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token);
+      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode,refer_code);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": result,
         "pass": pass,
         "phone": phone,
-        "access_token":access_token
+        "access_token":access_token,
+        "sharableCode":sharableCode,
+        "referred_by":refer_code
 
       });
     }
   });
 }
+
 /**
  * <b>API [GET] /books-auth/verify_otp</b><br>
  * @param req {OBJECT} request query should contain session_id and otp
@@ -810,10 +813,10 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token){
 }
 
 //function to insert new user into tb_user from website
-function InsertWebuserInDb(handlerInfo, phone, pass,access_token){
-  var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token, date_registered) "+
+function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode,refer_code){
+  var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,sharable_link,referred_by, date_registered) "+
                  "VALUES(?,?, ?, DATE(NOW()))";
-  var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
+  var tt = connection.query(sqlQuery, [phone, pass ,access_token,sharableCode,refer_code], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
 }
