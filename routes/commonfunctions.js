@@ -748,7 +748,9 @@ function verifyWebOTP(req, res) {
         "data": result,
         "pass": pass,
         "phone": phone,
-        "access_token":access_token
+        "access_token":access_token,
+        "sharable_link":sharableCode,
+        "referred_by":refer_by
 
       });
     }
