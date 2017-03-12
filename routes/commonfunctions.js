@@ -724,7 +724,7 @@ function verifyWebOTP(req, res) {
   };
   var otp = req.query.otp;
   var pass = req.query.pass;
-  var refer_code = req.query.refer_code;
+ // var refer_code = req.query.refer_code;
   verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -748,9 +748,7 @@ function verifyWebOTP(req, res) {
         "data": result,
         "pass": pass,
         "phone": phone,
-        "access_token":access_token,
-        "sharableCode":sharableCode,
-        "referred_by":refer_code
+        "access_token":access_token
 
       });
     }
@@ -814,7 +812,7 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token){
 
 //function to insert new user into tb_user from website
 function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode){
-  var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,sharable_link,referred_by, date_registered) "+
+  var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,sharable_link, date_registered) "+
                  "VALUES(?,?, ?,?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token,sharableCode], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
