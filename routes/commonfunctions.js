@@ -741,7 +741,7 @@ function verifyWebOTP(req, res) {
       var cryption  = phone + pass;
       var sharableCode = 'http://vevsa.com/vevap/register.html?refer_code='+phone;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
-      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode,refer_code);
+      InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode);
       return res.send({
         "log" : "Verified",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -813,10 +813,10 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token){
 }
 
 //function to insert new user into tb_user from website
-function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode,refer_code){
+function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode){
   var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,sharable_link,referred_by, date_registered) "+
-                 "VALUES(?,?, ?,?,? DATE(NOW()))";
-  var tt = connection.query(sqlQuery, [phone, pass ,access_token,sharableCode,refer_code], function(err, result) {
+                 "VALUES(?,?, ?,?, DATE(NOW()))";
+  var tt = connection.query(sqlQuery, [phone, pass ,access_token,sharableCode], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
 }
