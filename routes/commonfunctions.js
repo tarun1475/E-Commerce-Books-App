@@ -815,7 +815,7 @@ function InsertVendorInDb(handlerInfo, phone, pass,access_token){
 //function to insert new user into tb_user from website
 function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode,refer_code){
   var sqlQuery = "INSERT INTO tb_users (user_phone,user_pass, access_token,sharable_link,referred_by, date_registered) "+
-                 "VALUES(?,?, ?, DATE(NOW()))";
+                 "VALUES(?,?, ?,?,? DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token,sharableCode,refer_code], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
     });
