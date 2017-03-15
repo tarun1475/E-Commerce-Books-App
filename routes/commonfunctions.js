@@ -740,7 +740,7 @@ function verifyWebOTP(req, res) {
       var phone = result[0].phone_no;
       var pass = result[0].pass;
       var cryption  = phone + pass;
-      var sharableCode = 'http://books.vevsa.com:7001/books-auth/refer?refer_code='+ encrypt(phone);
+      var sharableCode = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
       InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode,refer_by);
       return res.send({
