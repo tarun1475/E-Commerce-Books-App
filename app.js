@@ -109,6 +109,9 @@ app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
 app.post('/books-auth/send_otp'                 , utils.logRequest
    , utils.sendOTP
    , error);
+app.get('/books-auth/referCode'                       , utils.logRequest
+    , utils.serverReferUser
+    , error);
 app.post('/books-auth/send_push'                 , utils.logRequest
    , utils.sendPush
    , error);
@@ -339,9 +342,7 @@ app.post('/books-auth/email/verify_otp'           , utils.logRequest
 app.get('/books-auth/refer'                       , utils.logRequest
     , utils.serverReferUserPage
     , error);
-app.get('/books-auth/referCode'                       , utils.logRequest
-    , utils.serverReferUser
-    , error);
+
 
 app.post('/books-auth/referrals/login'            , utils.logRequest
     , utils.loginReferralProgramme
