@@ -38,6 +38,7 @@ exports.loginWebUser                   = loginWebUser;
 exports.sendOtpViaEmail                = sendOtpViaEmail;
 exports.verifyEmailOtp                 = verifyEmailOtp;
 exports.serverReferUserPage            = serverReferUserPage;
+exports.serverReferUser                = serverReferUser;
 exports.loginReferralProgramme         = loginReferralProgramme;
 exports.getReferralLeaderBoard         = getReferralLeaderBoard
 exports.getUserReferrals               = getUserReferrals;
@@ -736,10 +737,10 @@ function verifyWebOTP(req, res) {
       });
     }
     else{
-      var phone = result[0].phone_no;
+      var phone = encrypt(result[0].phone_no);
       var pass = result[0].pass;
       var cryption  = phone + pass;
-      var sharableCode = 'http://vevsa.com/vevap/register.html?refer_code='+phone;
+      var sharableCode = 'http://vevsa.com/books-auth/referCode?refer_code='+phone;
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
       InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode,refer_by);
       return res.send({
@@ -1039,6 +1040,29 @@ function updateDeviceToken(handlerInfo, userId, regAs, deviceToken, callback) {
       return callback(err, null);
     }
     callback(null, result);
+  });
+}
+//function to redirect user to referral link
+function serverReferUser(req, res, next) {
+  var reqParams        = req.query;
+  var handlerInfo      = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "serverReferUser"
+  };
+  var referralCode     = reqParams.refer_code;
+  var userPhone        = decrypt(referralCode);
+  var sqlQuery = "SELECT * FROM tb_users WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [userPhone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting referred_by", err, result, tt.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.status(constants.responseFlags.NOT_FOUND).send("404 Not found");
+    }
+    var userId = result[0].user_id;
+    var referUrl = "http://vevsa.com/vevap/register.html?refer_code="+userId;
+    res.redirect(referUrl);
   });
 }
 
