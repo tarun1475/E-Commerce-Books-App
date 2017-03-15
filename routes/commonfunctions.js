@@ -737,10 +737,10 @@ function verifyWebOTP(req, res) {
       });
     }
     else{
-      var phone = encrypt(result[0].phone_no);
+      var phone = result[0].phone_no;
       var pass = result[0].pass;
       var cryption  = phone + pass;
-      var sharableCode = 'http://vevsa.com/books-auth/referCode?refer_code='+phone;
+      var sharableCode = 'http://vevsa.com/books-auth/referCode?refer_code='+ encrypt(phone);
       var access_token = crypto.createHash("md5").update(phone).digest("hex");
       InsertWebuserInDb(handlerInfo, phone,encrypt(pass) , access_token,sharableCode,refer_by);
       return res.send({
