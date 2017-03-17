@@ -168,6 +168,9 @@ app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , utils.verifyClientToken
   , users.getVendorDetails
   , error);
+app.post('/books-auth/location'          , utils.logRequest
+    , vendors.superVendorLocation
+    , error);
 app.post('/books-auth/response_details'          , utils.logRequest
     , vendors.vendorResponses
     , error);
