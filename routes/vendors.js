@@ -90,9 +90,7 @@ function superVendorLocation(req , res){
   var to = req.body.toSector;
   var kms = req.body.kms;
   var vendor_id = req.body.vendor_id;
-  var sqlQuery = "INSERT INTO tb_super_vendor_location (vendor_id,  from_sector, to_sector, kms" +
-        "time) "+
-                   "VALUES(?, ?, ?, ?, DATE(NOW()))";
+  var sqlQuery = "INSERT INTO tb_super_vendor_location (vendor_id,  from_sector, to_sector, kms,time) VALUES(?, ?, ?, ?, DATE(NOW()))";
     connection.query(sqlQuery, [vendor_id,  from,to, kms], function(err, result) {
       if(err) {
         console.log(err);
