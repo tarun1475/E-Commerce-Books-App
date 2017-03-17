@@ -13,6 +13,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.vendorResponses        = vendorResponses;
+exports.superVendorLocation    = superVendorLocation;
 exports.fetchVendorNumbers     = fetchVendorNumbers;
 exports.getBookDetailsById     = getBookDetailsById;
 exports.createNewVendor        = createNewVendor;
@@ -73,6 +74,38 @@ function bindVendorRates(handlerInfo,dateInterval,callback){
       callback(null, result);
 
 });
+}
+/**
+ * <b>API [POST] /books-auth/location </b> <br>
+ * API to insert vendor location details to database
+ * @param doesnt require any parameter. 
+ * @return {JSON} - Response body contains log and flag
+ */
+function superVendorLocation(req , res){
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "superVendorLocation"
+  };
+  var from = req.body.fromSector;
+  var to = req.body.toSector;
+  var kms = req.body.kms;
+  var vendor_id = req.body.vendorId;
+  var sqlQuery = "INSERT INTO tb_super_vendor_location (vendor_id,  from_sector, to_sector, kms" +
+        "time) "+
+                   "VALUES(?, ?, ?, ?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendor_id,  from,to, kms], function(err, result) {
+      if(err) {
+        console.log(err);
+        return res.send({
+          "log": "Server execution error",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      return res.send({
+        "log" : "Successfully inserted location details",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
 }
 /**
  * <b>API [GET] /books-auth/fetch_numbers </b> <br>
