@@ -94,7 +94,7 @@ function cashIncashOut(req , res){
   var cashOut = req.body.cash_out || 0;
   var profit = parseInt(cashIn - cashOut) || 0;
   var sqlQuery = "INSERT INTO tb_cashIn_cashOut (vendor_id,  cash_in, cash_in_purpose,cash_out,cash_out_purpose,profit,date) VALUES(?, ?, ?, ?,?,?, DATE(NOW()))";
-    connection.query(sqlQuery, [vendor_id,  cashIn,cashInpurpose,cashOut,cashOutpurpose,profit], function(err, result) {
+    connection.query(sqlQuery, [vendorId,  cashIn,cashInpurpose,cashOut,cashOutpurpose,profit], function(err, result) {
       if(err) {
         console.log(err);
         return res.send({
