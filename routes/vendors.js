@@ -14,6 +14,7 @@ var logging        = require('./logging');
 
 exports.vendorResponses        = vendorResponses;
 exports.superVendorLocation    = superVendorLocation;
+exports.cashIncashOut          = cashIncashOut;
 exports.fetchVendorNumbers     = fetchVendorNumbers;
 exports.getBookDetailsById     = getBookDetailsById;
 exports.createNewVendor        = createNewVendor;
@@ -74,6 +75,38 @@ function bindVendorRates(handlerInfo,dateInterval,callback){
       callback(null, result);
 
 });
+}
+/**
+ * <b>API [POST] /books-auth/cash_inOut </b> <br>
+ * API to insert vendor location details to database
+ * @param doesnt require any parameter. 
+ * @return {JSON} - Response body contains log and flag
+ */
+function cashIncashOut(req , res){
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "cashIncashOut"
+  };
+  var vendorId = req.body.vendor_id;
+  var cashIn = req.body.cash_in || 0;
+  var cashInpurpose = req.body.cash_in_purpose || 0;
+  var cashOutpurpose = req.body.cash_out_purpose || 0;
+  var cashOut = req.body.cash_out || 0;
+  var profit = parseInt(cashIn - cashOut) || 0;
+  var sqlQuery = "INSERT INTO tb_cashIn_cashOut (vendor_id,  cash_in, cash_in_purpose,cash_out,cash_out_purpose,profit,date) VALUES(?, ?, ?, ?,?,?, DATE(NOW()))";
+    connection.query(sqlQuery, [vendor_id,  cashIn,cashInpurpose,cashOut,cashOutpurpose,profit], function(err, result) {
+      if(err) {
+        console.log(err);
+        return res.send({
+          "log": "Server execution error",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      return res.send({
+        "log" : "Successfully inserted cashIncashOut details",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+    });
 }
 /**
  * <b>API [POST] /books-auth/location </b> <br>
