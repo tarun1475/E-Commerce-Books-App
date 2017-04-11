@@ -537,6 +537,7 @@ function confirmBookOrder(req, res) {
         var bookCondition = ["Old" , "New"];             
         var bookCategory = ["College", "School", "Competition", "Novel"];
         for(var i = 0; i < responseData.length; i++) {
+        var totMrp +=  responseData[i].mrp;
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
           html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
@@ -555,8 +556,9 @@ function confirmBookOrder(req, res) {
           html += ("<td align=center> Rs."+parseInt(responseData[i].mrp * .10)+"</td>");
           html += "</tr>";
         }
+        var totalPrice = totPrice - parseInt(totMrp * .02);
         html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
-        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totPrice+"</b></td>";
+        html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totalPrice+"</b></td>";
         html += "</table><br><br>";
 
         html += "These would be delivered to :<br><b>"+userName+",<br>"+deliveryAddress+"<br>"+userPhone+"</b>";
