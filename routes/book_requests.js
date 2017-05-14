@@ -296,7 +296,7 @@ function putBookRequestResponse(req, res) {
       var responseId = insRes.insertId;
       var asyncTasks = [];
       for(var i = 0; i < books.length; i++) {
-      var surgePrice = parseInt(books[i].price) + parseInt(books[i].mrp * .02) ;
+      var surgePrice = parseInt(books[i].price) ;
         console.log("is_available : ", books[i].is_available);
         asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id,
           surgePrice || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
