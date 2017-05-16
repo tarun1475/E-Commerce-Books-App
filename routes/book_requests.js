@@ -159,7 +159,7 @@ function fetchDetailsByBookId(req, res) {
     res.send({
       "log": "Successfully fetched pending book requests",
       "flag": constants.responseFlags.ACTION_COMPLETE,
-      "data": result
+      "data": result[0]
 
     });
   });
