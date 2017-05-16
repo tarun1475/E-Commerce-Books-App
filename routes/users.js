@@ -77,9 +77,9 @@ function vevsaPro(req, res) {
     "apiModule": "users",
     "apiHandler":"vevsaPro"
   };
-  var userId = req.query.user_id;
-  var sqlQuery = "SELECT vevsa_pro from tb_users WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+  var access_token = req.query.access_token;
+  var sqlQuery = "SELECT vevsa_pro from tb_users WHERE access_token = ?";
+  var tt = connection.query(sqlQuery, [access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching status of pro customer or not", err, result);
     if(err) {
       return res.send({
@@ -109,9 +109,9 @@ function vevsaMoney(req, res) {
     "apiModule": "users",
     "apiHandler":"vevsaMoney"
   };
-  var userId = req.query.user_id;
-  var sqlQuery = "SELECT vevsa_money from tb_users WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+  var access_token = req.query.access_token;
+  var sqlQuery = "SELECT vevsa_money from tb_users WHERE access_token = ?";
+  var tt = connection.query(sqlQuery, [access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching money from wallet", err, result);
     if(err) {
       return res.send({
