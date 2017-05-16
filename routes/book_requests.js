@@ -231,10 +231,10 @@ function putBookRequestSuperVendorResponse(req, res) {
       var responseId = insRes.insertId;
       var asyncTasks = [];
       for(var i = 0; i < books.length; i++) {
-      //var surgePrice = books[i].price;
+      var surgePrice = parseInt(books[i].price) + parseInt(books[i].mrp * .02) ;
         console.log("is_available : ", books[i].is_available);
         asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id,
-          books[i].price || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
+          surgePrice || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
       }
       async.series(asyncTasks, function(error, result) {
         if(error) {
@@ -336,10 +336,10 @@ function putBookRequestResponse(req, res) {
       var responseId = insRes.insertId;
       var asyncTasks = [];
       for(var i = 0; i < books.length; i++) {
-      //var surgePrice = books[i].price ;
+      var surgePrice = parseInt(books[i].price) + parseInt(books[i].mrp * .02) ;
         console.log("is_available : ", books[i].is_available);
         asyncTasks.push(insertBookResponse.bind(null, handlerInfo, responseId, vendorId, books[i].book_id,
-          books[i].price || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
+          surgePrice || 10000000, books[i].mrp || 10000000, books[i].is_available == undefined));
       }
       async.series(asyncTasks, function(error, result) {
         if(error) {
