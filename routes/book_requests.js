@@ -15,6 +15,7 @@ var logging   = require('./logging');
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.putBookRequestSuperVendorResponse = putBookRequestSuperVendorResponse;
+exports.putBooksInDb                     = putBooksInDb;
 exports.putBookRequestResponse          = putBookRequestResponse;
 exports.getMinimumPriceResponse         = getMinimumPriceResponse;
 exports.confirmBookOrder                = confirmBookOrder;
@@ -250,6 +251,44 @@ function putBookRequestSuperVendorResponse(req, res) {
     });
   });
 }
+/**
+ * [POST] '/req_book_auth/put_books_in_db'<br>
+ * API responsible for submitting a request's response from a particular vendor.<br>
+ */
+function putBooksInDb(req, res) {
+  var handlerInfo    = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "putBooksInDb"
+  };
+  var reqParams      = req.body;
+  var book_name      = reqParams.book_name;
+  var book_author    = reqParams.book_author;
+  var book_mrp       = reqParams.book_mrp;
+  var book_price     = reqParams.book_price;
+  var book_category  = reqParams.book_category;
+  var book_stream    = reqParams.book_stream;
+  var book_sem       = reqParams.book_sem;
+  var book_stock     = reqParams.book_stock;
+  var book_publisher = reqParams.book_publisher;
+  var book_edition   = reqParams.book_edition;
+
+  var reqQuery = "INSERT INTO tb_books_db (book_name, book_author, book_mrp, book_price,book_category,book_stream,book_sem,stock,book_publisher,book_edition) VALUES(?,?,?,?,?,?,?,?,?,?) ";
+    var tt = connection.query(reqQuery, [book_name,book_author,book_mrp,book_price,book_category,book_stream,book_sem,book_stock,book_publisher,book_edition], function(reqErr, insRes) {
+      if(reqErr) {
+        logging.logDatabaseQuery(handlerInfo, "inserting books into db", reqErr, insRes, tt.sql);
+        return res.send(constants.databaseErrorResponse);
+      }
+
+      res.send({
+        "data": insRes,
+        "log" : "Successfully logged book request response",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+
+    });
+  
+}
+
 
 /**
  * [POST] '/req_book_auth/put_response'<br>
