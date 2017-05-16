@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.fetchBooksDb                    = fetchBooksDb;
 exports.putBookRequestSuperVendorResponse = putBookRequestSuperVendorResponse;
 exports.putBooksInDb                     = putBooksInDb;
 exports.putBookRequestResponse          = putBookRequestResponse;
@@ -134,6 +135,33 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
     callback(null, "Successfully logged book request");
   });
 }
+
+/**
+ * [POST] '/req_book_auth/fetch_books_db' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function fetchBooksDb(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "fetchBooksDb"
+  };
+ 
+  var sqlQuery = " SELECT * FROM tb_books_db ";
+  var jj = connection.query(sqlQuery, function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting books", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched pending book requests",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+
+    });
+  });
+}
+
 
 /**
  * [POST] '/req_book_auth/get_pending_requests' <br>
