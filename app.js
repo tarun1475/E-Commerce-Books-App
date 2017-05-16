@@ -219,6 +219,9 @@ app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
 app.get('/req_book_auth/fetch_book_db'          , utils.logRequest
    , requests.fetchBooksDb
    , error);
+app.post('/req_book_auth/fetch_details_by_book_id'          , utils.logRequest
+   , requests.fetchDetailsByBookId
+   , error);
 
 app.post('/req_book_auth/put_books_in_db'          , utils.logRequest
    , requests.putBooksInDb
