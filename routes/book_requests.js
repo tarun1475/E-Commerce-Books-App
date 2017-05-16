@@ -271,9 +271,10 @@ function putBooksInDb(req, res) {
   var book_stock     = reqParams.book_stock;
   var book_publisher = reqParams.book_publisher;
   var book_edition   = reqParams.book_edition;
+  var book_condition = reqParams.book_condition;
 
-  var reqQuery = "INSERT INTO tb_books_db (book_name, book_author, book_mrp, book_price,book_category,book_stream,book_sem,stock,book_publisher,book_edition) VALUES(?,?,?,?,?,?,?,?,?,?) ";
-    var tt = connection.query(reqQuery, [book_name,book_author,book_mrp,book_price,book_category,book_stream,book_sem,book_stock,book_publisher,book_edition], function(reqErr, insRes) {
+  var reqQuery = "INSERT INTO tb_books_db (book_name, book_author, book_mrp, book_price,book_category,book_stream,book_sem,stock,book_publisher,book_edition,book_condition) VALUES(?,?,?,?,?,?,?,?,?,?,?) ";
+    var tt = connection.query(reqQuery, [book_name,book_author,book_mrp,book_price,book_category,book_stream,book_sem,book_stock,book_publisher,book_edition,book_condition], function(reqErr, insRes) {
       if(reqErr) {
         logging.logDatabaseQuery(handlerInfo, "inserting books into db", reqErr, insRes, tt.sql);
         return res.send(constants.databaseErrorResponse);
