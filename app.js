@@ -217,6 +217,10 @@ app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
    , requests.putBookRequestSuperVendorResponse
    , error);
 
+app.post('/req_book_auth/put_books_in_db'          , utils.logRequest
+   , requests.putBooksInDb
+   , error);
+
 app.post('/req_book_auth/put_response'          , utils.logRequest
    , utils.verifyClientToken
    , requests.putBookRequestResponse
