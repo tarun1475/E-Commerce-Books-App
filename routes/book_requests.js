@@ -15,6 +15,7 @@ var logging   = require('./logging');
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.fetchBooksDb                    = fetchBooksDb;
+exports.fetchDetailsByBookId            = fetchDetailsByBookId
 exports.putBookRequestSuperVendorResponse = putBookRequestSuperVendorResponse;
 exports.putBooksInDb                     = putBooksInDb;
 exports.putBookRequestResponse          = putBookRequestResponse;
@@ -133,6 +134,34 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
       return callback(err, null);
     }
     callback(null, "Successfully logged book request");
+  });
+}
+/**
+ * [POST] '/req_book_auth/fetch_details_by_book_id' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function fetchDetailsByBookId(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "fetchDetailsByBookId"
+  };
+
+  var reqParams   = req.body;
+  var book_id = reqParams.book_id;
+ 
+  var sqlQuery = " SELECT * FROM tb_books_db WHERE book_id = ? ";
+  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting books", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched pending book requests",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+
+    });
   });
 }
 
