@@ -180,6 +180,23 @@ function putBooksToCart(req, res) {
   var book_price = reqParams.book_price;
   var user_id = reqParams.user_id;
   var cart_status = reqParams.cart_status;
+  
+  var dupQuery = "SELECT book_id FROM tb_cart_db WHERE  user_id = ? ";
+  var tt = connection.query(dupQuery, [user_id], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate entry", dupErr, dupData);
+    if(dupErr) {
+      return res.send({
+        "log": "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    if(dupData.length > 0) {
+      return res.send({
+        "log": "The item  has a limit of 1 per customer.",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+  });
  
   var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?,?)";
   var jj = connection.query(sqlQuery,[user_id,book_id,book_price,cart_status], function(err, result) {
