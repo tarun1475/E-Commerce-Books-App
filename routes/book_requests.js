@@ -160,7 +160,8 @@ function cartItemsCounter(req, res) {
 
     res.send({
       "log": "Successfully fetched from cart",
-      "flag": constants.responseFlags.ACTION_COMPLETE
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result
     });
   });
 }
