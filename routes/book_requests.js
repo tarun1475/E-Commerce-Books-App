@@ -153,10 +153,7 @@ function cartDetails(req, res) {
   var user_id = reqParams.user_id;
 
  
-  var sqlQuery = "SELECT tb_cart_db.book_id,tb_books_db.book_name,tb_books_db.book_author,tb_books_db.book_mrp"+
-  ", tb_books_db.book_price, tb_books_db.book_condition,tb_books_db.book_category"+
-  " FROM tb_cart_db RIGHT JOIN tb_books_db ON tb_cart_db.book_id = tb_books_db.book_id"+
-  "ORDER BY tb_cart_db.book_id WHERE user_id = ?";
+  var sqlQuery = "SELECT book_id from tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetch cart details", err, result, jj.sql);
