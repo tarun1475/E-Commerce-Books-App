@@ -216,6 +216,9 @@ app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
    , utils.verifyClientToken
    , requests.putBookRequestSuperVendorResponse
    , error);
+app.post('/req_book_auth/cartDetails'          , utils.logRequest
+   , requests.cartDetails
+   , error);
 app.post('/req_book_auth/cart_item_counter'          , utils.logRequest
    , requests.cartItemsCounter
    , error);
