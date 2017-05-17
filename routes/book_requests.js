@@ -182,7 +182,7 @@ function putBooksToCart(req, res) {
   var cart_status = reqParams.cart_status;
 
   var dupQuery = "SELECT * FROM tb_cart_db WHERE  book_id = ? ";
-  var tt = connection.query(dupQuery, [user_id], function(dupErr, dupData) {
+  var tt = connection.query(dupQuery, [book_id], function(dupErr, dupData) {
     logging.logDatabaseQuery(handlerInfo, "checking duplicate entry", dupErr, dupData);
     if(dupErr) {
       return res.send({
