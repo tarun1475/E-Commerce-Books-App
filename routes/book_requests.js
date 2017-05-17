@@ -196,7 +196,6 @@ function putBooksToCart(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    else {
  
   var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?,?)";
   var jj = connection.query(sqlQuery,[user_id,book_id,book_price,cart_status], function(err, result) {
@@ -210,7 +209,6 @@ function putBooksToCart(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
-  }
   });
 }
 /**
@@ -1077,3 +1075,4 @@ function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
     callback(null, result);
   });
 }
+
