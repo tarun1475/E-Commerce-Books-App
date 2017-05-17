@@ -180,7 +180,7 @@ function putBooksToCart(req, res) {
   var user_id = reqParams.user_id;
   var cart_status = reqParams.cart_status;
  
-  var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?)";
+  var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?,?)";
   var jj = connection.query(sqlQuery,[user_id,book_id,book_price,cart_status], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "inserting books", err, result, jj.sql);
