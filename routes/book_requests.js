@@ -151,7 +151,7 @@ function cartItemsCounter(req, res) {
   var reqParams   = req.body;
   var user_id = reqParams.user_id;
  
-  var sqlQuery = "SELECT COUNT(book_id),SUM(book_price) FROM tb_cart_db WHERE user_id = ?";
+  var sqlQuery = "SELECT COUNT(book_id) as items,SUM(book_price) as totalPrice FROM tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetch cart counter", err, result, jj.sql);
