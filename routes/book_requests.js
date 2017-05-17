@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.cartItemsCounter                = cartItemsCounter;
 exports.putBooksToCart                  = putBooksToCart;
 exports.fetchBooksDb                    = fetchBooksDb;
 exports.fetchDetailsByBookId            = fetchDetailsByBookId
@@ -138,6 +139,32 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
   });
 }
 /**
+ * [POST] '/req_book_auth/cart_item_counter' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function cartItemsCounter(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "cartItemsCounter"
+  };
+
+  var reqParams   = req.body;
+  var user_id = reqParams.user_id;
+ 
+  var sqlQuery = "SELECT COUNT(book_id),SUM(book_price) FROM tb_cart_db WHERE user_id = ?";
+  var jj = connection.query(sqlQuery,[user_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "fetch cart counter", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched from cart",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+/**
  * [POST] '/req_book_auth/put_books_cart' <br>
  * API responsible for getting book requests depending upon their status.<br>
  */
@@ -149,11 +176,12 @@ function putBooksToCart(req, res) {
 
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
+  var book_price = reqParams.book_price;
   var user_id = reqParams.user_id;
   var cart_status = reqParams.cart_status;
  
-  var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id, cart_status) VALUES (?, ?, ?)";
-  var jj = connection.query(sqlQuery,[user_id,book_id,cart_status], function(err, result) {
+  var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?)";
+  var jj = connection.query(sqlQuery,[user_id,book_id,book_price,cart_status], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "inserting books", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
