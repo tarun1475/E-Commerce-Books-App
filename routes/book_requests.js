@@ -161,7 +161,7 @@ function cartItemsCounter(req, res) {
     res.send({
       "log": "Successfully fetched from cart",
       "flag": constants.responseFlags.ACTION_COMPLETE,
-      "data":result
+      "data":result[0]
     });
   });
 }
