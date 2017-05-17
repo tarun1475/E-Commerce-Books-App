@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.putBooksToCart                  = putBooksToCart;
 exports.fetchBooksDb                    = fetchBooksDb;
 exports.fetchDetailsByBookId            = fetchDetailsByBookId
 exports.putBookRequestSuperVendorResponse = putBookRequestSuperVendorResponse;
@@ -134,6 +135,34 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
       return callback(err, null);
     }
     callback(null, "Successfully logged book request");
+  });
+}
+/**
+ * [POST] '/req_book_auth/put_books_cart' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function putBooksToCart(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "putBooksToCart"
+  };
+
+  var reqParams   = req.body;
+  var book_id = reqParams.book_id;
+  var user_id = reqParams.user_id;
+  var cart_status = reqParams.cart_status;
+ 
+  var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id, cart_status) VALUES (?, ?, ?)";
+  var jj = connection.query(sqlQuery,[user_id,book_id,cart_status], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "inserting books", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully inserted into cart",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
   });
 }
 /**
