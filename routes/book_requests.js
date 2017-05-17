@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.cartDetails                     = cartDetails;
 exports.cartItemsCounter                = cartItemsCounter;
 exports.putBooksToCart                  = putBooksToCart;
 exports.fetchBooksDb                    = fetchBooksDb;
@@ -139,6 +140,37 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
   });
 }
 /**
+ * [POST] '/req_book_auth/cart_details' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function cartDetails(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "cartDetails"
+  };
+
+  var reqParams   = req.body;
+  var user_id = reqParams.user_id;
+
+ 
+  var sqlQuery = "SELECT tb_cart_db.book_id,tb_books_db.book_name,tb_books_db.book_author,tb_books_db.book_mrp"+
+  ", tb_books_db.book_price, tb_books_db.book_condition,tb_books_db.book_category"+
+  " FROM tb_cart_db RIGHT JOIN tb_books_db ON tb_cart_db.book_id = tb_books_db.book_id"+
+  "ORDER BY tb_cart_db.book_id";
+  var jj = connection.query(sqlQuery,[user_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "fetch cart details", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched from cart",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result
+    });
+  });
+}
+/**
  * [POST] '/req_book_auth/cart_item_counter' <br>
  * API responsible for getting book requests depending upon their status.<br>
  */
@@ -181,8 +213,8 @@ function putBooksToCart(req, res) {
   var user_id = reqParams.user_id;
   var cart_status = reqParams.cart_status;
 
-  var dupQuery = "SELECT * FROM tb_cart_db WHERE  book_id = ? ";
-  var tt = connection.query(dupQuery, [book_id], function(dupErr, dupData) {
+  var dupQuery = "SELECT book_id FROM tb_cart_db WHERE  user_id = ? ";
+  var tt = connection.query(dupQuery, [user_id], function(dupErr, dupData) {
     logging.logDatabaseQuery(handlerInfo, "checking duplicate entry", dupErr, dupData);
     if(dupErr) {
       return res.send({
