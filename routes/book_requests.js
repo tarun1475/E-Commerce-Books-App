@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.confirmCartOrder                = confirmCartOrder;
 exports.memberShip                      = memberShip;
 exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
@@ -165,6 +166,51 @@ var book_id = "62";
       "data":result[0]
     });
   });
+}
+/**
+ * [POST] '/req_book_auth/confirm_cart_order' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function confirmCartOrder(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "confirmCartOrder"
+  };
+
+  var reqParams   = req.body;
+  var book_id = reqParams.book_id;
+  var user_id = reqParams.user_id;
+   updateCartDetails(book_id);
+ 
+   var sqlQuery = "INSERT INTO tb_delivery_db (user_id, book_id,date_registered) VALUES (?, ?, NOW())";
+ 
+  var jj = connection.query(sqlQuery,[user_id,book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "Inserting Delivery", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully inserted Delivery",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
+//function to update cart details 
+function updateCartDetails(book_id){
+var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ?";
+  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "delete cart items", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully deleted from cart",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
 }
 
 /**
