@@ -181,7 +181,7 @@ function confirmCartOrder(req, res) {
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
   var user_id = reqParams.user_id;
-   updateCartDetails(book_id,user_id);
+  // updateCartDetails(book_id,user_id);
  
    var sqlQuery = "INSERT INTO tb_delivery_db (user_id, book_id,date_registered) VALUES (?, ?, NOW())";
  
