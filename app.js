@@ -219,6 +219,9 @@ app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
 app.get('/req_book_auth/member_ship'          , utils.logRequest
    , requests.memberShip
    , error);
+app.post('/req_book_auth/confirm_cart_order'          , utils.logRequest
+   , requests.confirmCartOrder
+   , error);
 app.post('/req_book_auth/remove_cart_items'          , utils.logRequest
    , requests.removeCartItems
    , error);
