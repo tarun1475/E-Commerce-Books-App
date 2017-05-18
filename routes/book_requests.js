@@ -225,10 +225,11 @@ function removeCartItems(req, res) {
 
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
+  var user_id = reqParams.user_id;
 
  
-  var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ?";
-  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
+  var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ? AND user_id =?";
+  var jj = connection.query(sqlQuery,[book_id,user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "delete cart items", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
