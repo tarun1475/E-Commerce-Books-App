@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
 exports.cartItemsCounter                = cartItemsCounter;
 exports.putBooksToCart                  = putBooksToCart;
@@ -137,6 +138,33 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
       return callback(err, null);
     }
     callback(null, "Successfully logged book request");
+  });
+}
+/**
+ * [POST] '/req_book_auth/remove_cart_items' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function removeCartItems(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "removeCartItems"
+  };
+
+  var reqParams   = req.body;
+  var book_id = reqParams.book_id;
+
+ 
+  var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ?";
+  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "delete cart items", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully deleted from cart",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
   });
 }
 /**
