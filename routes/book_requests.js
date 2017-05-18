@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.memberShip                      = memberShip;
 exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
 exports.cartItemsCounter                = cartItemsCounter;
@@ -141,6 +142,32 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
   });
 }
 /**
+ * [GET] '/req_book_auth/member_ship' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function memberShip(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "memberShip"
+  };
+
+ 
+  var sqlQuery = "SELECT * FROM tb_member_ship ";
+  var jj = connection.query(sqlQuery, function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "fetching membership items", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched memberShip item",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result[0]
+    });
+  });
+}
+
+/**
  * [POST] '/req_book_auth/remove_cart_items' <br>
  * API responsible for getting book requests depending upon their status.<br>
  */
@@ -181,7 +208,7 @@ function cartDetails(req, res) {
   var user_id = reqParams.user_id;
 
  
-  var sqlQuery = "SELECT book_id from tb_cart_db WHERE user_id = ?";
+  var sqlQuery = "SELECT book_id,SUM(book_price) as total from tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetch cart details", err, result, jj.sql);
