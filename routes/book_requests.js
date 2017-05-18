@@ -182,6 +182,14 @@ function confirmCartOrder(req, res) {
   var book_id = reqParams.book_id;
   var user_id = reqParams.user_id;
   // updateCartDetails(book_id,user_id);
+  
+  var Query = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
+  var tj = connection.query(Query,[book_id,user_id], function(Err, res) {
+    if(Err) {
+      logging.logDatabaseQuery(handlerInfo, "delete cart items", Err, res, tj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+ });
  
    var sqlQuery = "INSERT INTO tb_delivery_db (user_id, book_id,date_registered) VALUES (?, ?, NOW())";
  
