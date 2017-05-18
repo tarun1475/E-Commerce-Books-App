@@ -198,7 +198,7 @@ function confirmCartOrder(req, res) {
   });
 }
 //function to update cart details 
-function updateCartDetails(book_id){
+function updateCartDetails(book_id,user_id){
 var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
   var jj = connection.query(sqlQuery,[book_id,user_id], function(err, result) {
     if(err) {
