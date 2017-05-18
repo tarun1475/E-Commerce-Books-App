@@ -142,6 +142,7 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
     callback(null, "Successfully logged book request");
   });
 }
+
 /**
  * [GET] '/req_book_auth/member_ship' <br>
  * API responsible for getting book requests depending upon their status.<br>
@@ -180,7 +181,7 @@ function confirmCartOrder(req, res) {
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
   var user_id = reqParams.user_id;
-   updateCartDetails(book_id);
+   updateCartDetails(book_id,user_id);
  
    var sqlQuery = "INSERT INTO tb_delivery_db (user_id, book_id,date_registered) VALUES (?, ?, NOW())";
  
@@ -198,8 +199,8 @@ function confirmCartOrder(req, res) {
 }
 //function to update cart details 
 function updateCartDetails(book_id){
-var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ?";
-  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
+var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
+  var jj = connection.query(sqlQuery,[book_id,user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "delete cart items", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
@@ -212,7 +213,6 @@ var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ?";
   });
 
 }
-
 /**
  * [POST] '/req_book_auth/remove_cart_items' <br>
  * API responsible for getting book requests depending upon their status.<br>
