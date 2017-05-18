@@ -208,7 +208,7 @@ function cartDetails(req, res) {
   var user_id = reqParams.user_id;
 
  
-  var sqlQuery = "SELECT book_id,SUM(book_price) as total from tb_cart_db WHERE user_id = ?";
+  var sqlQuery = "SELECT book_id from tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetch cart details", err, result, jj.sql);
