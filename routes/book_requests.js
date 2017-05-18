@@ -150,10 +150,10 @@ function memberShip(req, res) {
     "apiModule": "bookRequests",
     "apiHandler": "memberShip"
   };
-
+var book_id = "62";
  
-  var sqlQuery = "SELECT * FROM tb_member_ship ";
-  var jj = connection.query(sqlQuery, function(err, result) {
+  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_id = ? ";
+  var jj = connection.query(sqlQuery,[book_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetching membership items", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
