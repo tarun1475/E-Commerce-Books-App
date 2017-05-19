@@ -568,7 +568,8 @@ function getMyCartOrders(req, res) {
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data": bookIdArr,
-        "delivery_status": isDeliveredArr
+        "delivery_status": isDeliveredArr,
+        "result":result
       });
   });
 }
