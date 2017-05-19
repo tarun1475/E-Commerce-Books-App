@@ -532,28 +532,28 @@ function getMyCartOrders(req, res) {
   var reqParams = req.query;
   var userId    = reqParams.user_id;
 
+  var Query  = "SELECT book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+  var UserDeliveries = connection.query(Query, [userId], function(err, res) {
+    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, res, UserDeliveries.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+  });
 
-  var sqlQuery  = "SELECT COUNT(book_id) as counter,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+
+
+  var sqlQuery  = "SELECT COUNT(book_id),book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-
-  var Query  = "SELECT book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
-  var UserDeliveries = connection.query(Query, [userId], function(Err, res) {
-    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, UserDeliveries.sql);
-    if(Err) {
-      return res.send(constants.databaseErrorResponse);
-    }
-
-    res.send({
+ 
+      res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data":result,
-        "count": res
-      });
-  
+        "data":res,
+        "count":result
       });
   });
 }
