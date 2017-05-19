@@ -531,43 +531,29 @@ function getMyCartOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-  var sqlQuery  = "SELECT COUNT(book_id),date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+
+
+  var sqlQuery  = "SELECT COUNT(book_id) as counter,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    var bookIdArr = [];
-    var isDeliveredArr = [];
-    //var deliveryDetailsObj = {};
-    for(var i = 0; i < result.length; i++) {
-      bookIdArr.push(result[i].book_id);
-      isDeliveredArr.push(result[i].is_delivered);
+
+  var Query  = "SELECT book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+  var UserDeliveries = connection.query(Query, [userId], function(Err, res) {
+    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, UserDeliveries.sql);
+    if(Err) {
+      return res.send(constants.databaseErrorResponse);
     }
-    /*
-    var asyncTasks = [];
-    for(var i = 0; i < deliveryIdArr.length; i++) {
-      asyncTasks.push(bookRequests.getDeliveryDetailsHelper.bind(null, handlerInfo, deliveryIdArr[i], deliveryDetailsObj));
-    }
-    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
-      if(asyncErr) {
-        return res.send({
-          "log": asyncErr,
-          "flag": constants.responseFlags.ACTION_FAILED
-        });
-      }
-      var deliveryArr = Object.keys(deliveryDetailsObj).map(function(key) { return deliveryDetailsObj[key] });
-      deliveryArr.sort(function(a, b) {
-        var d1 = new Date(a.logged_on);
-        var d2 = new Date(b.logged_on);
-        return d1 < d2;
-      });*/
-      res.send({
+
+    res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data": bookIdArr,
-        "delivery_status": isDeliveredArr,
-        "result":result
+        "data":result,
+        "count": res
+      });
+  
       });
   });
 }
