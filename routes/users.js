@@ -24,6 +24,7 @@ exports.verifyUserByPhone                 = verifyUserByPhone;
 exports.searchUser                        = searchUser;
 exports.getMyDetails                      = getMyDetails;
 exports.getVendorDetails                  = getVendorDetails;
+exports.getMyCartOrders                   = getMyCartOrders;
 exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
 exports.getAllUsers                       = getAllUsers;
@@ -515,6 +516,63 @@ function getMyDetails(req, res) {
     res.send(responseData);
   });
 }
+/**
+ * <b> API [GET] /books-auth/my_cart_orders </b> <br>
+ * API to get recent orders/deliveries for a particular user
+ * request query requires the following parameters:
+ * @param token {STRING} access token for user
+ * @param start_from {INTEGER} pagination start index
+ * @param page_size {INTEGER} pagination offset
+ */
+function getMyCartOrders(req, res) {
+  var handlerInfo = {
+    "apiModule": "users",
+    "apiHandler": "getMyCartOrders"
+  };
+  var reqParams = req.query;
+  var userId    = reqParams.user_id;
+  var startFrom = parseInt(reqParams.start_from);
+  var pageSize  = parseInt(reqParams.page_size);
+  var sqlQuery  = "SELECT book_id,is_delivered FROM tb_delivery_db WHERE user_id = ? ORDER BY date_registered DESC LIMIT ?, ?";
+  var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    var bookIdArr = [];
+    var isDeliveredArr = [];
+    //var deliveryDetailsObj = {};
+    for(var i = 0; i < result.length; i++) {
+      bookIdArr.push(result[i].book_id);
+      isDeliveredArr.push(result[i].is_delivered);
+    }
+    /*
+    var asyncTasks = [];
+    for(var i = 0; i < deliveryIdArr.length; i++) {
+      asyncTasks.push(bookRequests.getDeliveryDetailsHelper.bind(null, handlerInfo, deliveryIdArr[i], deliveryDetailsObj));
+    }
+    async.parallel(asyncTasks, function(asyncErr, asyncRes) {
+      if(asyncErr) {
+        return res.send({
+          "log": asyncErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      var deliveryArr = Object.keys(deliveryDetailsObj).map(function(key) { return deliveryDetailsObj[key] });
+      deliveryArr.sort(function(a, b) {
+        var d1 = new Date(a.logged_on);
+        var d2 = new Date(b.logged_on);
+        return d1 < d2;
+      });*/
+      res.send({
+        "log": "Successfully fetched orders data",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": bookIdArr,
+        "delivery_status": isDeliveredArr
+      });
+  });
+}
+
 
 /**
  * <b> API [GET] /books-auth/my_orders </b> <br>
