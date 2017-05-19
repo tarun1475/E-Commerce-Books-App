@@ -24,6 +24,7 @@ exports.verifyUserByPhone                 = verifyUserByPhone;
 exports.searchUser                        = searchUser;
 exports.getMyDetails                      = getMyDetails;
 exports.getVendorDetails                  = getVendorDetails;
+exports.getMyCartCountOrders              = getMyCartCountOrders ;
 exports.getMyCartOrders                   = getMyCartOrders;
 exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
@@ -517,6 +518,38 @@ function getMyDetails(req, res) {
   });
 }
 /**
+ * <b> API [GET] /books-auth/my_cart_count_orders </b> <br>
+ * API to get recent orders/deliveries for a particular user
+ * request query requires the following parameters:
+ * @param token {STRING} access token for user
+ * @param start_from {INTEGER} pagination start index
+ * @param page_size {INTEGER} pagination offset
+ */
+function getMyCartCountOrders(req, res) {
+  var handlerInfo = {
+    "apiModule": "users",
+    "apiHandler": "getMyCartCountOrders"
+  };
+  var reqParams = req.query;
+  var userId    = reqParams.user_id;
+
+
+  var sqlQuery  = "SELECT COUNT(book_id) as book_counter FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+  var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+ 
+      res.send({
+        "log": "Successfully fetched orders data",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data":result
+      });
+  });
+}
+
+/**
  * <b> API [GET] /books-auth/my_cart_orders </b> <br>
  * API to get recent orders/deliveries for a particular user
  * request query requires the following parameters:
@@ -531,8 +564,6 @@ function getMyCartOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-
-
 
 
   var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? ORDER BY date_registered DESC ";
