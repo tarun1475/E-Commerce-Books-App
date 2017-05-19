@@ -181,8 +181,22 @@ function confirmCartOrder(req, res) {
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
   var user_id = reqParams.user_id;
-  // updateCartDetails(book_id,user_id);
-  
+  var order_id = reqParams.order_id;
+
+   var tQuery = "SELECT * from tb_delivery_db WHERE order_id = ?";
+  var ttj = connection.query(tQuery,[order_id], function(Errr, ress) {
+    if(Errr) {
+      logging.logDatabaseQuery(handlerInfo, "delete cart items", Errr, ress, ttj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    if(ress.length > 0){
+      return res.send({
+      "log": "already Existed"
+      });
+    }
+ });
+
   var Query = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
   var tj = connection.query(Query,[book_id,user_id], function(Err, res) {
     if(Err) {
@@ -190,10 +204,9 @@ function confirmCartOrder(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
  });
+   var sqlQuery = "INSERT INTO tb_delivery_db (order_id,user_id, book_id,date_registered) VALUES (?,?, ?, NOW())";
  
-   var sqlQuery = "INSERT INTO tb_delivery_db (user_id, book_id,date_registered) VALUES (?, ?, NOW())";
- 
-  var jj = connection.query(sqlQuery,[user_id,book_id], function(err, result) {
+  var jj = connection.query(sqlQuery,[order_id,user_id,book_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "Inserting Delivery", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
