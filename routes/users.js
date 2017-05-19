@@ -540,35 +540,12 @@ function getMyCartCountOrders(req, res) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-
-    for(i=0; i < result.length ; i++){
-      getCartBookDetails(handlerInfo,result[i].date_registered,user_id,function(Err,Res){
-          if(Err){
-            return res.send(constants.databaseErrorResponse);
-          }
-
-      });
-    }
+ 
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data":Res,
-        "orders":result
+        "data":result
       });
-
- 
-  });
-}
-function getCartBookDetails(handlerInfo,date_registered,user_id,callback){
-  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? AND date_registered = ?  ORDER BY date_registered DESC ";
-  var getUserDeliveries = connection.query(sqlQuery, [user_id,date_registered], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
-     if(err) {
-      //logging.logDatabaseQuery(handlerInfo, "updating user activity status", err, result, updateUser.sql);
-      return callback("There was some error in fetching Books", null);
-    }
-    callback(null, result);
-
   });
 }
 
