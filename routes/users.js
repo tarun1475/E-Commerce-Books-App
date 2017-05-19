@@ -531,10 +531,8 @@ function getMyCartOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-  var startFrom = parseInt(reqParams.start_from);
-  var pageSize  = parseInt(reqParams.page_size);
-  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? ORDER BY date_registered DESC LIMIT ?, ?";
-  var getUserDeliveries = connection.query(sqlQuery, [userId, startFrom, pageSize], function(err, result) {
+  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered ";
+  var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
