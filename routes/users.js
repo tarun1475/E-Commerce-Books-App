@@ -547,16 +547,14 @@ function getMyCartCountOrders(req, res) {
             return res.send(constants.databaseErrorResponse);
           }
 
-        res.send({
+      });
+    }
+      res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data":Res,
         "orders":result
       });
-
-
-      });
-    }
 
  
   });
