@@ -532,13 +532,6 @@ function getMyCartOrders(req, res) {
   var reqParams = req.query;
   var userId    = reqParams.user_id;
 
-  var Query  = "SELECT book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
-  var UserDeliveries = connection.query(Query, [userId], function(err, res) {
-    logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, res, UserDeliveries.sql);
-    if(err) {
-      return res.send(constants.databaseErrorResponse);
-    }
-  });
 
 
 
@@ -552,8 +545,7 @@ function getMyCartOrders(req, res) {
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data":res,
-        "count":result
+        "data":result
       });
   });
 }
