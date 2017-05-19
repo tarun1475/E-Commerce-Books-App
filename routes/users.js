@@ -535,7 +535,7 @@ function getMyCartOrders(req, res) {
 
 
 
-  var sqlQuery  = "SELECT COUNT(book_id),book_id,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+  var sqlQuery  = "SELECT COUNT(book_id),book_id,date_registered FROM tb_delivery_db WHERE user_id = ? ORDER BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
