@@ -534,7 +534,9 @@ function getMyCartCountOrders(req, res) {
   var userId    = reqParams.user_id;
 
 
-  var sqlQuery  = "SELECT COUNT(book_id) as book_counter,date_registered FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
+
+
+  var sqlQuery  = "SELECT COUNT(book_id) as book_counter,order_id FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
@@ -564,11 +566,11 @@ function getMyCartOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-  var date_registered = reqParams.date_registered;
+  var order_id = reqParams.order_id;
 
 
-  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? AND date_registered = ?  ORDER BY book_id DESC";
-  var getUserDeliveries = connection.query(sqlQuery, [userId,date_registered], function(err, result) {
+  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? AND order_id = ?  ORDER BY date_registered DESC";
+  var getUserDeliveries = connection.query(sqlQuery, [userId,order_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
