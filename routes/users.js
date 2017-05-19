@@ -533,9 +533,6 @@ function getMyCartCountOrders(req, res) {
   var reqParams = req.query;
   var userId    = reqParams.user_id;
 
-
-
-
   var sqlQuery  = "SELECT COUNT(book_id) as book_counter,order_id FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
@@ -569,13 +566,13 @@ function getMyCartOrders(req, res) {
   var order_id = reqParams.order_id;
 
 
-  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE user_id = ? AND order_id = ?  ORDER BY date_registered DESC";
+  var sqlQuery  = "SELECT tb_delivery_db.order_id,tb_books_db.book_name,tb_books_db.book_auhtor,tb_books_db.book_price FROM tb_delivery_db INNER JOIN tb_books_db ON tb_delivery_db.book_id= tb_books_db.book_id WHERE user_id = ? AND order_id = ? ";
   var getUserDeliveries = connection.query(sqlQuery, [userId,order_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
- 
+    
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
