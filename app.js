@@ -193,6 +193,9 @@ app.get('/books-auth/my_orders'                , utils.logRequest
   , utils.verifyClientToken
   , users.getMyOrders
   , error);
+app.get('/books-auth/my_cart_count_orders'                , utils.logRequest
+  , users.getMyCartCountOrders
+  , error);
 app.get('/books-auth/my_cart_orders'                , utils.logRequest
   , users.getMyCartOrders
   , error);
