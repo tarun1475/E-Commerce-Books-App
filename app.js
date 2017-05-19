@@ -194,7 +194,7 @@ app.get('/books-auth/my_orders'                , utils.logRequest
   , users.getMyOrders
   , error);
 app.get('/books-auth/my_cart_orders'                , utils.logRequest
-  , users.getMyOrders
+  , users.getMyCartOrders
   , error);
 
 app.get('/books-auth/delete_account'          , utils.logRequest
