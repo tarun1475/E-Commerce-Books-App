@@ -186,6 +186,7 @@ function confirmCartOrder(req, res) {
   };
   var order_id       = req.body.order_id;
   var userId          = req.body.user_id;
+  var total_price      = req.body.total_price;
   var books           = req.body.books;
 
   for(var i=0 ; i< books.length; i++){
@@ -201,7 +202,7 @@ function confirmCartOrder(req, res) {
 
   }
 
-  insertOrders(handlerInfo, order_id, userId, function(insertErr, insertRes){
+  insertOrders(handlerInfo, order_id, userId, total_price,function(insertErr, insertRes){
      if(insertErr) {
       return res.send({
         "log" : "There was some error in updating order details",
@@ -235,9 +236,9 @@ function confirmCartOrder(req, res) {
  * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
  * @param callback [FUNCTION] callback function
  */
-function insertOrders(handlerInfo,order_id, user_id, callback) {
-  var sqlQuery = "INSERT INTO tb_orders (order_id,user_id,date_registered) VALUES (?,?, NOW())";
-  var tt = connection.query(sqlQuery, [order_id,user_id], function(err, result) {
+function insertOrders(handlerInfo,order_id, user_id, total_price,callback) {
+  var sqlQuery = "INSERT INTO tb_orders (order_id,user_id,total_price,date_registered) VALUES (?,?,?, NOW())";
+  var tt = connection.query(sqlQuery, [order_id,user_id,total_price], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "inserting book delivery", err, result, tt.sql);
       return callback(err, null);
