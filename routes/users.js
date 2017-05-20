@@ -576,7 +576,7 @@ function getMyCartOrders(req, res) {
   var userId    = reqParams.user_id;
 
 
-  var sqlQuery  = "SELECT order_id FROM tb_orders WHERE user_id = ? ORDER BY date_registered DESC ";
+  var sqlQuery  = "SELECT * FROM tb_orders WHERE user_id = ? ORDER BY date_registered DESC ";
   var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user orders", err, result, getUserDeliveries.sql);
     if(err) {
