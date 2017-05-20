@@ -169,71 +169,60 @@ var book_id = "62";
   });
 }
 /**
- * [POST] '/req_book_auth/confirm_cart_order' <br>
- * API responsible for getting book requests depending upon their status.<br>
+ * <b>[POST] '/books-auth/confirm_cart_order'</b><br>
+ * API for confirmation of an order by user<br>
+ * Request body requires following parameters:
+ * @param {STRING} token - access token of user
+ * @param {INTEGER} response_id - response id of vendor
+ * @param {INTEGER} request_id - request id of the request
+ * @param {VARCHAR} delivery_address - address of the delivery
+ * @param {INTEGER} is_urgent - whether delivery is urgent or not
+ * @param {INTEGER} vendor_id - vendor who gave the response
  */
 function confirmCartOrder(req, res) {
-  var handlerInfo = {
+  var handlerInfo     = {
     "apiModule": "bookRequests",
     "apiHandler": "confirmCartOrder"
   };
+  var requestId       = req.body.order_id;
+  var userId          = req.body.user_id;
+  var books           = req.body.books;
 
-  var reqParams   = req.body;
-  var book_id = reqParams.book_id;
-  var user_id = reqParams.user_id;
-  var order_id = reqParams.order_id;
-
-   var tQuery = "SELECT * from tb_delivery_db WHERE order_id = ?";
-  var ttj = connection.query(tQuery,[order_id], function(Errr, ress) {
-    if(Errr) {
-      logging.logDatabaseQuery(handlerInfo, "delete cart items", Errr, ress, ttj.sql);
-      return res.send(constants.databaseErrorResponse);
-    }
-
-    if(ress.length > 0){
+  for(i=0 ; i< books.length; i++){
+     updateCartDetails(handlerInfo, user_id, books[i], function(updateErr, updateRes) {
+    if(updateErr) {
       return res.send({
-      "log": "already Existed"
+        "log" : "There was some error in updating cart details",
+        "flag": constants.responseFlags.ACTION_FAILED
       });
     }
- });
 
-  var Query = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
-  var tj = connection.query(Query,[book_id,user_id], function(Err, res) {
-    if(Err) {
-      logging.logDatabaseQuery(handlerInfo, "delete cart items", Err, res, tj.sql);
-      return res.send(constants.databaseErrorResponse);
-    }
- });
-   var sqlQuery = "INSERT INTO tb_delivery_db (order_id,user_id, book_id,date_registered) VALUES (?,?, ?, NOW())";
- 
-  var jj = connection.query(sqlQuery,[order_id,user_id,book_id], function(err, result) {
-    if(err) {
-      logging.logDatabaseQuery(handlerInfo, "Inserting Delivery", err, result, jj.sql);
-      return res.send(constants.databaseErrorResponse);
-    }
-
-    res.send({
-      "log": "Successfully inserted Delivery",
-      "flag": constants.responseFlags.ACTION_COMPLETE
-    });
-  });
-}
-//function to update cart details 
-function updateCartDetails(book_id,user_id){
-var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ? AND user_id=?";
-  var jj = connection.query(sqlQuery,[book_id,user_id], function(err, result) {
-    if(err) {
-      logging.logDatabaseQuery(handlerInfo, "delete cart items", err, result, jj.sql);
-      return res.send(constants.databaseErrorResponse);
-    }
-
-    res.send({
-      "log": "Successfully deleted from cart",
-      "flag": constants.responseFlags.ACTION_COMPLETE
-    });
   });
 
+  }   
 }
+
+/**
+ * Helper function to update the book request and update it's status
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param requestId {INTEGER} request id
+ * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
+ * @param callback [FUNCTION] callback function
+ */
+function updateCartDetails(handlerInfo, user_id, book_id, callback) {
+  var sqlQuery = "DELETE  from tb_cart_db "+
+                 "WHERE  user_id = ? "+
+                 "AND book_id = ?";
+  var tt = connection.query(sqlQuery, [user_id, book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "updating book request", err, result, tt.sql);
+      return callback(err, null);
+    }
+    callback(null, "Sucessfully updated cartDetails");
+  });
+}
+
+
 /**
  * [POST] '/req_book_auth/remove_cart_items' <br>
  * API responsible for getting book requests depending upon their status.<br>
