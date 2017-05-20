@@ -231,6 +231,9 @@ app.post('/req_book_auth/insert_membership'          , utils.logRequest
 app.post('/req_book_auth/is_vevsa_pro'          , utils.logRequest
    , requests.isVevsaPro
    , error);
+app.post('/req_book_auth/search_cart_book'          , utils.logRequest
+   , requests.searchCartBook
+   , error);
 app.post('/req_book_auth/confirm_cart_order'          , utils.logRequest
    , requests.confirmCartOrder
    , error);
