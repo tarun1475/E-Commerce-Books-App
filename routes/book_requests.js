@@ -158,7 +158,7 @@ function searchCartBook(req, res) {
    var key = reqParams.key;
 
  
-  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name OR book_author LIKE '%"+ key +"%'; ";
+  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%'; ";
   var jj = connection.query(sqlQuery, function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetching search results", err, result, jj.sql);
