@@ -532,6 +532,7 @@ function getMyCartCountOrders(req, res) {
   };
   var reqParams = req.query;
   var order_id    = reqParams.order_id;
+  var bookIdArray = [];
 
   var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE order_id = ? ";
   var getUserDeliveries = connection.query(sqlQuery, [order_id], function(err, result) {
@@ -540,11 +541,13 @@ function getMyCartCountOrders(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
- 
+  for(var i =0; i< result.length ; i++){
+    bookIdArray.push(result[i].book_id);
+  }
   });
 
-   for(var i =0; i< result.length ; i++){
-      getBookOrdersDetails(handlerInfo, result[i].book_id , function(bookErr,bookResult){
+   for(var i =0; i< bookIdArray.length ; i++){
+      getBookOrdersDetails(handlerInfo, bookIdArray[0] , function(bookErr,bookResult){
       if(bookErr) {
       return res.send(constants.databaseErrorResponse);
       }
