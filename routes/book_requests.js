@@ -15,6 +15,7 @@ var logging   = require('./logging');
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.confirmCartOrder                = confirmCartOrder;
+exports.insertMembershipDetails         = insertMembershipDetails;
 exports.memberShip                      = memberShip;
 exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
@@ -142,6 +143,35 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
     callback(null, "Successfully logged book request");
   });
 }
+/**
+ * [POST] '/req_book_auth/insert_membership' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function insertMembershipDetails(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "insertMembershipDetails"
+  };
+
+  var reqParams   = req.body;
+  var membership_status = reqParams.membership_status;
+  var membership_price = reqParams.membership_price;
+   var user_id = reqParams.user_id;
+
+ 
+  var sqlQuery = "INSERT INTO tb_membership (user_id,membership_status,membership_price,membership_date) VALUES (?,?,?, NOW())";
+  var jj = connection.query(sqlQuery,[user_id,membership_status,membership_price], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "inserting membership details", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully inserted membership details",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+}
 
 /**
  * [GET] '/req_book_auth/member_ship' <br>
@@ -168,6 +198,7 @@ var book_id = "62";
     });
   });
 }
+
 /**
  * <b>[POST] '/books-auth/confirm_cart_order'</b><br>
  * API for confirmation of an order by user<br>
@@ -205,14 +236,6 @@ function confirmCartOrder(req, res) {
 
   }
 
-  /*insertMembershipDetails(handlerinfo,userId,membership_status,membership_price,function(memberErr,memberRes){
-    if(memberErr) {
-      return res.send({
-        "log" : "There was some error in inserting membership details",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-  });*/
 
   insertOrders(handlerInfo, order_id, userId, total_price,function(insertErr, insertRes){
      if(insertErr) {
@@ -240,23 +263,7 @@ function confirmCartOrder(req, res) {
   });
 }
 }
-/**
- * Helper function to update the book request and update it's status
- * @param handlerInfo {OBJECT} handler info for logging
- * @param requestId {INTEGER} request id
- * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
- * @param callback [FUNCTION] callback function
- */
-function insertMembershipDetails(handlerInfo, user_id,membership_status,membership_price,callback) {
-  var sqlQuery = "INSERT INTO tb_membership (user_id,membership_status,membership_price,membership_date) VALUES (?,?,?, NOW())";
-  var tt = connection.query(sqlQuery, [user_id,membership_status,membership_price], function(err, result) {
-    if(err) {
-      logging.logDatabaseQuery(handlerInfo, "inserting book membership_status", err, result, tt.sql);
-      return callback(err, null);
-    }
-    callback(null, "Sucessfully inserted into membership");
-  });
-}
+
 
 
 /**
