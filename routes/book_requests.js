@@ -184,7 +184,7 @@ function confirmCartOrder(req, res) {
     "apiModule": "bookRequests",
     "apiHandler": "confirmCartOrder"
   };
-  var requestId       = req.body.order_id;
+  var order_id       = req.body.order_id;
   var userId          = req.body.user_id;
   var books           = req.body.books;
 
@@ -199,7 +199,24 @@ function confirmCartOrder(req, res) {
 
   });
 
-  }   
+  } 
+  for(var i=0 ; i< books.length; i++){
+  insertCartOrder(handlerInfo,order_id, userId, books[i], function(orderErr, orderRes){
+       if(orderErr) {
+      return res.send({
+        "log" : "There was some error in updating order details",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     res.send({
+        "log" : "Successfully Inserted",
+        "flag": constants.responseFlags.ACTION_COMPLETE
+      });
+
+
+  });
+}
 }
 
 /**
@@ -220,6 +237,23 @@ function updateCartDetails(handlerInfo, user_id, book_id, callback) {
   });
 }
 
+/**
+ * Helper function to update the book request and update it's status
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param requestId {INTEGER} request id
+ * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
+ * @param callback [FUNCTION] callback function
+ */
+function insertCartOrder(handlerInfo,order_id, user_id, book_id, callback) {
+  var sqlQuery = "INSERT INTO tb_delivery_db (order_id,user_id, book_id,date_registered) VALUES (?,?, ?, NOW())";
+  var tt = connection.query(sqlQuery, [order_id,user_id, book_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "inserting book delivery", err, result, tt.sql);
+      return callback(err, null);
+    }
+    callback(null, "Sucessfully inserted into deliveryTable");
+  });
+}
 
 
 /**
