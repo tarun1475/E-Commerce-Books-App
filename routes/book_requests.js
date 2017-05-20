@@ -196,7 +196,7 @@ function isVevsaPro(req, res) {
     res.send({
       "log": "Successfully fetched memberShip item",
       "flag": constants.responseFlags.ACTION_COMPLETE,
-      "data":result[0]
+      "data":result
     });
   });
 }
