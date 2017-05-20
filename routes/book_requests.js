@@ -199,7 +199,16 @@ function confirmCartOrder(req, res) {
 
   });
 
-  } 
+  }
+
+  insertOrders(handlerInfo, order_id, userId, function(insertErr, insertRes){
+     if(insertErr) {
+      return res.send({
+        "log" : "There was some error in updating order details",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+  }); 
   for(var i=0 ; i< books.length; i++){
   insertCartOrder(handlerInfo,order_id, userId, books[i], function(orderErr, orderRes){
        if(orderErr) {
@@ -217,6 +226,24 @@ function confirmCartOrder(req, res) {
 
   });
 }
+}
+
+/**
+ * Helper function to update the book request and update it's status
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param requestId {INTEGER} request id
+ * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
+ * @param callback [FUNCTION] callback function
+ */
+function insertOrders(handlerInfo,order_id, user_id, callback) {
+  var sqlQuery = "INSERT INTO tb_orders (order_id,user_id,date_registered) VALUES (?,?, NOW())";
+  var tt = connection.query(sqlQuery, [order_id,user_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "inserting book delivery", err, result, tt.sql);
+      return callback(err, null);
+    }
+    callback(null, "Sucessfully inserted into OrdersTable");
+  });
 }
 
 /**
