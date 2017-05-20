@@ -15,6 +15,7 @@ var logging   = require('./logging');
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.confirmCartOrder                = confirmCartOrder;
+exports.searchCartBook                  = searchCartBook;
 exports.insertMembershipDetails         = insertMembershipDetails;
 exports.isVevsaPro                      = isVevsaPro;
 exports.memberShip                      = memberShip;
@@ -144,6 +145,34 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
     callback(null, "Successfully logged book request");
   });
 }
+/**
+ * [POST] '/req_book_auth/search_cart_book' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function searchCartBook(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "searchCartBook"
+  };
+   var reqParams   = req.body;
+   var key = reqParams.key;
+
+ 
+  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name OR book_author LIKE '%"+ key +"%'; ";
+  var jj = connection.query(sqlQuery, function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "fetching search results", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched search Results",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result
+    });
+  });
+}
+
 /**
  * [POST] '/req_book_auth/is_vevsa_pro' <br>
  * API responsible for getting book requests depending upon their status.<br>
