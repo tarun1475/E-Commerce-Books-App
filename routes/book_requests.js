@@ -188,8 +188,8 @@ function confirmCartOrder(req, res) {
   var userId          = req.body.user_id;
   var books           = req.body.books;
 
-  for(i=0 ; i< books.length; i++){
-     updateCartDetails(handlerInfo, user_id, books[i], function(updateErr, updateRes) {
+  for(var i=0 ; i< books.length; i++){
+     updateCartDetails(handlerInfo, userId, books[i], function(updateErr, updateRes) {
     if(updateErr) {
       return res.send({
         "log" : "There was some error in updating cart details",
@@ -210,9 +210,7 @@ function confirmCartOrder(req, res) {
  * @param callback [FUNCTION] callback function
  */
 function updateCartDetails(handlerInfo, user_id, book_id, callback) {
-  var sqlQuery = "DELETE  from tb_cart_db "+
-                 "WHERE  user_id = ? "+
-                 "AND book_id = ?";
+  var sqlQuery = "DELETE  from tb_cart_db WHERE  user_id = ? AND book_id = ?";
   var tt = connection.query(sqlQuery, [user_id, book_id], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "updating book request", err, result, tt.sql);
@@ -221,6 +219,7 @@ function updateCartDetails(handlerInfo, user_id, book_id, callback) {
     callback(null, "Sucessfully updated cartDetails");
   });
 }
+
 
 
 /**
