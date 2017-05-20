@@ -188,10 +188,10 @@ function confirmCartOrder(req, res) {
   var userId          = req.body.user_id;
   var total_price      = req.body.total_price;
   var books           = req.body.books;
-  var membership_status = parseInt(req.body.membership_status);
-  var membership_price = "99";
+  var membership_status = req.body.membership_status;
+  var membership_price = req.body.membership_price;
 
-  insertMembershipDetails(handlerinfo,userId,membership_status,parseInt(membership_price),function(memberErr,memberRes){
+  insertMembershipDetails(handlerinfo,userId,membership_status,membership_price,function(memberErr,memberRes){
     if(memberErr) {
       return res.send({
         "log" : "There was some error in inserting membership details",
