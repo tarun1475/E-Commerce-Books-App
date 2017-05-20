@@ -225,6 +225,9 @@ app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
 app.get('/req_book_auth/member_ship'          , utils.logRequest
    , requests.memberShip
    , error);
+app.post('/req_book_auth/insert_membership'          , utils.logRequest
+   , requests.insertMembershipDetails
+   , error);
 app.post('/req_book_auth/confirm_cart_order'          , utils.logRequest
    , requests.confirmCartOrder
    , error);
