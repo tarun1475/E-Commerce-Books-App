@@ -551,7 +551,6 @@ function getMyCartCountOrders(req, res) {
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data":result,
         "books": bookResult
       });
 
