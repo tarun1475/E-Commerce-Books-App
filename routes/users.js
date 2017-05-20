@@ -574,8 +574,8 @@ function getMyCartOrders(req, res) {
   };
   var reqParams = req.query;
   var userId    = reqParams.user_id;
-  var start_from = "0";
-  var page_size = "5";
+  var start_from = 0;
+  var page_size = 5;
 
 
   var sqlQuery  = "SELECT * FROM tb_orders WHERE user_id = ? ORDER BY date_registered DESC LIMIT ?,? ";
