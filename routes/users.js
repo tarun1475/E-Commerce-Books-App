@@ -525,16 +525,16 @@ function getMyDetails(req, res) {
  * @param start_from {INTEGER} pagination start index
  * @param page_size {INTEGER} pagination offset
  */
-function getMyCartCountOrders(req, res) {
+function getMyOrdersDetails(req, res) {
   var handlerInfo = {
     "apiModule": "users",
-    "apiHandler": "getMyCartCountOrders"
+    "apiHandler": "getMyOrdersDetails"
   };
   var reqParams = req.query;
-  var userId    = reqParams.user_id;
+  var order_id    = reqParams.order_id;
 
-  var sqlQuery  = "SELECT COUNT(book_id) as book_counter,order_id FROM tb_delivery_db WHERE user_id = ? GROUP BY date_registered DESC ";
-  var getUserDeliveries = connection.query(sqlQuery, [userId], function(err, result) {
+  var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE order_id = ? ";
+  var getUserDeliveries = connection.query(sqlQuery, [order_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user deliveries", err, result, getUserDeliveries.sql);
     if(err) {
       return res.send(constants.databaseErrorResponse);
