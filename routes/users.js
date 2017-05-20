@@ -540,23 +540,23 @@ function getMyCartCountOrders(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    for(var i =0; i< result.length ; i++){
+ 
+  });
+
+   for(var i =0; i< result.length ; i++){
       getBookOrdersDetails(handlerInfo, result[i].book_id , function(bookErr,bookResult){
       if(bookErr) {
       return res.send(constants.databaseErrorResponse);
       }
-
-
-      } );
-    }
- 
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
         "data":result,
         "books": bookResult
       });
-  });
+
+      } );
+    }
 }
 function getBookOrdersDetails(handlerInfo,book_id , callback){
    var sqlQuery = "SELECT * from tb_books_db WHERE book_id = ? ";
