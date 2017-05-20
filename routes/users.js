@@ -539,24 +539,22 @@ function getMyCartCountOrders(req, res) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    var books = [];
+
     for(var i =0; i< result.length ; i++){
       getBookOrdersDetails(handlerInfo, result.data[i].book_id , function(bookErr,bookResult){
       if(bookErr) {
       return res.send(constants.databaseErrorResponse);
       }
-
-      books.push(bookResult);
+      res.send({
+        "log": "Successfully fetched orders data",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "books": bookResult
+      });
 
       } );
     }
  
-      res.send({
-        "log": "Successfully fetched orders data",
-        "flag": constants.responseFlags.ACTION_COMPLETE,
-        "data":result,
-        "books": books
-      });
+      
   });
 }
 function getBookOrdersDetails(handlerInfo,book_id , callback){
