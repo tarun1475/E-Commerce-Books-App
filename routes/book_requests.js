@@ -191,14 +191,7 @@ function confirmCartOrder(req, res) {
   var membership_status = req.body.membership_status;
   var membership_price = req.body.membership_price;
 
-  insertMembershipDetails(handlerinfo,userId,membership_status,membership_price,function(memberErr,memberRes){
-    if(memberErr) {
-      return res.send({
-        "log" : "There was some error in inserting membership details",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
-  });
+ 
 
   for(var i=0 ; i< books.length; i++){
      updateCartDetails(handlerInfo, userId, books[i], function(updateErr, updateRes) {
@@ -212,6 +205,15 @@ function confirmCartOrder(req, res) {
   });
 
   }
+  
+  insertMembershipDetails(handlerinfo,userId,membership_status,membership_price,function(memberErr,memberRes){
+    if(memberErr) {
+      return res.send({
+        "log" : "There was some error in inserting membership details",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+  });
 
   insertOrders(handlerInfo, order_id, userId, total_price,function(insertErr, insertRes){
      if(insertErr) {
