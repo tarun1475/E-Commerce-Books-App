@@ -16,6 +16,7 @@ exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
 exports.confirmCartOrder                = confirmCartOrder;
 exports.insertMembershipDetails         = insertMembershipDetails;
+exports.isVevsaPro                      = isVevsaPro;
 exports.memberShip                      = memberShip;
 exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
@@ -143,6 +144,34 @@ function insertNewBook(handlerInfo, request_id, name, stream, semester, vconditi
     callback(null, "Successfully logged book request");
   });
 }
+/**
+ * [POST] '/req_book_auth/is_vevsa_pro' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ */
+function isVevsaPro(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "isVevsaPro"
+  };
+   var reqParams   = req.body;
+   var user_id = reqParams.user_id;
+
+ 
+  var sqlQuery = "SELECT membership_status FROM tb_membership WHERE user_id = ? ";
+  var jj = connection.query(sqlQuery,[user_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "fetching membership status", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "log": "Successfully fetched memberShip item",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result[0]
+    });
+  });
+}
+
 /**
  * [POST] '/req_book_auth/insert_membership' <br>
  * API responsible for getting book requests depending upon their status.<br>
