@@ -525,10 +525,10 @@ function getMyDetails(req, res) {
  * @param start_from {INTEGER} pagination start index
  * @param page_size {INTEGER} pagination offset
  */
-function getMyOrdersDetails(req, res) {
+function getMyCartCountOrders(req, res) {
   var handlerInfo = {
     "apiModule": "users",
-    "apiHandler": "getMyOrdersDetails"
+    "apiHandler": "getMyCartCountOrders"
   };
   var reqParams = req.query;
   var order_id    = reqParams.order_id;
