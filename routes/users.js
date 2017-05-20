@@ -532,7 +532,6 @@ function getMyCartCountOrders(req, res) {
   };
   var reqParams = req.query;
   var order_id    = reqParams.order_id;
-  var bookIdArray = [];
 
   var sqlQuery  = "SELECT * FROM tb_delivery_db WHERE order_id = ? ";
   var getUserDeliveries = connection.query(sqlQuery, [order_id], function(err, result) {
@@ -541,24 +540,13 @@ function getMyCartCountOrders(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-  for(var i =0; i< result.length ; i++){
-    bookIdArray.push(result[i].book_id);
-  }
-  });
-
-   for(var i =0; i< bookIdArray.length ; i++){
-      getBookOrdersDetails(handlerInfo, bookIdArray[0] , function(bookErr,bookResult){
-      if(bookErr) {
-      return res.send(constants.databaseErrorResponse);
-      }
+ 
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
-        "books": bookResult
+        "data":result
       });
-
-      } );
-    }
+  });
 }
 function getBookOrdersDetails(handlerInfo,book_id , callback){
    var sqlQuery = "SELECT * from tb_books_db WHERE book_id = ? ";
