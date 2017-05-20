@@ -188,6 +188,17 @@ function confirmCartOrder(req, res) {
   var userId          = req.body.user_id;
   var total_price      = req.body.total_price;
   var books           = req.body.books;
+  var membership_status = req.body.membership_status;
+  var membership_price = 99;
+
+  insertMembershipDetails(handlerinfo,userId,membership_status,membership_price,function(memberErr,memberRes){
+    if(memberErr) {
+      return res.send({
+        "log" : "There was some error in inserting membership details",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+  });
 
   for(var i=0 ; i< books.length; i++){
      updateCartDetails(handlerInfo, userId, books[i], function(updateErr, updateRes) {
@@ -228,6 +239,24 @@ function confirmCartOrder(req, res) {
   });
 }
 }
+/**
+ * Helper function to update the book request and update it's status
+ * @param handlerInfo {OBJECT} handler info for logging
+ * @param requestId {INTEGER} request id
+ * @param reqStatus {INTEGER} 0 -> Pending, 1-> Complete, 2-> Cancelled
+ * @param callback [FUNCTION] callback function
+ */
+function insertMembershipDetails(handlerInfo, user_id,membership_status,membership_price,callback) {
+  var sqlQuery = "INSERT INTO tb_membership (user_id,membership_status,membership_price,membership_date) VALUES (?,?,?, NOW())";
+  var tt = connection.query(sqlQuery, [user_id,membership_status,membership_price], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "inserting book membership_status", err, result, tt.sql);
+      return callback(err, null);
+    }
+    callback(null, "Sucessfully inserted into membership");
+  });
+}
+
 
 /**
  * Helper function to update the book request and update it's status
