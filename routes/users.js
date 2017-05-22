@@ -76,30 +76,35 @@ function checkVersion(req, res) {
  *
  */
 function insertCodeVevsaContest(req, res) {
-  var handlerInfo   = {
-    "apiModule": "users",
-    "apiHandler":"insertCodeVevsaContest"
+ var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "insertCodeVevsaContest"
   };
-  var access_token   = req.body.access_token;
-  var phone = req.body.user_phone;
-  var sharable_code = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
- var sqlQuery = "UPDATE tb_users SET sharable_link = ? WHERE access_token= ? ";
-  var tt = connection.query(sqlQuery, [sharable_code,access_token], function(err, result) {
-    logging.logDatabaseQuery(handlerInfo, "updating user details", err, result);
+  var reqParams = req.body;
+  var access_token    = reqParams.access_token;
+  var phone      = reqParams.user_phone;
+  var sharable_code   = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
+
+  var sqlQuery = "", queryParams = [];
+    sqlQuery = "UPDATE tb_users SET sharable_link = ?  WHERE access_token = ?";
+    queryParams.push(sharable_code,access_token);
+ 
+  var getUserDetails = connection.query(sqlQuery, queryParams, function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "updating code details", err, result, getUserDetails.sql);
     if(err) {
-      return res.send({
-        "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
+      return res.send(constants.databaseErrorResponse);
     }
-    res.send({
-      "log" : "updated successfully",
-      "flag": constants.responseFlags.ACTION_COMPLETE
-    });
+    var responseData = {
+      "log": "Successfully updated your details",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+    };
+    
+    res.send(responseData);
   });
 
 
 }
+
 
 
 /**
