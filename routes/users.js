@@ -88,7 +88,7 @@ function contestRank(req, res) {
 function getReferralLeaderBoard(handlerInfo, callback) {
   var sqlQuery = "SELECT r1.referred_by, r2.user_name, r2.user_phone, r2.sharable_link, COUNT(*) as referrals "+
     "FROM `tb_users` as r1 "+
-    "JOIN users as r2 ON r2.user_id = r1.referred_by "+
+    "JOIN tb_users as r2 ON r2.user_id = r1.referred_by "+
     "GROUP BY r1.referred_by "+
     "ORDER BY referrals DESC";
   var tt = connection.query(sqlQuery, [], function(err, result) {
