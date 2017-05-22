@@ -199,6 +199,9 @@ app.get('/books-auth/my_cart_count_orders'                , utils.logRequest
 app.get('/books-auth/my_cart_orders'                , utils.logRequest
   , users.getMyCartOrders
   , error);
+app.post('/books-auth/vevsa_contest_user_details'                , utils.logRequest
+  , users.userDetailsVevsaContest
+  , error);
 
 app.get('/books-auth/delete_account'          , utils.logRequest
   , utils.verifyClientToken
