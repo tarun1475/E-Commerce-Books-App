@@ -130,6 +130,9 @@ app.post('/books-auth/forgot_vendor_pass'                 , utils.logRequest
 app.get('/books-auth/verify_forgot_vendor_otp'               , utils.logRequest
    , utils.verifyForgotVendorOTP
    , error);
+app.get('/books-auth/insert_code_vevsa_contest'               , utils.logRequest
+   , utils.insertCodeVevsaContest
+   , error);
 app.get('/books-auth/verify_vendor_otp'               , utils.logRequest
    , utils.verifyVendorOTP
    , error);
@@ -198,9 +201,6 @@ app.get('/books-auth/my_cart_count_orders'                , utils.logRequest
   , error);
 app.get('/books-auth/my_cart_orders'                , utils.logRequest
   , users.getMyCartOrders
-  , error);
-app.get('/books-auth/insert_code_vevsa_contest'                , utils.logRequest
-  , users.insertCodeVevsaContest
   , error);
 app.post('/books-auth/vevsa_contest_user_details'                , utils.logRequest
   , users.userDetailsVevsaContest
