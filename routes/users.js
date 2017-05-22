@@ -80,7 +80,7 @@ function insertCodeVevsaContest(req, res) {
     "apiModule": "Users",
     "apiHandler": "insertCodeVevsaContest"
   };
-  var reqParams = req.body;
+  var reqParams = req.query;
   var access_token    = reqParams.access_token;
   var phone      = reqParams.user_phone;
   var sharable_code   = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
@@ -104,7 +104,6 @@ function insertCodeVevsaContest(req, res) {
 
 
 }
-
 
 
 /**
