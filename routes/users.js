@@ -82,8 +82,8 @@ function insertCodeVevsaContest(req, res) {
   };
   var reqParams = req.query;
   var access_token    = reqParams.access_token;
-  var phone      = reqParams.user_phone;
-  var sharable_code   = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
+ // var phone      = reqParams.user_phone;
+ // var sharable_code   = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
 
    var  sqlQuery = "SELECT * from tb_users   WHERE access_token = ?";
  
