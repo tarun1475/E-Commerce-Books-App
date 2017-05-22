@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
 exports.vevsaMoney                        = vevsaMoney;
 exports.createNewAppUser                  = createNewAppUser;
@@ -65,6 +66,39 @@ function checkVersion(req, res) {
 
 
 }
+/**
+ *
+ * [POST] '/books-auth/vevsa_contest_user_details'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function userDetailsVevsaContest(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"userDetailsVevsaContest"
+  };
+  var access_token   = req.body.access_token;
+ var sqlQuery = "SELECT * from tb_users WHERE access_token = ?";
+  var tt = connection.query(sqlQuery, [access_token], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching user details", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "fetched successfully",
+      "access_token": access_token,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
+
+}
+
 
 /**
  *
