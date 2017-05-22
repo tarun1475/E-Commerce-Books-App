@@ -83,7 +83,7 @@ function insertCodeVevsaContest(req, res) {
   var access_token   = req.body.access_token;
   var phone = req.body.user_phone;
   var sharable_code = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
- var sqlQuery = "UPDATE tb_users SET sharable_code = ? WHERE access_token= ? ";
+ var sqlQuery = "UPDATE tb_users SET sharable_link = ? WHERE access_token= ? ";
   var tt = connection.query(sqlQuery, [sharable_code,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "updating user details", err, result);
     if(err) {
