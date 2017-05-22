@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
 exports.vevsaMoney                        = vevsaMoney;
@@ -68,6 +69,38 @@ function checkVersion(req, res) {
 }
 
 
+/**
+ *
+ * [POST] '/books-auth/people_joined'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function peopleJoined(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"peopleJoined"
+  };
+  var user_id   = req.body.user_id;
+ var sqlQuery = "SELECT COUNT(referred_by) from tb_users WHERE referred_by = ?";
+  var tt = connection.query(sqlQuery, [user_id], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching user details", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "fetched successfully",
+      "data": result[0],
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
+
+}
 
 /**
  *
