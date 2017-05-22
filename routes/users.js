@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
@@ -67,6 +68,38 @@ function checkVersion(req, res) {
 
 
 }
+function contestRank(req, res) {
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "contestRank"
+  };
+  getReferralLeaderBoard(handlerInfo, function(err, leaderboardData) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    res.send({
+      "log": "Successfully fetched leaderboard data",
+      "flag": constants.responseFlags.ACTION_COMPETE,
+      "data": leaderboardData
+    });
+  });
+}
+
+function getReferralLeaderBoard(handlerInfo, callback) {
+  var sqlQuery = "SELECT r1.referred_by, r2.user_name, r2.user_phone, r2.sharable_link, COUNT(*) as referrals "+
+    "FROM `tb_users` as r1 "+
+    "JOIN users as r2 ON r2.user_id = r1.referred_by "+
+    "GROUP BY r1.referred_by "+
+    "ORDER BY referrals DESC";
+  var tt = connection.query(sqlQuery, [], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "getting leaderboard", err, result, tt.sql);
+    if(err) {
+      return callback(new Error(err), null);
+    }
+    callback(null, result);
+  });
+}
+
 
 
 /**
