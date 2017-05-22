@@ -83,7 +83,7 @@ function peopleJoined(req, res) {
     "apiHandler":"peopleJoined"
   };
   var user_id   = req.body.user_id;
- var sqlQuery = "SELECT COUNT(referred_by) from tb_users WHERE referred_by = ?";
+ var sqlQuery = "SELECT COUNT(referred_by) as people_joined from tb_users WHERE referred_by = ?";
   var tt = connection.query(sqlQuery, [user_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching user details", err, result);
     if(err) {
