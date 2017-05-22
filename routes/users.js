@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.insertCodeVevsaContest            = insertCodeVevsaContest;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
 exports.vevsaMoney                        = vevsaMoney;
@@ -66,6 +67,41 @@ function checkVersion(req, res) {
 
 
 }
+/**
+ *
+ * [POST] '/books-auth/insert_code_vevsa_contest'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function insertCodeVevsaContest(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"insertCodeVevsaContest"
+  };
+  var access_token   = req.body.access_token;
+  var phone = req.body.user_phone;
+  var sharable_code = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
+ var sqlQuery = "UPDATE tb_users SET sharable_code = ? WHERE access_token= ? ";
+  var tt = connection.query(sqlQuery, [sharable_code,access_token], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "updating user details", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "updated successfully",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
+
+}
+
+
 /**
  *
  * [POST] '/books-auth/vevsa_contest_user_details'<br> 
