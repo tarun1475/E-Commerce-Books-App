@@ -91,7 +91,7 @@ function userDetailsVevsaContest(req, res) {
     }
     res.send({
       "log" : "fetched successfully",
-      "access_token": access_token,
+      "data": result[0],
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
