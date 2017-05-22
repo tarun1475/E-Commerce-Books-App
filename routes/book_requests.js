@@ -156,10 +156,11 @@ function searchCartBook(req, res) {
   };
    var reqParams   = req.body;
    var key = reqParams.key;
+   var book_category = "College";
 
  
-  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%'; ";
-  var jj = connection.query(sqlQuery, function(err, result) {
+  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%' AND book_category != ? ";
+  var jj = connection.query(sqlQuery,[book_category], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetching search results", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
