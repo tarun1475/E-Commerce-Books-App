@@ -14,6 +14,7 @@ var logging   = require('./logging');
 
 exports.raiseBooksRequest               = raiseBooksRequest;
 exports.getBookRequests                 = getBookRequests;
+exports.getBookSuperVendorRequests      = getBookSuperVendorRequests;
 exports.confirmCartOrder                = confirmCartOrder;
 exports.searchCartBook                  = searchCartBook;
 exports.insertMembershipDetails         = insertMembershipDetails;
@@ -159,7 +160,7 @@ function searchCartBook(req, res) {
    var book_category = "College";
 
  
-  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%' AND book_category != ? ";
+  var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%' AND book_category != ?; ";
   var jj = connection.query(sqlQuery,[book_category], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "fetching search results", err, result, jj.sql);
@@ -280,7 +281,7 @@ function confirmCartOrder(req, res) {
   var books           = req.body.books;
   var membership_status = req.body.membership_status;
   var membership_price = req.body.membership_price;
-  
+
    // send email to admins 
         var from     = 'support@vevsa.com';
         var to       = config.get('emailRecipents.orderConfirmationEmail').split(',');
@@ -580,6 +581,50 @@ function fetchBooksDb(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE,
       "data": result
 
+    });
+  });
+}
+/**
+ * [POST] '/req_book_auth/get_pending_supervendor_requests' <br>
+ * API responsible for getting book requests depending upon their status.<br>
+ * Request body requires the following parameters:
+ * @param {STRING}  token      - access token
+ * @param {INTEGER} start_from - start index  
+ * @param {INTEGER} page_size  - end index
+ * @param {INTEGER} req_status - status for request <br>
+ *  i.e {0 -> pending, 1-> approved, 2 -> disapproved}
+ */
+function getBookSuperVendorRequests(req, res) {
+  var handlerInfo = {
+    "apiModule": "bookRequests",
+    "apiHandler": "getBookSuperVendorRequests"
+  };
+  var reqParams   = req.body;
+  var request_id    = reqParams.request_id;
+  var status = "0";
+
+  var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND req_id = ?";
+  var jj = connection.query(sqlQuery, [status,request_id], function(err, result) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
+      return res.send(constants.databaseErrorResponse);
+    }
+    var requestArr = [];
+    for(var i = 0; i < result.length; i++) {
+      requestArr.push(result[i].req_id);
+    }
+    getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, requestDetails) {
+      if(reqErr) {
+        return res.send({
+          "log": reqErr,
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
+      res.send({
+        "log": "Successfully fetched pending book requests",
+        "flag": constants.responseFlags.ACTION_COMPLETE,
+        "data": requestDetails
+      });
     });
   });
 }
