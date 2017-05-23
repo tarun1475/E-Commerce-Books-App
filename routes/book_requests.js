@@ -280,6 +280,26 @@ function confirmCartOrder(req, res) {
   var books           = req.body.books;
   var membership_status = req.body.membership_status;
   var membership_price = req.body.membership_price;
+  
+  // send email to admins 
+        var from     = 'support@vevsa.com';
+        var to       = config.get('emailRecipents.orderConfirmationEmail').split(',');
+        var subject  = 'ORDER CONFIRMATION : Cart Order id '+order_id;
+        var text     = "";
+        var html     = "Hello, <br><br>"+
+                       "The order corresponding to the User id : "+userId+
+                       " has been confirmed. <br />"+
+                       "Total Price: "+ total_price +
+                       "No of Books: " + books.length + "<br />Please check vevsa super vendor app for more details.";
+
+        messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+          if(mailErr) {
+            return res.send({
+              "log": "There was some error in sending email to admins, request is confirmed though",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+        });
 
 
   for(var i=0 ; i< books.length; i++){
