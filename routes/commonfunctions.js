@@ -1097,7 +1097,7 @@ function serverReferUser(req, res, next) {
       return res.status(constants.responseFlags.NOT_FOUND).send("404 Not found");
     }
     var userId = result[0].user_id;
-    var referUrl = "http://vevsa.com/refer/register.html?refer_code="+userId;
+    var referUrl = "http://vevsa.com/contest/register.html?refer_code="+userId;
     res.redirect(referUrl);
   });
 }
