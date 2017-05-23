@@ -230,6 +230,9 @@ app.post('/req_book_auth/get_pending_requests'  , utils.logRequest
    , utils.verifyClientToken
    , requests.getBookRequests
    , error);
+app.post('/req_book_auth/get_pending_supervendor_requests'  , utils.logRequest
+   , requests.getBookSuperVendorRequests
+   , error);
 app.post('/req_book_auth/put_super_vendor_response'          , utils.logRequest
    , utils.verifyClientToken
    , requests.putBookRequestSuperVendorResponse
