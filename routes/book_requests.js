@@ -1018,10 +1018,16 @@ function confirmBookOrder(req, res) {
   var deliveryAddress = req.body.delivery_address || req.body.user_address;
   var userName        = req.body.delivery_name || req.body.user_name;
   var userPhone       = req.body.delivery_phone || req.body.user_phone;
+  var userProStatus   = req.body.vevsa_pro;
   var reqStatus       = req.body.request_status;
   var isUrgent        = parseInt(req.body.is_urgent);
   var userId          = req.body.user_id;
   var totPrice        = parseInt(req.body.tPrice);
+
+  if(userProStatus == 1)
+    var proStatus = "Yes";
+  else var proStatus = "No";
+
   // only process available books:
   var tmp = responseData.slice();
   responseData = [];
@@ -1073,12 +1079,13 @@ function confirmBookOrder(req, res) {
         var bookCategory = ["College", "School", "Competition", "Novel"];
         var totMrp = 0;
         for(var i = 0; i < responseData.length; i++) {
-         totMrp +=  responseData[i].mrp;
+         totMrp +=  parseInt(responseData[i].mrp);
+         var price = parseInt(responseData[i].price) - parseInt(responseData[i].mrp * .02);
           html += ("<tr><td align=center>"+responseData[i].book_name+"</td>");
           html += ("<td align=center>"+responseData[i].book_author+"</td>");
           html += ("<td align=center>"+responseData[i].vendor_name+"</td>");
           html += ("<td align=center> Rs."+responseData[i].mrp+"</td>");
-          html += ("<td align=center> Rs."+responseData[i].price+"</td>");
+          html += ("<td align=center> Rs."+price+"</td>");
           html += ("<td align=center> "+bookCategory[responseData[i].book_category]+"</td>");
           html += ("<td align=center> "+bookCondition[responseData[i].vcondition]+"</td>");
 
@@ -1093,6 +1100,7 @@ function confirmBookOrder(req, res) {
           html += "</tr>";
         }
         var totalPrice = totPrice - parseInt(totMrp * .02);
+        html += "<tr><td colspan=3 align=center><b>Vevsa Pro Status </b></td><td align=center><b> Rs."+proStatus+"</b></td>";
         html += "<tr><td colspan=3 align=center><b>Urgent Delivery Charges</b></td><td align=center><b> Rs."+urgentDeliveryCharges+"</b></td>";
         html += "<tr><td colspan=3 align=center><b>Total Price</b></td><td align=center><b> Rs."+totalPrice+"</b></td>";
         html += "</table><br><br>";
@@ -1122,7 +1130,6 @@ function confirmBookOrder(req, res) {
     }
   });
 }
-
 /**
  * Helper function to update the book request and update it's status
  * @param handlerInfo {OBJECT} handler info for logging
