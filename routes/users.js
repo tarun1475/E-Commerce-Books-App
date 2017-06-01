@@ -251,8 +251,7 @@ function transferMoney(req, res) {
   var toPhone   = req.body.to_phone;
   var amount   = parseInt(req.body.amount);
 
-  var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount, logged_on) "+
-                 "VALUES(?, ?, ?, NOW())";
+  var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount, logged_on) VALUES(?, ?, ?, NOW())";
   var tt = connection.query(sqlQuery, [from_phone,to_phone, amount], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
     if(err) {
