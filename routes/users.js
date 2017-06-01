@@ -19,6 +19,7 @@ exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
 exports.transferMoney                     = transferMoney;
+exports.fetchWalletTransactions           = fetchWalletTransactions;
 exports.vevsaMoney                        = vevsaMoney;
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
@@ -233,6 +234,40 @@ function vevsaMoney(req, res) {
   });
 
 }
+
+
+/**
+ *
+ * [POST] '/books-auth/fetch_wallet_transaction'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function fetchWalletTransactions(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"fetchWalletTransactions"
+  };
+  var userPhone   = req.body.user_phone;
+  var page_size = "10";
+
+  var sqlQuery = "SELECT * from tb_vevsa_money_transactions WHERE from_user_phone = ? ORDER BY logged_on DESC LIMIT ?";
+  var tt = connection.query(sqlQuery, [userPhone,page_size], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching from db", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "transaction fetched successfully",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":result
+    });
+  });
+}
+
 
 /**
  *
