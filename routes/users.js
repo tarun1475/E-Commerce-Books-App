@@ -251,8 +251,8 @@ function fetchWalletTransactions(req, res) {
   var userPhone   = req.body.user_phone;
   var page_size = "10";
 
-  var sqlQuery = "SELECT * from tb_vevsa_money_transactions WHERE from_user_phone = ? ORDER BY logged_on DESC LIMIT ?";
-  var tt = connection.query(sqlQuery, [userPhone,page_size], function(err, result) {
+  var sqlQuery = "SELECT * from tb_vevsa_money_transactions WHERE from_user_phone = ? ORDER BY logged_on DESC ";
+  var tt = connection.query(sqlQuery, [userPhone], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching from db", err, result);
     if(err) {
       return res.send({
