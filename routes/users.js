@@ -261,8 +261,8 @@ function transferMoney(req, res) {
       });
     }
 
-    updateVevsaMoneyFromUser(handlerInfo,from_phone,amount);
-    updateVevsaMoneyToUser(handlerInfo,to_phone,amount);
+    updateVevsaMoneyFromUser(handlerInfo,fromPhone,amount);
+    updateVevsaMoneyToUser(handlerInfo,toPhone,amount);
     res.send({
       "log" : "transaction inserted successfully",
       "flag": constants.responseFlags.ACTION_COMPLETE
