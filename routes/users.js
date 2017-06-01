@@ -18,6 +18,7 @@ exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
 exports.vevsaPro                          = vevsaPro;
+exports.transferMoney                     = transferMoney;
 exports.vevsaMoney                        = vevsaMoney;
 exports.createNewAppUser                  = createNewAppUser;
 exports.getRecentRequestsByUserId         = getRecentRequestsByUserId;
@@ -231,10 +232,104 @@ function vevsaMoney(req, res) {
     });
   });
 
+}
 
+/**
+ *
+ * [POST] '/books-auth/transfer_vevsa_money'<br> 
+ * API to check the version, <br>Request body requires following parameters:
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function transferMoney(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"transferMoney"
+  };
+  //var user_id   = req.body.user_id;
+  var fromPhone   = req.body.from_phone;
+  var toPhone   = req.body.to_phone;
+  var amount   = parseInt(req.body.amount);
+
+  var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount, logged_on) "+
+                 "VALUES(?, ?, ?, NOW())";
+  var tt = connection.query(sqlQuery, [from_phone,to_phone, amount], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+    updateVevsaMoneyFromUser(handlerInfo,from_phone,amount);
+    updateVevsaMoneyToUser(handlerInfo,to_phone,amount);
+    res.send({
+      "log" : "transaction inserted successfully",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
 
 
 }
+function updateVevsaMoneyFromUser(handlerInfo,from_phone,amount){
+  var sqlQuery = "SELECT vevsa_money from tb_users WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [from_phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "selecting vevsa_money from database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    var updatedAmount =  parseInt(result[0].vevsa_money) - amount;
+    updateVevsaMoneyFromHelper(handlerInfo,from_phone,updatedAmount);
+  });
+}
+function updateVevsaMoneyFromHelper(handlerInfo,from_phone,updatedAmount){
+  var sqlQuery = "update tb_users SET vevsa_money = ? WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [updatedAmount,from_phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "updating vevsa money from  database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    
+  });
+
+}
+
+function updateVevsaMoneyToUser(handlerInfo,to_phone,amount){
+  var sqlQuery = "SELECT vevsa_money from tb_users WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [to_phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "selecting vevsa_money from database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    var updatedAmount =  parseInt(result[0].vevsa_money) + amount;
+    updateVevsaMoneyToHelper(handlerInfo,to_phone,updatedAmount);
+  });
+}
+function updateVevsaMoneyToHelper(handlerInfo,to_phone,updatedAmount){
+  var sqlQuery = "update tb_users SET vevsa_money = ? WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [updatedAmount,to_phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "updating vevsa money to  database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    
+  });
+
+}
+
 
 
 /**
