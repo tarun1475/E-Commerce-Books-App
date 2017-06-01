@@ -252,7 +252,7 @@ function transferMoney(req, res) {
   var amount   = parseInt(req.body.amount);
 
   var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount, logged_on) VALUES(?, ?, ?, NOW())";
-  var tt = connection.query(sqlQuery, [from_phone,to_phone, amount], function(err, result) {
+  var tt = connection.query(sqlQuery, [fromPhone,toPhone, amount], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
     if(err) {
       return res.send({
@@ -261,8 +261,8 @@ function transferMoney(req, res) {
       });
     }
 
-    //updateVevsaMoneyFromUser(handlerInfo,from_phone,amount);
-    //updateVevsaMoneyToUser(handlerInfo,to_phone,amount);
+    updateVevsaMoneyFromUser(handlerInfo,from_phone,amount);
+    updateVevsaMoneyToUser(handlerInfo,to_phone,amount);
     res.send({
       "log" : "transaction inserted successfully",
       "flag": constants.responseFlags.ACTION_COMPLETE
