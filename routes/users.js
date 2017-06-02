@@ -287,7 +287,6 @@ function transferMoney(req, res) {
   var description = req.body.wallet_description;
   var amount   = parseInt(req.body.amount);
 
-  checkIfUserExists(handlerInfo,toPhone);
 
   var dupQuery = "SELECT user_phone FROM tb_users WHERE  user_phone = ? ";
   var tt = connection.query(dupQuery, [toPhone], function(dupErr, dupData) {
@@ -299,7 +298,7 @@ function transferMoney(req, res) {
       });
     }
 
-    if(dupData.length == null){
+    if(dupData.length == 0){
       return res.send({
         "log": "User is not registered with vevsa.",
         "flag": constants.responseFlags.ACTION_FAILED
