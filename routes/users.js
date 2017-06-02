@@ -289,6 +289,22 @@ function transferMoney(req, res) {
 
   checkIfUserExists(handlerInfo,toPhone);
 
+  var dupQuery = "SELECT user_phone FROM tb_users WHERE  user_phone = ? ";
+  var tt = connection.query(dupQuery, [toPhone], function(dupErr, dupData) {
+    logging.logDatabaseQuery(handlerInfo, "checking duplicate user", dupErr, dupData);
+    if(dupErr) {
+      return res.send({
+        "log": "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+    if(dupData.length == null){
+      return res.send({
+        "log": "User is not registered with vevsa.",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
 
   var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount,description, logged_on) VALUES(?, ?, ?,?, NOW())";
   var tt = connection.query(sqlQuery, [fromPhone,toPhone, amount,description], function(err, result) {
@@ -308,6 +324,7 @@ function transferMoney(req, res) {
     });
   });
 
+  });
 
 }
 
