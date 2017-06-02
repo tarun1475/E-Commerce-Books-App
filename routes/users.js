@@ -287,6 +287,9 @@ function transferMoney(req, res) {
   var description = req.body.wallet_description;
   var amount   = parseInt(req.body.amount);
 
+  checkIfUserExists(handlerInfo,toPhone);
+
+
   var sqlQuery = "INSERT INTO tb_vevsa_money_transactions (from_user_phone, to_user_phone,amount,description, logged_on) VALUES(?, ?, ?,?, NOW())";
   var tt = connection.query(sqlQuery, [fromPhone,toPhone, amount,description], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
@@ -306,6 +309,25 @@ function transferMoney(req, res) {
   });
 
 
+}
+
+function checkIfUserExists(handlerInfo,toPhone){
+  var sqlQuery = "SELECT user_phone from tb_users WHERE user_phone = ?";
+  var tt = connection.query(sqlQuery, [toPhone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "selecting user_phone from database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+   if(result.length == null){
+    return res.send({
+        "log" : "User Does Not Exist",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+   }
+  });
 }
 function updateVevsaMoneyFromUser(handlerInfo,from_phone,amount){
   var sqlQuery = "SELECT vevsa_money from tb_users WHERE user_phone = ?";
