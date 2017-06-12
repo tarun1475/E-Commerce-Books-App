@@ -186,8 +186,9 @@ function vevsaInternIncome(req, res) {
   };
   var userId = req.body.user_id;
   var vevsa_pro = 1;
-  var sqlQuery = "SELECT COUNT(referred_by) as total_books from tb_delivery_distribution WHERE referred_by  = ?";
-  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+  var is_delivered = 1;
+  var sqlQuery = "SELECT COUNT(referred_by) as total_books from tb_delivery_distribution WHERE referred_by  = ? AND is_delivered = ?";
+  var tt = connection.query(sqlQuery, [userId,is_delivered], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching vevsa intern income", err, result);
     if(err) {
       return res.send({
