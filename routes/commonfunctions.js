@@ -282,6 +282,7 @@ function verifyClientToken(req, res, next) {
       req.query.user_id = result[0].user_id;
       req.body.user_name = result[0].user_name;
       req.body.user_phone = result[0].user_phone;
+      req.body.referred_by = result[0].referred_by;
       req.body.user_address = result[0].user_address;
       req.query.user_name = result[0].user_name;
       req.query.user_address = result[0].user_address;
