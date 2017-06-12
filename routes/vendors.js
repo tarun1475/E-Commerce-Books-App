@@ -149,8 +149,9 @@ function fetchVendorNumbers(req , res){
     "apiModule": "Users",
     "apiHandler": "fetchVendorNumbers"
   };
-  var sqlQuery = "SELECT vendor_phone FROM tb_vendors";
-   var tt = connection.query(sqlQuery, function(err, result) {
+  var is_active = 1;
+  var sqlQuery = "SELECT vendor_phone FROM tb_vendors WHERE is_active = ?";
+   var tt = connection.query(sqlQuery,[is_active], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor numbers", err, result, tt.sql);
      if(err) {
         return res.send({
