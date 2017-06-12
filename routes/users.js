@@ -17,6 +17,7 @@ exports.checkVersion                      = checkVersion;
 exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
+exports.vevsaInternIncome                 = vevsaInternIncome;
 exports.vevsaPro                          = vevsaPro;
 exports.transferMoney                     = transferMoney;
 exports.fetchWalletTransactions           = fetchWalletTransactions;
@@ -168,6 +169,37 @@ function userDetailsVevsaContest(req, res) {
   });
 
 
+}
+
+/**
+ *
+ * [POST] '/books-auth/vevsa_intern_income'<br> 
+ * API to fetch vevsa intern income from tb_delivery, <br>Request body requires following parameters:
+ * @param {string} user_id - id of the user
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function vevsaInternIncome(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"vevsaInternIncome"
+  };
+  var userId = req.body.user_id;
+  var sqlQuery = "SELECT COUNT(referred_by) as total_books from tb_delivery_distribution WHERE referred_by  = ?";
+  var tt = connection.query(sqlQuery, [userId], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "fetching vevsa intern income", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "vevsa intern income fetched successfully.",
+      "total_books": result[0].total_books,
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
 }
 
 
