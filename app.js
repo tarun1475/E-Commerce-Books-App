@@ -96,6 +96,9 @@ app.post('/books-auth/transfer_money'             , utils.logRequest
 app.post('/books-auth/wallet_transactions'             , utils.logRequest
    , users.fetchWalletTransactions
    , error);
+app.post('/books-auth/vevsa_intern_income'             , utils.logRequest
+   , users.vevsaInternIncome
+   , error);
 app.get('/books-auth/vevsa_pro'             , utils.logRequest
    , users.vevsaPro
    , error);
