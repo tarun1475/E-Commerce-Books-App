@@ -185,6 +185,7 @@ function vevsaInternIncome(req, res) {
     "apiHandler":"vevsaInternIncome"
   };
   var userId = req.body.user_id;
+  var vevsa_pro = 1;
   var sqlQuery = "SELECT COUNT(referred_by) as total_books from tb_delivery_distribution WHERE referred_by  = ?";
   var tt = connection.query(sqlQuery, [userId], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "fetching vevsa intern income", err, result);
@@ -194,11 +195,27 @@ function vevsaInternIncome(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    res.send({
+
+  var Query = "SELECT COUNT(referred_by) as total_vevsa_pro from tb_users WHERE referred_by  = ? AND vevsa_pro = ?";
+  var tt = connection.query(Query, [userId,vevsa_pro], function(proErr, proResult) {
+    logging.logDatabaseQuery(handlerInfo, "fetching vevsa intern income", proErr, proResult);
+    if(proErr) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     res.send({
       "log" : "vevsa intern income fetched successfully.",
+      "total_vevsa_pro": proResult[0].total_vevsa_pro,
       "total_books": result[0].total_books,
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
+
+  });
+
+   
   });
 }
 
