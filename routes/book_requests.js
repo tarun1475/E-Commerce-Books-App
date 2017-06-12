@@ -1019,7 +1019,7 @@ function confirmBookOrder(req, res) {
   var userName        = req.body.delivery_name || req.body.user_name;
   var userPhone       = req.body.delivery_phone || req.body.user_phone;
   var userProStatus   = req.body.vevsa_pro;
-  //var refer_by        = req.body.referred_by;
+  var refer_by        = req.body.referred_by;
   var reqStatus       = req.body.request_status;
   var isUrgent        = parseInt(req.body.is_urgent);
   var userId          = req.body.user_id;
@@ -1052,7 +1052,7 @@ function confirmBookOrder(req, res) {
       if(isUrgent === 1) {
        urgentDeliveryCharges = 30;
       }
-      deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
+      deliverBooksToUser(handlerInfo, requestId, userId,refer_by,deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
           return res.send({
             "log" : "There was some error in adding delivery to database",
@@ -1161,11 +1161,11 @@ function updateBookRequest(handlerInfo, requestId, reqStatus, callback) {
  * @param responseData {OBJECT} This is the same object returned from minimum response
  * @param callback {FUNCTION} callback function
  */
-function deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUrgent, responseData, callback) {
+function deliverBooksToUser(handlerInfo, requestId, userId,refer_by,deliveryAddress, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
-  var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id, delivery_address, is_urgent_delivery, delivery_date) "+
-                 "VALUES (?, ?, ?, ?, "+dateStr+") ";
-  var tt = connection.query(sqlQuery, [requestId, userId,deliveryAddress, isUrgent], function(err, result) {
+  var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id,referred_by, delivery_address, is_urgent_delivery, delivery_date) "+
+                 "VALUES (?, ?, ?,?, ?, "+dateStr+") ";
+  var tt = connection.query(sqlQuery, [requestId, userId,refer_by,deliveryAddress, isUrgent], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "adding delivery", err, result, tt.sql);
       return callback(err, null);
@@ -1180,7 +1180,7 @@ function deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUr
       var vevsaComission = (responseData[i].mrp * .05);
       else
        var vevsaComission = (responseData[i].mrp * .10); 
-      asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId,responseData[i].book_id, responseData[i].vendor_id, 
+      asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId,refer_by,responseData[i].book_id, responseData[i].vendor_id, 
         responseData[i].price, responseData[i].mrp, vevsaComission));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
@@ -1192,9 +1192,9 @@ function deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUr
   });
 }
 
-function logDeliveryDistribution(handlerInfo, deliveryId, book_id, vendor_id, price, mrp, vevsa_commission, callback) {
-  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id,book_id, vendor_id, book_price, mrp, vevsa_commission) VALUES(?, ?, ?, ?, ?, ?)";
-  var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id, price, mrp, vevsa_commission], function(err, result) {
+function logDeliveryDistribution(handlerInfo, deliveryId,refer_by, book_id, vendor_id, price, mrp, vevsa_commission, callback) {
+  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id,referred_by,book_id, vendor_id, book_price, mrp, vevsa_commission) VALUES(?, ?,?, ?, ?, ?, ?)";
+  var tt = connection.query(sqlQuery, [deliveryId, refer_by,book_id, vendor_id, price, mrp, vevsa_commission], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "logging delivery distribution", err, result, tt.sql);
       return callback("There was some error in logging delivery distribution", null);
