@@ -1193,7 +1193,7 @@ function deliverBooksToUser(handlerInfo, requestId, userId, refer_by,deliveryAdd
 }
 
 function logDeliveryDistribution(handlerInfo, deliveryId, book_id, vendor_id, price, mrp, vevsa_commission, callback) {
-  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id,referred_by, book_id, vendor_id, book_price, mrp, vevsa_commission) VALUES(?, ?, ?, ?, ?, ?)";
+  var sqlQuery = "INSERT INTO tb_delivery_distribution (delivery_id,book_id, vendor_id, book_price, mrp, vevsa_commission) VALUES(?, ?, ?, ?, ?, ?)";
   var tt = connection.query(sqlQuery, [deliveryId, book_id, vendor_id, price, mrp, vevsa_commission], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "logging delivery distribution", err, result, tt.sql);
