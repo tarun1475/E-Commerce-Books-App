@@ -1161,11 +1161,11 @@ function updateBookRequest(handlerInfo, requestId, reqStatus, callback) {
  * @param responseData {OBJECT} This is the same object returned from minimum response
  * @param callback {FUNCTION} callback function
  */
-function deliverBooksToUser(handlerInfo, requestId, userId, refer_by,deliveryAddress, isUrgent, responseData, callback) {
+function deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUrgent, responseData, callback) {
   var dateStr  = (isUrgent == 1 ? "CURDATE()" : "CURDATE()+ INTERVAL 1 DAY");
-  var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id,referred_by, delivery_address, is_urgent_delivery, delivery_date) "+
+  var sqlQuery = "INSERT INTO tb_delivery (request_id, user_id, delivery_address, is_urgent_delivery, delivery_date) "+
                  "VALUES (?, ?, ?, ?, "+dateStr+") ";
-  var tt = connection.query(sqlQuery, [requestId, userId,refer_by, deliveryAddress, isUrgent], function(err, result) {
+  var tt = connection.query(sqlQuery, [requestId, userId,deliveryAddress, isUrgent], function(err, result) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "adding delivery", err, result, tt.sql);
       return callback(err, null);
