@@ -1019,7 +1019,7 @@ function confirmBookOrder(req, res) {
   var userName        = req.body.delivery_name || req.body.user_name;
   var userPhone       = req.body.delivery_phone || req.body.user_phone;
   var userProStatus   = req.body.vevsa_pro;
-  var refer_by        = req.body.referred_by;
+  //var refer_by        = req.body.referred_by;
   var reqStatus       = req.body.request_status;
   var isUrgent        = parseInt(req.body.is_urgent);
   var userId          = req.body.user_id;
@@ -1052,7 +1052,7 @@ function confirmBookOrder(req, res) {
       if(isUrgent === 1) {
        urgentDeliveryCharges = 30;
       }
-      deliverBooksToUser(handlerInfo, requestId, userId, refer_by,deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
+      deliverBooksToUser(handlerInfo, requestId, userId,deliveryAddress, isUrgent, responseData, function(delErr, delRes) {
         if(delErr) {
           return res.send({
             "log" : "There was some error in adding delivery to database",
