@@ -366,6 +366,11 @@ app.post('/books-auth/get_requests'              , utils.logRequest
     , utils.verifyPanelToken
     , analytics.getOverallRequests
     , error);
+app.post('/books-auth/get_requests'              , utils.logRequest
+    , utils.verifyPanelToken
+    , analytics.getOverallRequests
+    , error);
+
 
 app.post('/books-auth/get_vendors_engagement'    , utils.logRequest
     , utils.verifyPanelToken

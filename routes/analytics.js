@@ -11,12 +11,13 @@ var bookRequests = require('./book_requests');
 exports.checkResponse         = checkResponse;
 exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
+exports.getRequestByUserId    = getRequestByUserId;
 exports.getVendorEngagements  = getVendorEngagements;
 
 
 /**
  * [POST] '/books-auth/check_response'<br>
- * API responsible for check response status. 
+ * API responsible for check response status.
  * @param {INTEGER} req_id - request id of book request
  */
 
@@ -35,7 +36,7 @@ function checkResponse(req, res) {
         });
     }
     return res.send({
-          "data": checkRes 
+          "data": checkRes
         });
 
   });
@@ -191,6 +192,58 @@ function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, call
         });
     });
 }
+/**
+ * <b>API [POST] /books-auth/get_requests_by_user_id</b><br>
+ * API to get overall panel requests
+ * @param token {STRING} access token
+ * @param date_interval {OBJECT} date interval for requests
+ * @param req_type {INTEGER} 0 -> Pending, 1 -> Complete, 2 -> Cancelled
+ * @return {JSON}  Response body would contain an array of request objects in 'data' key
+ *
+ */
+function getRequestByUserId(req, res) {
+    var handlerInfo = {
+      "apiModule" : "analytics",
+      "apiHandler": "getRequestByUserId"
+    };
+    var reqParams = req.body;
+    var dateInterval = reqParams.date_interval;
+    var requestStatus = reqParams.req_type;
+    var user_id = reqParams.user_id;
+    getRequestByUserIdHelper(handlerInfo, requestStatus,user_id, dateInterval, function(err, result) {
+        if(err) {
+            return res.send({
+                "log": err,
+                "flag": constants.responseFlags.ACTION_FAILED
+            });
+        }
+        res.send({
+            "log": "Successfully fetched the requests",
+            "flag": constants.responseFlags.ACTION_COMPLETE,
+            "data": result
+        });
+    });
+}
+
+function getRequestByUserIdHelper(handlerInfo, requestStatus,user_id ,dateInterval, callback) {
+    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+    var tt =connection.query(sqlQuery,[requestStatus,user_id, dateInterval.start_date, dateInterval.end_date], function(err, result) {
+        if(err) {
+            logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
+            return callback("There was some error in getting requests data", null);
+        }
+        var requestArr = [];
+        for(var i = 0; i < result.length; i++) {
+            requestArr.push(result[i].req_id);
+        }
+        bookRequests.getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, reqArr) {
+          if(reqErr) {
+            return callback(reqErr, null);
+          }
+          callback(null, reqArr);
+        });
+    });
+}
 
 /**
  * <b>API [POST] /books-auth/get_vendors_engagement</b><br>
@@ -221,7 +274,7 @@ function getVendorEngagements(req, res) {
 }
 
 function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
-    var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, COUNT(*) as responses_provided "+ 
+    var sqlQuery = "SELECT distribution.vendor_id, vendors.vendor_name, COUNT(*) as responses_provided "+
         "FROM `tb_books_overall_distribution` as distribution "+
         "JOIN tb_vendors as vendors ON vendors.vendor_id = distribution.vendor_id "+
         "WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?) "+
