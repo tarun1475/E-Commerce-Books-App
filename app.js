@@ -44,7 +44,7 @@ app.use('/books-auth/documentation', express.static(__dirname+'/docs'));
 app.use(cors());
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");  
+  res.header("Access-Control-Allow-Origin", "*");
   next();
 });
 
@@ -145,7 +145,7 @@ app.get('/books-auth/insert_code_vevsa_contest'               , utils.logRequest
 app.get('/books-auth/verify_vendor_otp'               , utils.logRequest
    , utils.verifyVendorOTP
    , error);
-   
+
 app.get('/books-auth/verify_web_otp'               , utils.logRequest
    , utils.verifyWebOTP
    , users.createNewAppUser
@@ -337,7 +337,6 @@ app.post('/books-auth/get/details_vendor'        , utils.logRequest
     , error);
 
 app.get('/books-auth/searchUser'               , utils.logRequest
-    , utils.verifyPanelToken
     , users.searchUser
     , error);
 
