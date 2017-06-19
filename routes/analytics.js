@@ -192,6 +192,7 @@ function getOverallRequestsHelper(handlerInfo, requestStatus, dateInterval, call
         });
     });
 }
+
 /**
  * <b>API [POST] /books-auth/get_requests_by_user_id</b><br>
  * API to get overall panel requests
@@ -209,8 +210,8 @@ function getRequestByUserId(req, res) {
     var reqParams = req.body;
     var dateInterval = reqParams.date_interval;
     var requestStatus = reqParams.req_type;
-    var user_id = reqParams.user_id;
-    getRequestByUserIdHelper(handlerInfo, requestStatus,user_id, dateInterval, function(err, result) {
+    //var user_id = reqParams.user_id;
+    getRequestByUserIdHelper(handlerInfo, requestStatus, dateInterval, function(err, result) {
         if(err) {
             return res.send({
                 "log": err,
@@ -225,9 +226,9 @@ function getRequestByUserId(req, res) {
     });
 }
 
-function getRequestByUserIdHelper(handlerInfo, requestStatus,user_id ,dateInterval, callback) {
-    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
-    var tt =connection.query(sqlQuery,[requestStatus,user_id, dateInterval.start_date, dateInterval.end_date], function(err, result) {
+function getRequestByUserIdHelper(handlerInfo, requestStatus,dateInterval, callback) {
+    var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE status = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+    var tt =connection.query(sqlQuery,[requestStatus, dateInterval.start_date, dateInterval.end_date], function(err, result) {
         if(err) {
             logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
             return callback("There was some error in getting requests data", null);
