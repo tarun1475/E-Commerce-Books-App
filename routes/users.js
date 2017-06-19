@@ -42,7 +42,7 @@ exports.createWebReq                      = createWebReq;
 
 /**
  *
- * [POST] '/books-auth/check_version'<br> 
+ * [POST] '/books-auth/check_version'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @param {string} app_version - version of the app
  * @return {JSON} Response body contains simple json object that contains version.
@@ -107,7 +107,7 @@ function getReferralLeaderBoard(handlerInfo, callback) {
 
 /**
  *
- * [POST] '/books-auth/people_joined'<br> 
+ * [POST] '/books-auth/people_joined'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @param {string} app_version - version of the app
  * @return {JSON} Response body contains simple json object that contains version.
@@ -140,7 +140,7 @@ function peopleJoined(req, res) {
 
 /**
  *
- * [POST] '/books-auth/vevsa_contest_user_details'<br> 
+ * [POST] '/books-auth/vevsa_contest_user_details'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @param {string} app_version - version of the app
  * @return {JSON} Response body contains simple json object that contains version.
@@ -173,7 +173,7 @@ function userDetailsVevsaContest(req, res) {
 
 /**
  *
- * [POST] '/books-auth/vevsa_intern_income'<br> 
+ * [POST] '/books-auth/vevsa_intern_income'<br>
  * API to fetch vevsa intern income from tb_delivery, <br>Request body requires following parameters:
  * @param {string} user_id - id of the user
  * @return {JSON} Response body contains simple json object that contains version.
@@ -216,14 +216,14 @@ function vevsaInternIncome(req, res) {
 
   });
 
-   
+
   });
 }
 
 
 /**
  *
- * [POST] '/books-auth/vevsa_pro'<br> 
+ * [POST] '/books-auth/vevsa_pro'<br>
  * API to check the vevsa pro status from users, <br>Request body requires following parameters:
  * @param {string} user_id - id of the user
  * @return {JSON} Response body contains simple json object that contains version.
@@ -255,7 +255,7 @@ function vevsaPro(req, res) {
 
 /**
  *
- * [POST] '/books-auth/vevsa_money'<br> 
+ * [POST] '/books-auth/vevsa_money'<br>
  * API to check the vevsa money from wallet, <br>Request body requires following parameters:
  * @param {string} user_id - id of the user
  * @return {JSON} Response body contains simple json object that contains version.
@@ -288,7 +288,7 @@ function vevsaMoney(req, res) {
 
 /**
  *
- * [POST] '/books-auth/fetch_wallet_transaction'<br> 
+ * [POST] '/books-auth/fetch_wallet_transaction'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @return {JSON} Response body contains simple json object that contains version.
  *
@@ -321,7 +321,7 @@ function fetchWalletTransactions(req, res) {
 
 /**
  *
- * [POST] '/books-auth/transfer_vevsa_money'<br> 
+ * [POST] '/books-auth/transfer_vevsa_money'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @return {JSON} Response body contains simple json object that contains version.
  *
@@ -419,7 +419,7 @@ function updateVevsaMoneyFromHelper(handlerInfo,from_phone,updatedAmount){
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    
+
   });
 
 }
@@ -448,7 +448,7 @@ function updateVevsaMoneyToHelper(handlerInfo,to_phone,updatedAmount){
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    
+
   });
 
 }
@@ -457,12 +457,12 @@ function updateVevsaMoneyToHelper(handlerInfo,to_phone,updatedAmount){
 
 /**
  *
- * [POST] '/books-auth/create_user'<br> 
+ * [POST] '/books-auth/create_user'<br>
  * API to create a new user during signup/login, <br>Request body requires following parameters:
  * @param {string} user_name - name of the user
  * @param {string} user_email - email of the user
  * @param {string} user_phone - phone number of the user
- * @param {string} device_name - name of the device 
+ * @param {string} device_name - name of the device
  * @param {string} os_name - name of the operating system
  * @param {integer} user_city - city of user, 1 for chandigarh
  * @return {JSON} Response body contains simple json object that contains access_token
@@ -725,9 +725,8 @@ function searchUser(req, res) {
 }
 
 function searchUserHelper(handlerInfo, searchKey, callback) {
-  var sqlQuery = "SELECT * FROM tb_users " +
-      "WHERE user_id = ? OR user_name LIKE '%"+searchKey+"%' OR user_email LIKE '%"+searchKey+"%' " +
-      "OR user_address LIKE '%"+searchKey+"%' ";
+  var sqlQuery = "SELECT * FROM tb_users WHERE user_phone = ?";
+
   var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "searching user", err, result, tt.sql);
     if(err) {
@@ -861,7 +860,7 @@ function getMyCartCountOrders(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
- 
+
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -905,8 +904,8 @@ function getMyCartOrders(req, res) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    
-   
+
+
       res.send({
         "log": "Successfully fetched orders data",
         "flag": constants.responseFlags.ACTION_COMPLETE,
@@ -1072,7 +1071,7 @@ function createWebReq(req , res){
   var userBranch   = reqParams.branch;
   var userUrgent     = reqParams.urgent;
   var userCondition    = reqParams.quality;
-  
+
   //var access_token = crypto.createHash("md5").update(userPhone).digest("hex");
   var sqlQuery = "INSERT INTO web_books_request (user_name, user_phone , quality , sem , college "+
                  ",college_medium, branch , urgent) "+
