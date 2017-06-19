@@ -368,7 +368,7 @@ app.post('/books-auth/get_requests'              , utils.logRequest
     , error);
 
 app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
-    , utils.verifyPanelToken
+    
     , analytics.getRequestByUserId
     , error);
 
