@@ -27,7 +27,7 @@ exports.searchVendor           = searchVendor;
 /**
  * <b>API [POST] /books-auth/response_details </b> <br>
  * API to fetch vendor responses to request ids numbers
- * @param doesnt require any parameter. 
+ * @param doesnt require any parameter.
  * @return {JSON} - Response body contains log and flag
  */
 function vendorResponses(req , res){
@@ -44,7 +44,7 @@ function vendorResponses(req , res){
           "log":"There was some error in getting  details",
           "flag":constants.responseFlags.ACTION_FAILED
         });
-      } 
+      }
       bindVendorRates(handlerInfo,dateInterval,function(resErr,resRes){
         if(resErr){
           return res.send({
@@ -61,7 +61,7 @@ function vendorResponses(req , res){
         });
 
       });
-    
+
 });
 }
 function bindVendorRates(handlerInfo,dateInterval,callback){
@@ -71,7 +71,7 @@ function bindVendorRates(handlerInfo,dateInterval,callback){
      if(err) {
         return callback("There was some error in getting delivery details", null);
       }
-     
+
       callback(null, result);
 
 });
@@ -79,7 +79,7 @@ function bindVendorRates(handlerInfo,dateInterval,callback){
 /**
  * <b>API [POST] /books-auth/cash_inOut </b> <br>
  * API to insert vendor location details to database
- * @param doesnt require any parameter. 
+ * @param doesnt require any parameter.
  * @return {JSON} - Response body contains log and flag
  */
 function cashIncashOut(req , res){
@@ -111,7 +111,7 @@ function cashIncashOut(req , res){
 /**
  * <b>API [POST] /books-auth/location </b> <br>
  * API to insert vendor location details to database
- * @param doesnt require any parameter. 
+ * @param doesnt require any parameter.
  * @return {JSON} - Response body contains log and flag
  */
 function superVendorLocation(req , res){
@@ -141,7 +141,7 @@ function superVendorLocation(req , res){
 /**
  * <b>API [GET] /books-auth/fetch_numbers </b> <br>
  * API to fetch vendor mobile numbers
- * @param doesnt require any parameter. 
+ * @param doesnt require any parameter.
  * @return {JSON} - Response body contains log and flag
  */
 function fetchVendorNumbers(req , res){
@@ -170,7 +170,7 @@ function fetchVendorNumbers(req , res){
 /**
  * <b>API [POST] /books-auth/vendor_orders </b> <br>
  * API to fetch vendor orders
- * @param vendor_id 
+ * @param vendor_id
  * @return {JSON} - Response body contains log and flag
  */
 function vendorOrders(req, res) {
@@ -203,7 +203,7 @@ function getDeliveriesOfVendor(handlerInfo, vendorId,callback){
      if(err) {
         return callback("There was some error in getting delivery details", null);
       }
-     
+
       callback(null, result);
 
 });
@@ -211,7 +211,7 @@ function getDeliveriesOfVendor(handlerInfo, vendorId,callback){
 /**
  * <b>API [POST] '/req_book_auth/get_books_by_id' </b><br>
  * API responsible for getting book to the respective id.<br>
- * request body requires the following parameters: 
+ * request body requires the following parameters:
  * @param {INTEGER} book_id
 
 */
@@ -239,7 +239,7 @@ function getBookDetailsById(req, res) {
 }
 /**
  * <b>API [POST] '/books-auth/create_vendor' </b><br>
- * 
+ *
  * API to create a new vendor
  * @param {string} vendor_name - Name of the vendor
  * @param {string} vendor_email - Email of vendor
@@ -465,9 +465,7 @@ function searchVendor(req, res) {
 }
 
 function searchVendorHelper(handlerInfo, searchKey, callback) {
-  var sqlQuery = "SELECT * FROM tb_vendors " +
-      "WHERE vendor_id = ? OR vendor_name LIKE '%"+searchKey+"%' OR vendor_email LIKE '%"+searchKey+"%' " +
-      "OR vendor_address LIKE '%"+searchKey+"%' ";
+  var sqlQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ? ";
   var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
     if(err) {

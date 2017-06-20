@@ -341,7 +341,6 @@ app.get('/books-auth/searchUser'               , utils.logRequest
     , error);
 
 app.get('/books-auth/searchVendor'              , utils.logRequest
-    , utils.verifyPanelToken
     , vendors.searchVendor
     , error);
 
@@ -368,7 +367,7 @@ app.post('/books-auth/get_requests'              , utils.logRequest
     , error);
 
 app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
-    
+
     , analytics.getRequestByUserId
     , error);
 
