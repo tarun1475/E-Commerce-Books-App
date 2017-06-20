@@ -387,6 +387,10 @@ app.post('/books-auth/get_delivery_details'     , utils.logRequest
    , requests.getDeliveryDetailsById
    , error);
 
+app.get('/books-auth/get_delivery_details_by_userid' , utils.logRequest
+   ,requests.getDeliveryDetailsByUserId
+   ,error);
+
 app.post('/books-auth/update_delivery_status'       , utils.logRequest
    , utils.verifyPanelToken
    , requests.updateDeliveryStatus

@@ -31,7 +31,8 @@ exports.putBooksInDb                     = putBooksInDb;
 exports.putBookRequestResponse          = putBookRequestResponse;
 exports.getMinimumPriceResponse         = getMinimumPriceResponse;
 exports.confirmBookOrder                = confirmBookOrder;
-exports.getDeliveryDetailsById          = getDeliveryDetailsById;
+exports.getDeliveryDetailsById          = getDeliveryDetails41ById;
+exports.getDeliveryDetailsByUserId      = getDeliveryDetailsByUserId;
 exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getPendingRequestArr            = getPendingRequestArr;
 exports.getRequestDetailsById           = getRequestDetailsById;
@@ -46,7 +47,7 @@ exports.updateDeliveryStatus            = updateDeliveryStatus;
  * <b>API [POST] '/req_book_auth/raise_request' </b><br>
  * API responsible for raising a book request.<br>
  * request body requires the following parameters:
- * @param {STRING} token - access token of user 
+ * @param {STRING} token - access token of user
  * @param {INTEGER} req_type - 0: buy, 1: Sell
  * @param {OBJECT} books - a json object of book requests
  * @param {INTEGER} book_req_category -  0 : College, 1 : School, 2 : Competitions, 3 : Novel
@@ -159,7 +160,7 @@ function searchCartBook(req, res) {
    var key = reqParams.key;
    var book_category = "College";
 
- 
+
   var sqlQuery = "SELECT * FROM tb_books_db WHERE book_name  LIKE '%"+ key +"%' AND book_category != ?; ";
   var jj = connection.query(sqlQuery,[book_category], function(err, result) {
     if(err) {
@@ -187,7 +188,7 @@ function isVevsaPro(req, res) {
    var reqParams   = req.body;
    var user_id = reqParams.user_id;
 
- 
+
   var sqlQuery = "SELECT membership_status FROM tb_membership WHERE user_id = ? ";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
@@ -218,7 +219,7 @@ function insertMembershipDetails(req, res) {
   var membership_price = reqParams.membership_price;
    var user_id = reqParams.user_id;
 
- 
+
   var sqlQuery = "INSERT INTO tb_membership (user_id,membership_status,membership_price,membership_date) VALUES (?,?,?, NOW())";
   var jj = connection.query(sqlQuery,[user_id,membership_status,membership_price], function(err, result) {
     if(err) {
@@ -243,7 +244,7 @@ function memberShip(req, res) {
     "apiHandler": "memberShip"
   };
 var book_id = "62";
- 
+
   var sqlQuery = "SELECT * FROM tb_books_db WHERE book_id = ? ";
   var jj = connection.query(sqlQuery,[book_id], function(err, result) {
     if(err) {
@@ -282,7 +283,7 @@ function confirmCartOrder(req, res) {
   var membership_status = req.body.membership_status;
   var membership_price = req.body.membership_price;
 
-   // send email to admins 
+   // send email to admins
         var from     = 'support@vevsa.com';
         var to       = config.get('emailRecipents.orderConfirmationEmail').split(',');
         var subject  = 'ORDER CONFIRMATION : Cart Order id '+order_id;
@@ -324,7 +325,7 @@ function confirmCartOrder(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-  }); 
+  });
   for(var i=0 ; i< books.length; i++){
   insertCartOrder(handlerInfo,order_id, userId, books[i], function(orderErr, orderRes){
        if(orderErr) {
@@ -415,7 +416,7 @@ function removeCartItems(req, res) {
   var book_id = reqParams.book_id;
   var user_id = reqParams.user_id;
 
- 
+
   var sqlQuery = "DELETE from tb_cart_db WHERE book_id = ? AND user_id =?";
   var jj = connection.query(sqlQuery,[book_id,user_id], function(err, result) {
     if(err) {
@@ -442,7 +443,7 @@ function cartDetails(req, res) {
   var reqParams   = req.body;
   var user_id = reqParams.user_id;
 
- 
+
   var sqlQuery = "SELECT book_id from tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
@@ -469,7 +470,7 @@ function cartItemsCounter(req, res) {
 
   var reqParams   = req.body;
   var user_id = reqParams.user_id;
- 
+
   var sqlQuery = "SELECT COUNT(book_id) as items,SUM(book_price) as totalPrice FROM tb_cart_db WHERE user_id = ?";
   var jj = connection.query(sqlQuery,[user_id], function(err, result) {
     if(err) {
@@ -515,7 +516,7 @@ function putBooksToCart(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
- 
+
   var sqlQuery = "INSERT INTO tb_cart_db (user_id, book_id,book_price, cart_status) VALUES (?, ?, ?,?)";
   var jj = connection.query(sqlQuery,[user_id,book_id,book_price,cart_status], function(err, result) {
     if(err) {
@@ -542,7 +543,7 @@ function fetchDetailsByBookId(req, res) {
 
   var reqParams   = req.body;
   var book_id = reqParams.book_id;
- 
+
   var sqlQuery = " SELECT * FROM tb_books_db WHERE book_id = ? ";
   var jj = connection.query(sqlQuery,[book_id], function(err, result) {
     if(err) {
@@ -568,7 +569,7 @@ function fetchBooksDb(req, res) {
     "apiModule": "bookRequests",
     "apiHandler": "fetchBooksDb"
   };
- 
+
   var sqlQuery = " SELECT * FROM tb_books_db ";
   var jj = connection.query(sqlQuery, function(err, result) {
     if(err) {
@@ -589,7 +590,7 @@ function fetchBooksDb(req, res) {
  * API responsible for getting book requests depending upon their status.<br>
  * Request body requires the following parameters:
  * @param {STRING}  token      - access token
- * @param {INTEGER} start_from - start index  
+ * @param {INTEGER} start_from - start index
  * @param {INTEGER} page_size  - end index
  * @param {INTEGER} req_status - status for request <br>
  *  i.e {0 -> pending, 1-> approved, 2 -> disapproved}
@@ -635,7 +636,7 @@ function getBookSuperVendorRequests(req, res) {
  * API responsible for getting book requests depending upon their status.<br>
  * Request body requires the following parameters:
  * @param {STRING}  token      - access token
- * @param {INTEGER} start_from - start index  
+ * @param {INTEGER} start_from - start index
  * @param {INTEGER} page_size  - end index
  * @param {INTEGER} req_status - status for request <br>
  *  i.e {0 -> pending, 1-> approved, 2 -> disapproved}
@@ -692,7 +693,7 @@ function getBookRequests(req, res) {
  * API responsible for submitting a request's response from a particular vendor.<br>
  * @param {STRING} token - access token
  * @param {INTEGER} req_id - request id of book request
- * @param {ARRAY} books - An Array of objects 
+ * @param {ARRAY} books - An Array of objects
  */
 function putBookRequestSuperVendorResponse(req, res) {
   var handlerInfo    = {
@@ -704,14 +705,14 @@ function putBookRequestSuperVendorResponse(req, res) {
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
   var status         = reqParams.bookStatus;
-  
- 
+
+
 
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
   }
 
-  
+
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
     if(dupErr) {
@@ -782,7 +783,7 @@ function putBooksInDb(req, res) {
       });
 
     });
-  
+
 }
 
 
@@ -791,7 +792,7 @@ function putBooksInDb(req, res) {
  * API responsible for submitting a request's response from a particular vendor.<br>
  * @param {STRING} token - access token
  * @param {INTEGER} req_id - request id of book request
- * @param {ARRAY} books - An Array of objects 
+ * @param {ARRAY} books - An Array of objects
  */
 function putBookRequestResponse(req, res) {
   var handlerInfo    = {
@@ -803,14 +804,14 @@ function putBookRequestResponse(req, res) {
   var requestId      = reqParams.req_id;
   var books          = reqParams.books;
   var status         = reqParams.bookStatus;
-  
- 
+
+
 
   if(utils.checkBlank([vendorId, requestId, books])) {
     return res.send(constants.parameterMissingResponse);
   }
 
-  
+
   var checkDup = "SELECT * FROM tb_books_response WHERE vendor_id = ? AND request_id = ?";
   connection.query(checkDup, [vendorId, requestId], function(dupErr, dupRes) {
     if(dupErr) {
@@ -1044,7 +1045,7 @@ function confirmBookOrder(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-    if(reqStatus == constants.bookRequestStatus.APPROVED) { 
+    if(reqStatus == constants.bookRequestStatus.APPROVED) {
       var totalPrice = 0;
       var urgentDeliveryCharges = 0;
       for(var i = 0; i < responseData.length; i++)
@@ -1059,7 +1060,7 @@ function confirmBookOrder(req, res) {
             "flag": constants.responseFlags.ACTION_FAILED
           });
         }
-        // send email to admins 
+        // send email to admins
         var from     = 'support@vevsa.com';
         var to       = config.get('emailRecipents.orderConfirmationEmail').split(',');
         var subject  = 'ORDER CONFIRMATION : Request id '+requestId;
@@ -1076,7 +1077,7 @@ function confirmBookOrder(req, res) {
                        "<th align=center>Category</th>"+
                        "<th align=center>Condition</th>"+
                        "<th align=center>Vevsa Comission</th></tr>";
-        var bookCondition = ["Old" , "New"];             
+        var bookCondition = ["Old" , "New"];
         var bookCategory = ["College", "School", "Competition", "Novel"];
         var totMrp = 0;
         for(var i = 0; i < responseData.length; i++) {
@@ -1179,8 +1180,8 @@ function deliverBooksToUser(handlerInfo, requestId, userId,refer_by,deliveryAddr
       else if(responseData[i].vcondition == 1 || (responseData[i].price/responseData[i].mrp) > .7)
       var vevsaComission = (responseData[i].mrp * .05);
       else
-       var vevsaComission = (responseData[i].mrp * .10); 
-      asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId,refer_by,responseData[i].book_id, responseData[i].vendor_id, 
+       var vevsaComission = (responseData[i].mrp * .10);
+      asyncTasks.push(logDeliveryDistribution.bind(null, handlerInfo, deliveryId,refer_by,responseData[i].book_id, responseData[i].vendor_id,
         responseData[i].price, responseData[i].mrp, vevsaComission));
     }
     async.parallel(asyncTasks, function(asyncErr, asyncRes) {
@@ -1283,6 +1284,58 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
     });
   });
 }
+
+
+/**
+ * <b>API [GET] /books-auth/get_delivery_details_by_userid</b><br>
+ * API to fetch delivery details corresponding to a user id,<br>
+ * Request body requires the following parameters
+ *
+ * @param delivery_id {INTEGER} user id
+ */
+function getDeliveryDetailsByUserId(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "getDeliveryDetailsByUserIdById"
+  };
+  var reqParams       = req.query;
+  var user_id     = parseInt(reqParams.user_id);
+
+  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+}
+
+/**
+ * Helper function to get delivery details for getDeliveryDetails API
+ * @param deliveryId {INTEGER} delivery id
+ * @param callback {FUNCTION} callback function
+ */
+function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
+  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? ";
+  var tt = connection.query(sqlQuery, [user_id], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+   callback(null, deliveryData);
+    });
+
+}
+
 
 function getPendingRequestArr(requestStatus, callback) {
   var sqlQuery = "SELECT request_id FROM tb_book_requests WHERE approval_status = ?";
@@ -1446,4 +1499,3 @@ function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
     callback(null, result);
   });
 }
-
