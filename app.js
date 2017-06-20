@@ -332,7 +332,6 @@ app.post('/books-auth/get/details_user'          , utils.logRequest
     , error);
 
 app.post('/books-auth/get/details_vendor'        , utils.logRequest
-    , utils.verifyPanelToken
     , vendors.getVendorDetailsPanel
     , error);
 

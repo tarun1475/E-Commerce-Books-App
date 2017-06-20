@@ -333,19 +333,19 @@ function updateVendorAccountStatus(handlerInfo, vendorId, status, callback) {
 /**
  * <b>API [POST] /books-auth/get/details_vendor</b> <br>
  * API to get vendor details
- * @param token - {STRING} access token
  * @param vendor_id - {INTERGER} vendor id
  * @return {JSON} - Response body contains vendor detail
  */
+
 function getVendorDetailsPanel(req, res) {
   var handlerInfo = {
     "apiModule": "Vendors",
     "apiHandler": "getVendorDetailsPanel"
   };
   var reqParams = req.body;
-  var vendorId = parseInt(reqParams.vendor_id || 0);
+  var vendorPhone = parseInt(reqParams.vendor_phone || 0);
   var deliveryPagination = reqParams.deliveryPagination;
-  getVendorDetails(handlerInfo, vendorId, deliveryPagination, function(err, result) {
+  getVendorDetails(handlerInfo, vendorPhone, deliveryPagination, function(err, result) {
     if(err) {
       return res.send({
         "log": err,
@@ -360,17 +360,18 @@ function getVendorDetailsPanel(req, res) {
   });
 }
 
-function getVendorDetails(handlerInfo, vendor_id, deliveryPagination, callback) {
+function getVendorDetails(handlerInfo, vendor_phone, deliveryPagination, callback) {
   var sqlQuery = "SELECT vendor_id, vendor_name, vendor_phone, vendor_email, vendor_address, vendor_device_name, " +
       "vendor_device_os, vendor_city " +
       "FROM tb_vendors " +
-      "WHERE vendor_id = ?";
-  var tt = connection.query(sqlQuery, [vendor_id], function(err, result) {
+      "WHERE vendor_phone = ?";
+  var tt = connection.query(sqlQuery, [vendor_phone], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
     if(err) {
       return callback("There was some error in getting vendor details", null);
     }
     var responseData = {};
+    var vendor_id                  = result[0].vendor_id;
     responseData.vendor_id         = result[0].vendor_id;
     responseData.vendor_name       = result[0].vendor_name;
     responseData.vendor_phone      = result[0].vendor_phone;
