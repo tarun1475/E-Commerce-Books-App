@@ -1296,7 +1296,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
 function getDeliveryDetailsByUserId(req, res) {
   var handlerInfo     = {
     "apiModule" : "bookRequests",
-    "apiHandler": "getDeliveryDetailsByUserIdById"
+    "apiHandler": "getDeliveryDetailsByUserId"
   };
   var reqParams       = req.query;
   var user_id     = parseInt(reqParams.user_id);
@@ -1331,7 +1331,7 @@ function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
     if(deliveryRes.length == 0) {
       return callback("No data found corresponding to this delivery id", null);
     }
-   callback(null, deliveryData);
+   callback(null, deliveryRes);
     });
 
 }
