@@ -343,7 +343,7 @@ function getVendorDetailsPanel(req, res) {
     "apiHandler": "getVendorDetailsPanel"
   };
   var reqParams = req.body;
-  var vendorPhone = parseInt(reqParams.vendor_phone || 0);
+  var vendorPhone = reqParams.vendor_phone;
   var deliveryPagination = reqParams.deliveryPagination;
   getVendorDetails(handlerInfo, vendorPhone, deliveryPagination, function(err, result) {
     if(err) {
