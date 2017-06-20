@@ -368,8 +368,8 @@ function getVendorDetails(handlerInfo, vendor_phone,  callback) {
       return callback("There was some error in getting vendor details", null);
     }
     var responseData = {};
-    callback(null, responseData);
-    });
+    callback(null, result);
+
   });
 }
 
