@@ -344,8 +344,7 @@ function getVendorDetailsPanel(req, res) {
   };
   var reqParams = req.body;
   var vendorPhone = reqParams.vendor_phone;
-  var deliveryPagination = reqParams.deliveryPagination;
-  getVendorDetails(handlerInfo, vendorPhone, deliveryPagination, function(err, result) {
+  getVendorDetails(handlerInfo, vendorPhone,function(err, result) {
     if(err) {
       return res.send({
         "log": err,
@@ -360,43 +359,16 @@ function getVendorDetailsPanel(req, res) {
   });
 }
 
-function getVendorDetails(handlerInfo, vendor_phone, deliveryPagination, callback) {
-  var sqlQuery = "SELECT vendor_id, vendor_name, vendor_phone, vendor_email, vendor_address, vendor_device_name, " +
-      "vendor_device_os, vendor_city " +
-      "FROM tb_vendors " +
-      "WHERE vendor_phone = ?";
+function getVendorDetails(handlerInfo, vendor_phone,  callback) {
+  var sqlQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ?";
+
   var tt = connection.query(sqlQuery, [vendor_phone], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting vendor details", err, result, tt.sql);
     if(err) {
       return callback("There was some error in getting vendor details", null);
     }
     var responseData = {};
-    var vendor_id                  = result[0].vendor_id;
-    responseData.vendor_id         = result[0].vendor_id;
-    responseData.vendor_name       = result[0].vendor_name;
-    responseData.vendor_phone      = result[0].vendor_phone;
-    responseData.vendor_email      = result[0].vendor_email;
-    responseData.vendor_address    = result[0].vendor_address;
-    responseData.vendor_device_name= result[0].vendor_device_name;
-    responseData.vendor_device_os  = result[0].vendor_device_os;
-    responseData.vendor_city       = result[0].vendor_city;
-    var getDeliveryQuery = "SELECT deliveryDistribution.delivery_id, deliveryDistribution.book_id, " +
-        "deliveryDistribution.book_price, deliveryDistribution.mrp, deliveryDistribution.vevsa_commission, " +
-        "books.book_name, books.book_stream, books.book_semester, books.type, books.book_author, " +
-        "books.book_category, books.publisher, deliveryDistribution.logged_on, " +
-        "books.class, books.competition_name, books.is_ncert, books.is_guide " +
-        "FROM `tb_delivery_distribution` as deliveryDistribution " +
-        "JOIN tb_books as books ON books.book_id = deliveryDistribution.book_id " +
-        "WHERE deliveryDistribution.vendor_id = ? " +
-        "ORDER BY deliveryDistribution.logged_on DESC " +
-        "LIMIT ?, ?";
-    var jj = connection.query(getDeliveryQuery, [vendor_id, deliveryPagination.start_from, deliveryPagination.page_size], function(delErr, deliveriesData) {
-      logging.logDatabaseQuery(handlerInfo, "getting deliveries for a vendor", delErr, deliveriesData, jj.sql);
-      if(delErr) {
-        return callback("There was some error in getting delivery details", null);
-      }
-      responseData.recent_deliveries = deliveriesData;
-      callback(null, responseData);
+    callback(null, responseData);
     });
   });
 }
