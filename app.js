@@ -383,7 +383,6 @@ app.post('/books-auth/get_deliveries'            , utils.logRequest
     , error);
 
 app.post('/books-auth/get_delivery_details'     , utils.logRequest
-   , utils.verifyPanelToken
    , requests.getDeliveryDetailsById
    , error);
 
