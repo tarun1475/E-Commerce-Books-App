@@ -1306,7 +1306,7 @@ function getDeliveryDetailsByUserId(req, res) {
   var user_id     = parseInt(reqParams.user_id);
   var dateInterval = reqParams.date_interval;
 
-  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,dateInterval function(delErr, deliveryData) {
+  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,dateInterval ,function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
