@@ -1287,8 +1287,6 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
 });
 }
 
-
-
 /**
  * <b>API [GET] /books-auth/get_delivery_details_by_userid</b><br>
  * API to fetch delivery details corresponding to a user id,<br>
