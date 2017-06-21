@@ -1290,7 +1290,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
 
 
 /**
- * <b>API [POST] /books-auth/get_delivery_details_by_userid</b><br>
+ * <b>API [GET] /books-auth/get_delivery_details_by_userid</b><br>
  * API to fetch delivery details corresponding to a user id,<br>
  * Request body requires the following parameters
  *
@@ -1301,11 +1301,10 @@ function getDeliveryDetailsByUserId(req, res) {
     "apiModule" : "bookRequests",
     "apiHandler": "getDeliveryDetailsByUserId"
   };
-  var reqParams       = req.body;
-  var date_interval   = reqParams.date_interval;
+  var reqParams       = req.query;
   var user_id     = parseInt(reqParams.user_id);
 
-  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,date_interval,function(delErr, deliveryData) {
+  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
@@ -1326,9 +1325,9 @@ function getDeliveryDetailsByUserId(req, res) {
  * @param deliveryId {INTEGER} delivery id
  * @param callback {FUNCTION} callback function
  */
-  function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id, date_interval, callback) {
-  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
-  var tt = connection.query(sqlQuery, [user_id,date_interval.start_date, dateInterval.end_date], function(err, deliveryRes) {
+  function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
+  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? ";
+  var tt = connection.query(sqlQuery, [user_id], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
