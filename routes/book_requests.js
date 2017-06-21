@@ -1285,9 +1285,9 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
       deliveryObj[deliveryId]      = deliveryData;
       callback(null, deliveryData);
     });
-}
 });
 }
+
 
 
 /**
