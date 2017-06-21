@@ -1325,7 +1325,7 @@ function getDeliveryDetailsByUserId(req, res) {
  * @param callback {FUNCTION} callback function
  */
   function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id, date_interval, callback) {
-  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? AND user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
   var tt = connection.query(sqlQuery, [user_id, date_interval.start_date ,date_interval.end_date], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
