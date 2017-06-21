@@ -1233,6 +1233,8 @@ function getDeliveryDetailsById(req, res) {
       "data": deliveryData
     });
   });
+
+
 }
 
 /**
@@ -1254,6 +1256,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
     if(deliveryRes.length == 0) {
       return callback("No data found corresponding to this delivery id", null);
     }
+
     var deliveryData = {};
     deliveryData.delivery_id       = deliveryRes[0].delivery_id;
     deliveryData.user_id           = deliveryRes[0].user_id;
@@ -1282,8 +1285,8 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
       deliveryObj[deliveryId]      = deliveryData;
       callback(null, deliveryData);
     });
-  });
 }
+});
 
 
 /**
@@ -1298,10 +1301,12 @@ function getDeliveryDetailsByUserId(req, res) {
     "apiModule" : "bookRequests",
     "apiHandler": "getDeliveryDetailsByUserId"
   };
+
   var reqParams       = req.query;
   var user_id     = parseInt(reqParams.user_id);
+  var dateInterval = reqParams.date_interval;
 
-  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  function(delErr, deliveryData) {
+  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,dateInterval function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
@@ -1314,6 +1319,7 @@ function getDeliveryDetailsByUserId(req, res) {
       "data": deliveryData
     });
   });
+
 }
 
 /**
@@ -1321,9 +1327,9 @@ function getDeliveryDetailsByUserId(req, res) {
  * @param deliveryId {INTEGER} delivery id
  * @param callback {FUNCTION} callback function
  */
-function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
-  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? ";
-  var tt = connection.query(sqlQuery, [user_id], function(err, deliveryRes) {
+  function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id, dateInterval,  callback) {
+  var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
+  var tt = connection.query(sqlQuery, [user_id],[dateInterval], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
@@ -1331,25 +1337,14 @@ function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
     if(deliveryRes.length == 0) {
       return callback("No data found corresponding to this delivery id", null);
     }
+
    callback(null, deliveryRes);
     });
 
-}
 
 
-function getPendingRequestArr(requestStatus, callback) {
-  var sqlQuery = "SELECT request_id FROM tb_book_requests WHERE approval_status = ?";
-  connection.query(sqlQuery, [requestStatus], function(err, result) {
-    if(err) {
-      return callback(err, null);
-    }
-    var reqIDArr = [];
-    for(var i = 0; i < result.length; i++) {
-      reqIDArr.push(result[i].request_id);
-    }
-    callback(null, reqIDArr);
-  });
 }
+
 
 function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
   var sqlQuery  = "SELECT requests.req_id, requests.generated_on, requests.status, users.user_id, users.user_name ,users.user_phone, "+
