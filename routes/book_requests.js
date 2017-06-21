@@ -36,6 +36,7 @@ exports.getDeliveryDetailsByUserId      = getDeliveryDetailsByUserId;
 exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
 exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
+exports.requestReportByDeliveryId       = requestReportByDeliveryId;
 exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 exports.updateDeliveryStatus            = updateDeliveryStatus;
@@ -1341,6 +1342,68 @@ function getDeliveryDetailsByUserId(req, res) {
 
 
 }
+
+/**
+ * <b>API [POST] /books-auth/get_delivery_details_by_userid</b><br>
+ * API to fetch delivery details corresponding to a user id,<br>
+ * Request body requires the following parameters
+ *
+ * @param delivery_id {INTEGER} delivery_id
+ * @param is_delivered {INTEGER} status whether it is delivered
+ */
+function requestReportByDeliveryId(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "requestReportByDeliveryId",
+    "apiHandler": "requestReportByDeliveryIdHandler"
+  };
+  var reqParams       = req.body;
+  var delivery_id         = parseInt(reqParams.delivery_id);
+  //var is_delivered   = reqParams.is_delivered;
+  requestReportByDeliveryIdHelper(handlerInfo,delivery_id , function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+
+}
+
+/**
+ * Helper function to get delivery details for getDeliveryDetails API
+ * @param deliveryId {INTEGER} delivery id
+ * @param deliverystatus {INTEGER} is_delivered
+ * @param callback {FUNCTION} callback function
+ */
+  function requestReportByDeliveryIdHelper(handlerInfo, delivery_id, callback) {
+  var sqlQuery = "SELECT tb_delivery_distribution.delivery_id, tb_delivery_distribution.book_id , "+
+  "tb_delivery_distribution.book_price, tb_delivery_distribution.vendor_id ,tb_books.book_id ,"+
+  "tb_books.book_name, tb_books.book_author FROM tb_delivery_distribution "+
+  "INNER JOIN tb_books ON tb_delivery_distribution.book_id=tb_books.book_id WHERE delivery_id = ?";
+  var tt = connection.query(sqlQuery, [delivery_id], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+
+   callback(null, deliveryRes);
+    });
+
+
+
+}
+
+
+
 
 
 function getRequestDetailsById(handlerInfo, request_id, requestObj, callback) {
