@@ -1287,6 +1287,7 @@ function getDeliveryDetailsHelper(handlerInfo, deliveryId, deliveryObj, callback
     });
 }
 });
+}
 
 
 /**
