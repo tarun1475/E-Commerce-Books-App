@@ -34,7 +34,6 @@ exports.confirmBookOrder                = confirmBookOrder;
 exports.getDeliveryDetailsById          = getDeliveryDetailsById;
 exports.getDeliveryDetailsByUserId      = getDeliveryDetailsByUserId;
 exports.getMinimumBookResponseWrapper   = getMinimumBookResponseWrapper;
-exports.getPendingRequestArr            = getPendingRequestArr;
 exports.getRequestDetailsById           = getRequestDetailsById;
 exports.getRequestDetailsWrapper        = getRequestDetailsWrapper;
 exports.getDeliveries                   = getDeliveries;
