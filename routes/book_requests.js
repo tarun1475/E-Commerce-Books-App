@@ -1301,12 +1301,10 @@ function getDeliveryDetailsByUserId(req, res) {
     "apiModule" : "bookRequests",
     "apiHandler": "getDeliveryDetailsByUserId"
   };
-
   var reqParams       = req.query;
   var user_id     = parseInt(reqParams.user_id);
-  var dateInterval = reqParams.date_interval;
 
-  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,dateInterval ,function(delErr, deliveryData) {
+  getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  function(delErr, deliveryData) {
     if(delErr) {
       return res.send({
         "log" : delErr,
@@ -1327,9 +1325,9 @@ function getDeliveryDetailsByUserId(req, res) {
  * @param deliveryId {INTEGER} delivery id
  * @param callback {FUNCTION} callback function
  */
-  function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id, dateInterval,  callback) {
+  function getDeliveryDetailsByUserIdHelper(handlerInfo, user_id,  callback) {
   var sqlQuery = "SELECT * from tb_delivery WHERE user_id = ? AND DATE(generated_on) BETWEEN DATE(?) AND DATE(?)";
-  var tt = connection.query(sqlQuery, [user_id],[dateInterval], function(err, deliveryRes) {
+  var tt = connection.query(sqlQuery, [user_id], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
