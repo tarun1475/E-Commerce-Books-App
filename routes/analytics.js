@@ -13,7 +13,7 @@ exports.getOverallReportPanel = getOverallReportPanel;
 exports.getOverallRequests    = getOverallRequests;
 exports.getRequestByUserId    = getRequestByUserId;
 exports.getVendorEngagements  = getVendorEngagements;
-
+exports.totalSales            = totalSales;
 
 /**
  * [POST] '/books-auth/check_response'<br>
@@ -288,4 +288,36 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
         }
         callback(null, result);
     });
+}
+
+
+
+/**
+ * <b>API [GET] /total_sales</b><br>
+ * API to fetch totalsales,<br>
+ * Request body requires the following parameters
+ */
+
+function totalSales(req, res) {
+
+  var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution ";
+
+  var tt = connection.query(sqlQuery , function(err, totalSalesRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, totalSalesRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+
+    res.send(
+     {"log": "Successfully fetched vendor engagement",
+     "flag": constants.responseFlags.ACTION_COMPLETE,
+     "data":totalSalesRes
+     }
+
+    );
+ });
+
 }

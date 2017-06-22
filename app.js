@@ -161,6 +161,7 @@ app.get('/books-auth/get_vendor_sales'         , utils.logRequest
   , vendors.getVendorSales
   , error);
 
+
 app.post('/books-auth/login'                   , utils.logRequest
   , utils.loginUser
   , error);
@@ -366,6 +367,11 @@ app.post('/books-auth/report'                    , utils.logRequest
 app.post('/books-auth/check_response'              , utils.logRequest
     , analytics.checkResponse
     , error);
+
+app.get('/books-auth/total_sales'         , utils.logRequest
+    , analytics.totalSales
+    , error);
+
 app.post('/books-auth/get_requests'              , utils.logRequest
     , utils.verifyPanelToken
     , analytics.getOverallRequests
