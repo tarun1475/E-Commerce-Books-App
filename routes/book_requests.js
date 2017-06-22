@@ -1563,12 +1563,14 @@ function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
 
 
 /**
- * <b>API [POST] /books-auth/get_cart_details_by_userid</b><br>
+ * <b>API [POST] /books-auth/cart_details_by_userid</b><br>
  * API to fetch delivery details corresponding to a user id,<br>
  * Request body requires the following parameters
  *
  * @param delivery_id {INTEGER} user id
+ * @param date_interval {OBJECT} date_interval
  */
+
 function cartDetailsByUserId(req, res) {
   var handlerInfo     = {
     "apiModule" : "bookRequests",
@@ -1625,8 +1627,8 @@ function cartDetailsByUserId(req, res) {
 
 function bookDetailsByOrderId(req, res) {
   var handlerInfo     = {
-    "apiModule" : "requestReportByDeliveryId",
-    "apiHandler": "requestReportByDeliveryIdHandler"
+    "apiModule" : "bookRequests",
+    "apiHandler": "bookDetailsByOrderId"
   };
   var reqParams       = req.body;
   var order_id        = parseInt(reqParams.order_id);
