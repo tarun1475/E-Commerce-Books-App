@@ -292,10 +292,10 @@ app.post('/req_book_auth/put_response'          , utils.logRequest
    , requests.putBookRequestResponse
    , error);
 
-/*app.post('/req_book_auth/book_details_by_order_id'        , utils.logRequest
+app.post('/req_book_auth/book_details_by_order_id'        , utils.logRequest
    , requests.bookDetailsByOrderId
    , error);
-*/
+
 app.post('/books-auth/confirm_book_order'       , utils.logRequest
    , utils.verifyClientToken
    , requests.confirmBookOrder
