@@ -1655,8 +1655,8 @@ function bookDetailsByOrderId(req, res) {
  */
   function bookDetailsByOrderIdHelper(handlerInfo, order_id, callback) {
   var sqlQuery = "SELECT tb_delivery_db.order_id, tb_delivery_db.book_id , "+
-  "tb_books_db.book_id , tb_books_db.book_name, tb_books_db.book_author FROM tb_delivery_db"+
-  "INNER JOIN tb_books_db ON tb_delivery_db.book_id=tb_books_db.book_id WHERE order_id = ?";
+  "tb_books_db.book_id , tb_books_db.book_name, tb_books_db.book_author FROM tb_delivery_db "+
+  "INNER JOIN tb_books_db ON tb_delivery_db.book_id=tb_books_db.book_id WHERE order_id = ? ";
   var tt = connection.query(sqlQuery, [order_id], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
