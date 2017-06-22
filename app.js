@@ -267,6 +267,9 @@ app.post('/req_book_auth/remove_cart_items'          , utils.logRequest
 app.post('/req_book_auth/cart_details'          , utils.logRequest
    , requests.cartDetails
    , error);
+app.post('/req_book_auth/cart_details_by_user_id'          , utils.logRequest
+   , requests.cartDetailsByUserId
+   , error);
 app.post('/req_book_auth/cart_item_counter'          , utils.logRequest
    , requests.cartItemsCounter
    , error);
@@ -289,6 +292,9 @@ app.post('/req_book_auth/put_response'          , utils.logRequest
    , requests.putBookRequestResponse
    , error);
 
+app.post('/req_book_auth/book_details_by_order_id   '          , utils.logRequest
+   , requests.bookDetailsByOrderId
+   , error);
 
 app.post('/books-auth/confirm_book_order'       , utils.logRequest
    , utils.verifyClientToken

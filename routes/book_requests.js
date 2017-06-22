@@ -22,6 +22,7 @@ exports.isVevsaPro                      = isVevsaPro;
 exports.memberShip                      = memberShip;
 exports.removeCartItems                 = removeCartItems ;
 exports.cartDetails                     = cartDetails;
+exports.cartDetailsByUserId             = cartDetailsByUserId;
 exports.cartItemsCounter                = cartItemsCounter;
 exports.putBooksToCart                  = putBooksToCart;
 exports.fetchBooksDb                    = fetchBooksDb;
@@ -40,6 +41,7 @@ exports.requestReportByDeliveryId       = requestReportByDeliveryId;
 exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 exports.updateDeliveryStatus            = updateDeliveryStatus;
+exports.bookDetailsByOrderId            = bookDetailsByOrderId;
 
 
 
@@ -1553,4 +1555,118 @@ function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
     }
     callback(null, result);
   });
+}
+
+
+
+
+
+
+/**
+ * <b>API [POST] /books-auth/get_cart_details_by_userid</b><br>
+ * API to fetch delivery details corresponding to a user id,<br>
+ * Request body requires the following parameters
+ *
+ * @param delivery_id {INTEGER} user id
+ */
+function cartDetailsByUserId(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "cartDetailsUserId"
+  };
+  var reqParams       = req.body;
+  var user_id         = parseInt(reqParams.user_id);
+  var date_interval   = reqParams.date_interval;
+  cartDetailsByUserIdHelper(handlerInfo, user_id, date_interval , function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+}
+
+/**
+ * Helper function to get cart details for cartDetailsByUserId API
+ * @param deliveryId {INTEGER} delivery id
+ * @param dateInterval {OBJECT} start_date and end_date
+ * @param callback {FUNCTION} callback function
+ */
+  function cartDetailsByUserIdHelper(handlerInfo, user_id, date_interval, callback) {
+  var sqlQuery = "SELECT * from tb_orders WHERE user_id = ? AND DATE(date_registered) BETWEEN DATE(?) AND DATE(?)";
+  var tt = connection.query(sqlQuery,[ user_id , date_interval.start_date , date_interval.end_date ], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+
+   callback(null, deliveryRes);
+    });
+}
+
+
+
+/**
+ * <b>API [POST] /books-auth/book_details_by_order_id</b><br>
+ * API to fetch delivery details corresponding to a user id,<br>
+ * Request body requires the following parameters
+ *
+ * @param OrderId {INTEGER} order_id
+ */
+
+function bookDetailsByOrderId(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "requestReportByDeliveryId",
+    "apiHandler": "requestReportByDeliveryIdHandler"
+  };
+  var reqParams       = req.body;
+  var order_id        = parseInt(reqParams.order_id);
+  bookDetailsByOrderIdHelper(handlerInfo, order_id , function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+
+}
+
+/**
+ * Helper function to get delivery details for getDeliveryDetails API
+ * @param deliveryId {INTEGER} delivery id
+ * @param callback {FUNCTION} callback function
+ */
+  function bookDetailsByOrderIdHelper(handlerInfo, order_id, callback) {
+  var sqlQuery = "SELECT tb_delivery_db.order_id, tb_delivery_db.book_id , "+
+  "tb_books_db.book_id , tb_books_db.book_name, tb_books_db.book_author FROM tb_delivery_db"+
+  "INNER JOIN tb_books_db ON tb_delivery_db.book_id=tb_books_db.book_id WHERE order_id = ?";
+  var tt = connection.query(sqlQuery, [order_id], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+
+   callback(null, deliveryRes);
+    });
+
+
+
 }
