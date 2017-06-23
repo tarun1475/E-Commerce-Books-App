@@ -298,7 +298,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
  * Request body requires the following parameters
  */
 
-function totalSales(req, res) {
+function totalSales(req , res) {
   var handlerInfo = {
     "apiModule": "analytics",
     "apiHandler": "totalSales"
@@ -306,7 +306,7 @@ function totalSales(req, res) {
 
   var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution ";
 
-  var tt = connection.query(sqlQuery , function(err, totalSalesRes) {
+  var tt = connection.query(sqlQuery, [] , function(err, totalSalesRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, totalSalesRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
@@ -322,6 +322,7 @@ function totalSales(req, res) {
      }
 
     );
+
  });
 
 }
