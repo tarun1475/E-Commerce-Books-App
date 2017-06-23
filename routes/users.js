@@ -1087,7 +1087,7 @@ function getAllUsersFromDb(handlerInfo, userType, userFilter, callback) {
  }
 
  function countAllUsersHelper(handlerInfo , callback) {
-     var sqlQuery = "SELECT COUNT(user_id) from tb_users";
+     var sqlQuery = "SELECT COUNT(user_id) as total_users from tb_users";
 
      var tt =connection.query(sqlQuery, [], function(err, result) {
          if(err) {
