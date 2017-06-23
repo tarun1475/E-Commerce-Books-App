@@ -485,7 +485,7 @@ function getBookDetailsByVendorId(req, res) {
 function getBookDetailsByVendorIdHelper(handlerInfo, vendor_id, is_available ,  callback) {
   var sqlQuery = "SELECT tb_books_overall_distribution.price,  tb_books_overall_distribution.mrp , "+
   "tb_books_overall_distribution.is_available, tb_books.book_name, tb_books.book_author "+
-  " FROM tb_books_overall_distribution INNER JOIN tb_books ON tb_books.book_id = tb_books_overall_distribution.book_id"+
+  " FROM tb_books_overall_distribution INNER JOIN tb_books ON tb_books.book_id = tb_books_overall_distribution.book_id "+
    "WHERE vendor_id = ? AND is_available =  ?";
   var tt = connection.query(sqlQuery, [vendor_id , is_available], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
