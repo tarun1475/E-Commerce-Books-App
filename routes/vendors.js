@@ -23,7 +23,7 @@ exports.blockVendorById        = blockVendorById;
 exports.getVendorDetailsPanel  = getVendorDetailsPanel;
 exports.getVendorSales         = getVendorSales;
 exports.searchVendor           = searchVendor;
-
+exports.getBookDetailsByVendorId = getBookDetailsByVendorId;
 /**
  * <b>API [POST] /books-auth/response_details </b> <br>
  * API to fetch vendor responses to request ids numbers
@@ -440,6 +440,54 @@ function searchVendor(req, res) {
 function searchVendorHelper(handlerInfo, searchKey, callback) {
   var sqlQuery = "SELECT * FROM tb_vendors WHERE vendor_phone = ? ";
   var tt = connection.query(sqlQuery, [searchKey], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+/**
+ * <b> API [POST] books-auth/get_book_details_by_vendor_id</b><br>
+ * @param req {INTEGER} vendor_id to search the vendor
+ * @param req {INTEGER} is_available to check the status
+ */
+
+function getBookDetailsByVendorId(req, res) {
+  var handlerInfo = {
+    "apiModule": "Vendors",
+    "apiHandler": "getBookDetailsByVendorId"
+  };
+
+  var reqParams = req.body;
+  var vendor_id = parseInt(reqParams.vendor_id);
+  var is_available = parseInt(reqParams.is_available);
+
+  getBookDetailsByVendorIdHelper(handlerInfo, vendor_id, is_available, function (err, result) {
+    if (err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if (result.length == 0) {
+      return res.send({
+        "log": "Invalid vendor ",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully fetched data from database",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+}
+
+function getBookDetailsByVendorIdHelper(handlerInfo, vendor_id, is_available ,  callback) {
+  var sqlQuery = "SELECT tb_books_overall_distribution.price,  tb_books_overall_distribution.mrp , "+
+  "tb_books_overall_distribution.is_available, tb_books.book_name, tb_books.book_author "+
+  " FROM tb_books_overall_distribution INNER JOIN tb_books ON tb_books.book_id = tb_books_overall_distribution.book_id"+
+   "WHERE vendor_id = ? AND is_available =  ?";
+  var tt = connection.query(sqlQuery, [vendor_id , is_available], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "searching vendor", err, result, tt.sql);
     if(err) {
       return callback(err, null);

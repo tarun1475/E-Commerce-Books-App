@@ -111,6 +111,10 @@ app.post('/books-auth/create_vendor'           , utils.logRequest
    , vendors.createNewVendor
    , error);
 
+app.post('/books-auth/get_book_details_by_vendor_id'           , utils.logRequest
+    , vendors.getBookDetailsByVendorId
+    , error);
+
 app.get('/books-auth/get_user_requests'        , utils.verifyClientToken
    , users.getRecentRequestsByUserId
    , error);
@@ -423,7 +427,6 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
 app.get('/req_book_auth/count_all_users'         , utils.logRequest
     , users.countAllUsers
     , error);
-
 
 
 /**
