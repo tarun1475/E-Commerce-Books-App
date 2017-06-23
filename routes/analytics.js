@@ -299,6 +299,10 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
  */
 
 function totalSales(req, res) {
+  var handlerInfo = {
+    "apiModule": "analytics",
+    "apiHandler": "totalSales"
+  };
 
   var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution ";
 
