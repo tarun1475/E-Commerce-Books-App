@@ -36,6 +36,7 @@ exports.getMyOrders                       = getMyOrders;
 exports.markUserInActive                  = markUserInActive;
 exports.getAllUsers                       = getAllUsers;
 exports.getAllUsersFromDb                 = getAllUsersFromDb;
+exports.countAllUsers                     = countAllUsers;
 //exports.createWebUser                     = createWebUser;
 exports.createWebReq                      = createWebReq;
 
@@ -1055,6 +1056,52 @@ function getAllUsersFromDb(handlerInfo, userType, userFilter, callback) {
     callback(null, result);
   });
 }
+
+
+/**
+ * <b>API [GET] /count_all_users</b><br>
+ * API to fetch countAllUsers,<br>
+ * Request body requires the following parameters
+ */
+ function countAllUsers(req, res) {
+     var handlerInfo = {
+       "apiModule" : "analytics",
+       "apiHandler": "countAllUsers"
+     };
+     countAllUsersHelper(handlerInfo,  function(err, result) {
+         if(err) {
+             return res.send({
+                 "log": err,
+                 "flag": constants.responseFlags.ACTION_FAILED
+             });
+         }
+         res.send({
+             "log": "Successfully fetched the requests",
+             "flag": constants.responseFlags.ACTION_COMPLETE,
+             "data": result
+
+         });
+
+     });
+
+ }
+
+ function countAllUsersHelper(handlerInfo , callback) {
+     var sqlQuery = "SELECT COUNT(user_id) from tb_users";
+
+     var tt =connection.query(sqlQuery, [], function(err, result) {
+         if(err) {
+          logging.logDatabaseQuery(handlerInfo, "getting user count for panel", err, result, tt.sql);
+          return callback("There was some error in getting requests data", null);
+         }
+
+        callback(null, result);
+
+         });
+
+ }
+
+
 //function to rasie web request
 
 function createWebReq(req , res){

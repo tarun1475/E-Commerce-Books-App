@@ -419,6 +419,14 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
     , utils.verifyPanelToken
     , users.getAllUsers
     , error);
+
+app.get('/req_book_auth/count_all_users'         , utils.logRequest
+    , utils.verifyPanelToken
+    , users.countAllUsers
+    , error);
+
+
+
 /**
  * To change the port, please edit the configuration file
  * @type {https.Server}
