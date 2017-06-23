@@ -297,32 +297,40 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
  * API to fetch totalsales,<br>
  * Request body requires the following parameters
  */
+ function totalSales(req, res) {
+     var handlerInfo = {
+       "apiModule" : "analytics",
+       "apiHandler": "totalSales"
+     };
+     totalSalesHelper(handlerInfo,  function(err, result) {
+         if(err) {
+             return res.send({
+                 "log": err,
+                 "flag": constants.responseFlags.ACTION_FAILED
+             });
+         }
+         res.send({
+             "log": "Successfully fetched the requests",
+             "flag": constants.responseFlags.ACTION_COMPLETE,
+             "data": result
 
-function totalSales(req , res) {
-  var handlerInfo = {
-    "apiModule": "analytics",
-    "apiHandler": "totalSales"
-  };
+         });
 
-  var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution ";
+     });
 
-  var tt = connection.query(sqlQuery, [] , function(err, totalSalesRes) {
-    if(err) {
-      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, totalSalesRes, tt.sql);
-      return callback("There was some error in fetching data corresponding to this delivery id", null);
-    }
-    if(deliveryRes.length == 0) {
-      return callback("No data found corresponding to this delivery id", null);
-    }
+ }
 
-    res.send(
-     {"log": "Successfully fetched vendor engagement",
-     "flag": constants.responseFlags.ACTION_COMPLETE,
-     "data":totalSalesRes
-     }
+ function totalSalesHelper(handlerInfo , callback) {
+     var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM `tb_delivery_distribution";
 
-    );
+     var tt =connection.query(sqlQuery, [], function(err, result) {
+         if(err) {
+          logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
+          return callback("There was some error in getting requests data", null);
+         }
 
- });
+        callback(null, result);
 
-}
+         });
+
+ }
