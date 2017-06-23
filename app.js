@@ -421,7 +421,6 @@ app.get('/req_book_auth/get_all_users'         , utils.logRequest
     , error);
 
 app.get('/req_book_auth/count_all_users'         , utils.logRequest
-    , utils.verifyPanelToken
     , users.countAllUsers
     , error);
 
