@@ -12,6 +12,7 @@ var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
+var messenger       = require('./messenger');
 
 exports.checkVersion                      = checkVersion;
 exports.purnhaEmail                       = purnhaEmail;
