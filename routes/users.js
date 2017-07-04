@@ -102,7 +102,7 @@ function purnhaEmail(req, res) {
 
      // send email to DS Mann Sir
         var from     = 'support@vevsa.com';
-        var to       = config.get('emailRecipentsPurnha.newUserPurnhaEmail').split(',');
+        var to       = config.get('emailRecipents.purnhaEmail').split(',');
         var subject  = 'New User :';
         var text     = "";
         var html     = "<br /> Name: " + name + '<br />' + 'Phone: ' + phone;
