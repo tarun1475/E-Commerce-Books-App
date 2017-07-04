@@ -14,7 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
-exports.purnhaEmail                        = purnhaEmail;
+exports.purnhaEmail                       = purnhaEmail;
 exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
@@ -98,6 +98,21 @@ function purnhaEmail(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
+
+     // send email to DS Mann Sir
+        var from     = 'support@vevsa.com';
+        var to       = config.get('emailRecipentsPurnha.newUserPurnhaEmail').split(',');
+        var subject  = 'New User :';
+        var text     = "";
+        var html     = "<br /> Name: " + name + '<br />' + 'Phone: ' + phone;
+        messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+          if(mailErr) {
+            return res.send({
+              "log": "There was some error in sending email to admins, request is confirmed though",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+        });
 
     res.send({
       "log" : "transaction inserted successfully",
