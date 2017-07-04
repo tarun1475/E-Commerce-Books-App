@@ -14,6 +14,7 @@ var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 
 exports.checkVersion                      = checkVersion;
+exports.purnhaEmail                        = purnhaEmail;
 exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
@@ -72,6 +73,40 @@ function checkVersion(req, res) {
 
 
 }
+/**
+ *
+ * [POST] '/books-auth/purnha Email'<br>
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function purnhaEmail(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"purnhaEmail"
+  };
+  var name        = req.body.person_name;
+  var phone       = req.body.person_phone;
+
+  var sqlQuery = "INSERT INTO tb_purnha_users (user_name, user_phone, logged_on) VALUES(?, ?, NOW())";
+  var tt = connection.query(sqlQuery, [name,phone], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+    res.send({
+      "log" : "transaction inserted successfully",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+  
+}
+
 function contestRank(req, res) {
   var handlerInfo = {
     "apiModule": "commonfunctions",
