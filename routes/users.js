@@ -88,10 +88,10 @@ function purnhaEmail(req, res) {
     "apiHandler":"purnhaEmail"
   };
   var name        = req.body.person_name;
-  var phone       = req.body.person_phone;
+  var message       = req.body.person_message;
 
-  var sqlQuery = "INSERT INTO tb_purnha_users (user_name, user_phone, logged_on) VALUES(?, ?, NOW())";
-  var tt = connection.query(sqlQuery, [name,phone], function(err, result) {
+  var sqlQuery = "INSERT INTO tb_purnha_users (user_name, user_message, logged_on) VALUES(?, ?, NOW())";
+  var tt = connection.query(sqlQuery, [name,message], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
     if(err) {
       return res.send({
