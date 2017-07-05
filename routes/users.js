@@ -105,7 +105,7 @@ function purnhaEmail(req, res) {
         var to       = config.get('emailRecipents.purnhaEmail').split(',');
         var subject  = 'New User :';
         var text     = "";
-        var html     = "<br /> Name: " + name + '<br />' + 'Phone: ' + phone;
+        var html     = "<br /> Name: " + name + '<br />' + 'Message: ' + message;
         messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
           if(mailErr) {
             return res.send({
