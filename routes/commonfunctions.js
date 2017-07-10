@@ -708,7 +708,8 @@ function verifyVendorOTP(req, res) {
   };
   var otp = req.query.otp;
   var pass = req.query.pass;
-  verifyOtpInDb(handlerInfo, otp, pass, function(err, result) {
+  var session_id = req.query.session_id;
+  verifyOtpInDb(handlerInfo, otp, pass,session_id, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
@@ -858,9 +859,9 @@ function InsertWebuserInDb(handlerInfo, phone, pass,access_token,sharableCode,re
     });
 }
 
-function verifyOtpInDb(handlerInfo, otp, pass, callback) {
-  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND pass = ?";
-  var tt = connection.query(sqlQuery, [otp, pass], function(err, result) {
+function verifyOtpInDb(handlerInfo, otp, pass,session_id, callback) {
+  var sqlQuery = "SELECT * FROM tb_otp WHERE one_time_password = ? AND session_id = ?";
+  var tt = connection.query(sqlQuery, [otp, session_id], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "verifying otp", err, result, tt.sql);
     if(err) {
       return callback(err, null);
