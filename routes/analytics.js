@@ -354,7 +354,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
       var device_token = reqParams.device_token;
       var user_id = reqParams.user_id;
 
-      totalSalesHelper(handlerInfo , device_token ,user_id , function(err, result) {
+      addDeviceTokenHelper(handlerInfo , device_token ,user_id , function(err, result) {
           if(err) {
               return res.send({
                   "log": err,
@@ -369,8 +369,9 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
       });
   }
 
-  function addDeviceTokenHelper(handlerInfo , device_token , user_id , callback) {
-      var sqlQuery = "UPDATE tb_users SET device_token = ? WHERE user_id = ? ";
+  function addDeviceTokenHelper(handlerInfo , device_token ,user_id , callback) {
+
+      var sqlQuery = "UPDATE tb_users SET device_token = ? WHERE user_id =? ";
       var tt =connection.query(sqlQuery, [device_token , user_id], function(err, result) {
           if(err) {
            logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
@@ -378,4 +379,5 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
           }
          callback(null, result);
           });
+
  }
