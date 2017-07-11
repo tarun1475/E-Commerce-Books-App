@@ -14,7 +14,7 @@ exports.getOverallRequests    = getOverallRequests;
 exports.getRequestByUserId    = getRequestByUserId;
 exports.getVendorEngagements  = getVendorEngagements;
 exports.totalSales            = totalSales;
-
+exports.addDeviceToken        = addDeviceToken;
 /**
  * [POST] '/books-auth/check_response'<br>
  * API responsible for check response status.
@@ -333,4 +333,49 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
 
          });
 
+ }
+
+
+ /**
+  * <b>API [POST] books-auth/add_device_token</b><br>
+  * API to update device token,<br>
+  * Request body requires the following parameters
+  * @param UserId {INTEGER} user_id
+  * @param DeviceToken {INTEGER} device_token
+  */
+
+  function addDeviceToken( req , res){
+      var handlerInfo = {
+        "apiModule" : "analytics",
+        "apiHandler": "addDeviceTokenHelper"
+      };
+
+      var reqParams   = req.body;
+      var device_token = reqParams.device_token;
+      var user_id = reqParams.user_id;
+
+      totalSalesHelper(handlerInfo , device_token ,user_id , function(err, result) {
+          if(err) {
+              return res.send({
+                  "log": err,
+                  "flag": constants.responseFlags.ACTION_FAILED
+              });
+          }
+          res.send({
+              "log": "Successfully fetched the requests",
+              "flag": constants.responseFlags.ACTION_COMPLETE,
+              "data": result
+          });
+      });
+  }
+
+  function addDeviceTokenHelper(handlerInfo , device_token , user_id , callback) {
+      var sqlQuery = "UPDATE tb_users SET device_token = ? WHERE user_id = ? ";
+      var tt =connection.query(sqlQuery, [device_token , user_id], function(err, result) {
+          if(err) {
+           logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
+           return callback("There was some error in getting requests data", null);
+          }
+         callback(null, result);
+          });
  }

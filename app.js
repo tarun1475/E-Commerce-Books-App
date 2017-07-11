@@ -381,8 +381,11 @@ app.post('/books-auth/get_requests'              , utils.logRequest
     , analytics.getOverallRequests
     , error);
 
-app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
+app.post('/books-auth/add_device_token'              , utils.logRequest
+    , analytics.addDeviceToken
+    , error);
 
+app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
     , analytics.getRequestByUserId
     , error);
 

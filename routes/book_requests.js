@@ -649,7 +649,7 @@ function getBookRequests(req, res) {
     "apiHandler": "getBookRequests"
   };
   var reqParams   = req.body;
- var start_from  = parseInt(reqParams.start_from);
+  var start_from  = parseInt(reqParams.start_from);
   var page_size   = parseInt(reqParams.page_size);
   var vendorId    = reqParams.vendor_id;
   var bookStatus  = reqParams.req_status;
@@ -666,8 +666,8 @@ function getBookRequests(req, res) {
       logging.logDatabaseQuery(handlerInfo, "getting book requests", err, result, jj.sql);
       return res.send(constants.databaseErrorResponse);
     }
-    var requestArr = [];
-    for(var i = 0; i < result.length; i++) {
+  var requestArr = [];
+  for(var i = 0; i < result.length; i++) {
       requestArr.push(result[i].req_id);
     }
     getRequestDetailsWrapper(handlerInfo, requestArr, function(reqErr, requestDetails) {
@@ -1668,7 +1668,4 @@ function bookDetailsByOrderId(req, res) {
 
    callback(null, deliveryRes);
     });
-
-
-
 }
