@@ -12,8 +12,10 @@ var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
+var messenger       = require('./messenger');
 
 exports.checkVersion                      = checkVersion;
+exports.purnhaEmail                       = purnhaEmail;
 exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
@@ -72,6 +74,55 @@ function checkVersion(req, res) {
 
 
 }
+/**
+ *
+ * [POST] '/books-auth/purnha Email'<br>
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function purnhaEmail(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"purnhaEmail"
+  };
+  var name        = req.body.person_name;
+  var message       = req.body.person_message;
+
+  var sqlQuery = "INSERT INTO tb_purnha_users (user_name, user_message, logged_on) VALUES(?, ?, NOW())";
+  var tt = connection.query(sqlQuery, [name,message], function(err, result) {
+    logging.logDatabaseQuery(handlerInfo, "inserting user transaction into database", err, result);
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     // send email to DS Mann Sir
+        var from     = 'support@vevsa.com';
+        var to       = config.get('emailRecipents.purnhaEmail').split(',');
+        var subject  = 'New User :';
+        var text     = "";
+        var html     = "<br /> Name: " + name + '<br />' + 'Message: ' + message;
+        messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+          if(mailErr) {
+            return res.send({
+              "log": "There was some error in sending email to admins, request is confirmed though",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+        });
+
+    res.send({
+      "log" : "transaction inserted successfully",
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+  
+}
+
 function contestRank(req, res) {
   var handlerInfo = {
     "apiModule": "commonfunctions",

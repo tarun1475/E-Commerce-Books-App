@@ -84,6 +84,9 @@ var upload = multer({storage: storage});
 /**
  * Users APIs
  */
+app.post('/books-auth/purnha_email'             , utils.logRequest
+   , users.purnhaEmail
+   , error);
 app.post('/books-auth/check_version'             , utils.logRequest
    , users.checkVersion
    , error);

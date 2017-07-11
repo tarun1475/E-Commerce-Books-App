@@ -9,6 +9,8 @@
     "connectionLimit" : 15
   },
   "emailRecipents" : {
-    "orderConfirmationEmail": "tarunkumargupta14@gmail.com,rddhiman10@gmail.com,singhamritpal661@gmail.com"
+    "orderConfirmationEmail": "tarunkumargupta14@gmail.com,rddhiman10@gmail.com,singhamritpal661@gmail.com",
+    "purnhaEmail": "support@vevsa.com,purnhafinance@gmail.com"
   }
+  
 }
