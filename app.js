@@ -411,6 +411,10 @@ app.post('/books-auth/request_report_by_delivery_id'     , utils.logRequest
     , requests.requestReportByDeliveryId
     , error);
 
+app.post('/books-auth/get_delivery_details_by_date_interval'     , utils.logRequest
+    , requests.getDeliveryDetailsByDateInterval
+    , error);
+
 
 app.post('/books-auth/get_delivery_details_by_userid' , utils.logRequest
    ,requests.getDeliveryDetailsByUserId

@@ -69,7 +69,7 @@ function checkBlank(arr)
 
 /**
  *
- * [POST] '/books-auth/insert_code_vevsa_contest'<br> 
+ * [POST] '/books-auth/insert_code_vevsa_contest'<br>
  * API to check the version, <br>Request body requires following parameters:
  * @param {string} app_version - version of the app
  * @return {JSON} Response body contains simple json object that contains version.
@@ -86,7 +86,7 @@ function insertCodeVevsaContest(req, res) {
   var sharable_code   = 'http://books.vevsa.com:7001/books-auth/referCode?refer_code='+ encrypt(phone);
 
    var  sqlQuery = "UPDATE tb_users SET sharable_link = ?  WHERE access_token = ?";
- 
+
   var getUserDetails = connection.query(sqlQuery, [sharable_code,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "updating code details", err, result, getUserDetails.sql);
     if(err) {
@@ -96,7 +96,7 @@ function insertCodeVevsaContest(req, res) {
       "log": "Successfully updated your details",
       "flag": constants.responseFlags.ACTION_COMPLETE,
     });
-    
+
   });
 
 }
@@ -453,7 +453,7 @@ function forgotVendorPass(req, res) {
  }
   });
 }
- 
+
 
 /**
  * <b>API [POST] /books-auth/send_vendor_otp</b><br>
@@ -646,7 +646,7 @@ function verifyForgotUserOTP(req, res) {
     }
   });
 }
-//function to update user into tb_users 
+//function to update user into tb_users
 function UpdateUserInDb(handlerInfo, phone, pass){
   var sqlQuery = "", queryParams = [];
     sqlQuery = "UPDATE tb_users SET user_pass = ? WHERE user_phone = ?";
@@ -737,7 +737,7 @@ function verifyVendorOTP(req, res) {
 
         }
       });
-      
+
     }
   });
 }
@@ -822,7 +822,7 @@ function verifyOTP(req, res, next) {
     next();
   });
 }
-//function to update vendor into tb_vendors 
+//function to update vendor into tb_vendors
 function UpdateVendorInDb(handlerInfo, phone, pass){
   var sqlQuery = "", queryParams = [];
     sqlQuery = "UPDATE tb_vendors SET vendor_pass = ? WHERE vendor_phone = ?";
@@ -839,13 +839,13 @@ function UpdateVendorInDb(handlerInfo, phone, pass){
     res.send(responseData);
   });
 }
-//function to insert new vendor into tb_vendors 
+//function to insert new vendor into tb_vendors
 function InsertVendorInDb(handlerInfo, phone, pass,access_token){
   var sqlQuery = "INSERT INTO tb_vendors (vendor_phone,vendor_pass, access_token, date_registered) "+
                  "VALUES(?,?, ?, DATE(NOW()))";
   var tt = connection.query(sqlQuery, [phone, pass ,access_token], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "inserting user into database", err, result);
-  
+
     });
 }
 

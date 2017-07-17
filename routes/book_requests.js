@@ -42,7 +42,7 @@ exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 exports.updateDeliveryStatus            = updateDeliveryStatus;
 exports.bookDetailsByOrderId            = bookDetailsByOrderId;
-
+exports.getDeliveryDetailsByDateInterval = getDeliveryDetailsByDateInterval;
 
 
 /*
@@ -1391,6 +1391,61 @@ function requestReportByDeliveryId(req, res) {
   var tt = connection.query(sqlQuery, [delivery_id], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this delivery id", null);
+    }
+
+   callback(null, deliveryRes);
+    });
+
+
+
+}
+
+
+
+/**
+ * <b>API [POST] /books-auth/get_delivery_details_by_date_interval</b><br>
+ * API to fetch delivery details corresponding to a date interval,<br>
+ * Request body requires the following parameters
+ *
+ * @param dateInterval {OBJECT} start_date and end_date
+ */
+function getDeliveryDetailsByDateInterval(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "getDeliveryDetailsByDateInterval"
+  };
+  var reqParams       = req.body;
+  var date_interval   = reqParams.date_interval;
+  getDeliveryDetailsByDateIntervalHelper(handlerInfo , date_interval , function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+
+}
+
+/**
+ * Helper function to get delivery details for getDeliveryDetails API
+ * @param dateInterval {OBJECT} start_date and end_date
+ * @param callback {FUNCTION} callback function
+ */
+  function getDeliveryDetailsByDateIntervalHelper(handlerInfo, date_interval, callback) {
+  var sqlQuery = "SELECT * from tb_delivery WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
+  var tt = connection.query(sqlQuery, [date_interval.start_date ,date_interval.end_date], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by date interval", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
     }
     if(deliveryRes.length == 0) {
