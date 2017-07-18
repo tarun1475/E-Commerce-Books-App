@@ -399,6 +399,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
   */
 
   function addDeviceToken( req , res){
+
       var handlerInfo = {
         "apiModule" : "analytics",
         "apiHandler": "addDeviceTokenHelper"
@@ -455,7 +456,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
 
        var reqParams       =  req.body;
        var delivery_id     =  reqParams.delivery_id;
-       var is_delivered =  reqParams.is_delivered;
+       var is_delivered    =  reqParams.is_delivered;
 
        setDeliveryStatusHelper(handlerInfo , is_delivered , delivery_id , function(err, result) {
            if(err) {
@@ -474,7 +475,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
 
    function setDeliveryStatusHelper(handlerInfo , is_delivered , delivery_id , callback) {
 
-       var sqlQuery = "UPDATE tb_delivery SET is_delivered = ? WHERE delivery_id =? ";
+       var sqlQuery = "UPDATE tb_delivery SET is_delivered = ? WHERE delivery_id = ? ";
        var tt =connection.query(sqlQuery, [ is_delivered , delivery_id ], function(err, result) {
 
           if(err) {
