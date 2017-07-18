@@ -16,6 +16,7 @@ exports.getVendorEngagements  = getVendorEngagements;
 exports.totalSales            = totalSales;
 exports.addDeviceToken        = addDeviceToken;
 exports.totalSalesByDate      = totalSalesByDate;
+exports.setDeliveryStatus     = setDeliveryStatus;
 
 /**
  * [POST] '/books-auth/check_response'<br>
@@ -434,3 +435,53 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
           });
 
  }
+
+
+
+  /**
+   * <b>API [POST] books-auth/set_delivery_status</b><br>
+   * API to update delivery status<br>
+   * Request body requires the following parameters
+   * @param DeliveryStatus {INTEGER} is_delivered
+   * @param DeliveryId {INTEGER} delivery_id
+   */
+
+ function setDeliveryStatus( req , res){
+
+       var handlerInfo = {
+         "apiModule" : "analytics",
+         "apiHandler": "setDeliveryStatus"
+        };
+
+       var reqParams       =  req.body;
+       var delivery_id     =  reqParams.delivery_id;
+       var is_delivered =  reqParams.is_delivered;
+
+       setDeliveryStatusHelper(handlerInfo , is_delivered , delivery_id , function(err, result) {
+           if(err) {
+               return res.send({
+                   "log": err,
+                   "flag": constants.responseFlags.ACTION_FAILED
+               });
+           }
+           res.send({
+               "log": "Successfully fetched the requests",
+               "flag": constants.responseFlags.ACTION_COMPLETE,
+               "data": result
+           });
+       });
+   }
+
+   function setDeliveryStatusHelper(handlerInfo , is_delivered , delivery_id , callback) {
+
+       var sqlQuery = "UPDATE tb_delivery SET is_delivered = ? WHERE delivery_id =? ";
+       var tt =connection.query(sqlQuery, [ is_delivered , delivery_id ], function(err, result) {
+
+          if(err) {
+            logging.logDatabaseQuery(handlerInfo, "setting delivery status for panel", err, result, tt.sql);
+            return callback("There was some error in getting requests data", null);
+           }
+          callback(null, result);
+           });
+
+  }

@@ -184,6 +184,10 @@ app.get('/books-auth/my_details'               , utils.logRequest
   , users.getMyDetails
   , error);
 
+app.post('/books-auth/total_sales_by_date'         , utils.logRequest
+  , analytics.totalSalesByDate
+  , error);
+
 app.get('/books-auth/get_vendor_details'               , utils.logRequest
   , utils.verifyClientToken
   , users.getVendorDetails
@@ -391,6 +395,11 @@ app.post('/books-auth/get_requests'              , utils.logRequest
 app.post('/books-auth/add_device_token'              , utils.logRequest
     , analytics.addDeviceToken
     , error);
+
+app.post('/books-auth/set_delivery_status'              , utils.logRequest
+    , analytics.addDeviceToken
+    , error);
+
 
 app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
     , analytics.getRequestByUserId
