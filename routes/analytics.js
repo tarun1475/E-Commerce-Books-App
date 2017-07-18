@@ -370,7 +370,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
 
   }
 
-  function totalSalesByDateHelper(handlerInfo , callback) {
+  function totalSalesByDateHelper(handlerInfo,date_interval , callback) {
       var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
       var tt =connection.query(sqlQuery, [date_interval.start_date ,date_interval.end_date], function(err, result) {
 
