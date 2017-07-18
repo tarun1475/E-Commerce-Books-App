@@ -15,6 +15,8 @@ exports.getRequestByUserId    = getRequestByUserId;
 exports.getVendorEngagements  = getVendorEngagements;
 exports.totalSales            = totalSales;
 exports.addDeviceToken        = addDeviceToken;
+exports.totalSalesByDate      = totalSalesByDate;
+
 /**
  * [POST] '/books-auth/check_response'<br>
  * API responsible for check response status.
@@ -321,7 +323,7 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
  }
 
  function totalSalesHelper(handlerInfo , callback) {
-     var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM `tb_delivery_distribution";
+     var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution";
 
      var tt =connection.query(sqlQuery, [], function(err, result) {
          if(err) {
@@ -334,6 +336,57 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
          });
 
  }
+
+ /**
+  * <b>API [POST] /total_sales_by_date</b><br>
+  * API to fetch totalsales by date given by the user,<br>
+  * Request body requires the following parameters
+  *
+  */
+
+  function totalSalesByDate(req, res) {
+      var handlerInfo = {
+        "apiModule" : "analytics",
+        "apiHandler": "totalSalesByDate"
+      };
+
+      var reqParams       = req.body;
+      var date_interval   = reqParams.date_interval;
+      totalSalesByDateHelper(handlerInfo, date_interval , function(err, result) {
+          if(err) {
+              return res.send({
+                  "log": err,
+                  "flag": constants.responseFlags.ACTION_FAILED
+             });
+          }
+          res.send({
+              "log": "Successfully fetched the requests",
+              "flag": constants.responseFlags.ACTION_COMPLETE,
+              "data": result
+
+          });
+
+      });
+
+  }
+
+  function totalSalesByDateHelper(handlerInfo , callback) {
+      var sqlQuery = "SELECT SUM(qty*book_price) as total_sales FROM tb_delivery_distribution WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
+      var tt =connection.query(sqlQuery, [date_interval.start_date ,date_interval.end_date], function(err, result) {
+
+       if(err) {
+           logging.logDatabaseQuery(handlerInfo, "getting overall requests for panel", err, result, tt.sql);
+           return callback("There was some error in getting requests data", null);
+          }
+
+         callback(null, result);
+
+          });
+
+  }
+
+
+
 
 
  /**

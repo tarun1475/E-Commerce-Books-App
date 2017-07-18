@@ -379,6 +379,10 @@ app.get('/books-auth/total_sales'         , utils.logRequest
     , analytics.totalSales
     , error);
 
+app.post('/books-auth/total_sales_by_date'         , utils.logRequest
+    , analytics.totalSalesByDate
+    , error);
+
 app.post('/books-auth/get_requests'              , utils.logRequest
     , utils.verifyPanelToken
     , analytics.getOverallRequests
