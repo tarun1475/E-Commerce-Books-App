@@ -397,7 +397,7 @@ app.post('/books-auth/add_device_token'              , utils.logRequest
     , error);
 
 app.post('/books-auth/set_delivery_status'              , utils.logRequest
-    , analytics.addDeviceToken
+    , analytics.setDeliveryStatus
     , error);
 
 
