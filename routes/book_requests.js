@@ -1656,18 +1656,14 @@ function cartDetailsByUserId(req, res) {
  * @param callback {FUNCTION} callback function
  */
   function cartDetailsByUserIdHelper(handlerInfo, user_id, date_interval, callback) {
-  var sqlQuery = "SELECT tb_orders.Id , tb_orders.order_id , tb_orders.user_id ,tb_orders.is_delivered ,tb_books_db.book_id , "+
-  " tb_books_db.book_name ,tb_books_db.book_author "+
-  " from tb_orders "+
-  " INNER JOIN tb_books_db ON tb_orders.Id = tb_books_db.book_id WHERE tb_orders.user_id = ? AND "+
-  " DATE(date_registered) BETWEEN DATE(?) AND DATE(?)";
+  var sqlQuery = "SELECT * from tb_orders WHERE user_id = ? AND DATE(date_registered) BETWEEN DATE(?) AND DATE(?)";
   var tt = connection.query(sqlQuery,[ user_id , date_interval.start_date , date_interval.end_date ], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
       return callback("There was some error in fetching data corresponding to this delivery id", null);
     }
     if(deliveryRes.length == 0) {
-      return callback("No data found corresponding to this user id", null);
+      return callback("No data found corresponding to this delivery id", null);
     }
 
    callback(null, deliveryRes);
