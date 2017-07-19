@@ -399,7 +399,6 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
   */
 
   function addDeviceToken( req , res){
-
       var handlerInfo = {
         "apiModule" : "analytics",
         "apiHandler": "addDeviceTokenHelper"
@@ -455,8 +454,8 @@ function getVendorEngagementsHelper(handlerInfo, dateInterval, callback) {
         };
 
        var reqParams       =  req.body;
-       var delivery_id     =  reqParams.delivery_id;
-       var is_delivered    =  reqParams.is_delivered;
+       var delivery_id     =  parseInt(reqParams.delivery_id);
+       var is_delivered =  parseInt(reqParams.is_delivered);
 
        setDeliveryStatusHelper(handlerInfo , is_delivered , delivery_id , function(err, result) {
            if(err) {
