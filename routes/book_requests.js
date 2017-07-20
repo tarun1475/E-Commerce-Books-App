@@ -1706,7 +1706,7 @@ function cartDetailsByDate(req, res) {
  * @param dateInterval {OBJECT} start_date and end_date
  * @param callback {FUNCTION} callback function
  */
-  function cartDetailsByUserIdHelper(handlerInfo, date_interval, callback) {
+  function cartDetailsByDateHelper(handlerInfo, date_interval, callback) {
   var sqlQuery = "SELECT * from tb_orders WHERE DATE(date_registered) BETWEEN DATE(?) AND DATE(?)";
   var tt = connection.query(sqlQuery,[ date_interval.start_date , date_interval.end_date ], function(err, deliveryRes) {
     if(err) {
