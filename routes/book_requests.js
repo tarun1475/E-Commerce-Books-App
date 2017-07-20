@@ -42,7 +42,8 @@ exports.getDeliveries                   = getDeliveries;
 exports.getDeliveryDetailsHelper        = getDeliveryDetailsHelper;
 exports.updateDeliveryStatus            = updateDeliveryStatus;
 exports.bookDetailsByOrderId            = bookDetailsByOrderId;
-exports.getDeliveryDetailsByDateInterval = getDeliveryDetailsByDateInterval;
+exports.getDeliveryDetailsByDateInterval= getDeliveryDetailsByDateInterval;
+exports.cartDetailsByDate               = cartDetailsByDate
 
 
 /*
@@ -1404,8 +1405,6 @@ function requestReportByDeliveryId(req, res) {
 
 }
 
-
-
 /**
  * <b>API [POST] /books-auth/get_delivery_details_by_date_interval</b><br>
  * API to fetch delivery details corresponding to a date interval,<br>
@@ -1618,7 +1617,7 @@ function updateDeliveryStatusHelper(handlerInfo, deliveryId, status, callback){
 
 
 /**
- * <b>API [POST] /books-auth/cart_details_by_userid</b><br>
+ * <b>API [POST] /req_book_auth/cart_details_by_user_id</b><br>
  * API to fetch delivery details corresponding to a user id,<br>
  * Request body requires the following parameters
  *
@@ -1671,9 +1670,61 @@ function cartDetailsByUserId(req, res) {
 }
 
 
+/**
+ * <b>API [POST] /req_book_auth/cart_details_by_date</b><br>
+ * API to fetch delivery details corresponding to a date interval,<br>
+ * Request body requires the following parameters
+ *
+ * @param date_interval {OBJECT} date_interval
+ */
+
+function cartDetailsByDate(req, res) {
+  var handlerInfo     = {
+    "apiModule" : "bookRequests",
+    "apiHandler": "cartDetailsByDate"
+  };
+  var reqParams       = req.body;
+  var date_interval   = reqParams.date_interval;
+  cartDetailsByDateHelper(handlerInfo, date_interval , function(delErr, deliveryData) {
+    if(delErr) {
+      return res.send({
+        "log" : delErr,
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    return res.send({
+      "log" : "Successfully fetched data for delivery object",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": deliveryData
+    });
+  });
+}
 
 /**
- * <b>API [POST] /books-auth/book_details_by_order_id</b><br>
+ * Helper function to get cart details for cartDetailsByDate API
+ *
+ * @param dateInterval {OBJECT} start_date and end_date
+ * @param callback {FUNCTION} callback function
+ */
+  function cartDetailsByUserIdHelper(handlerInfo, date_interval, callback) {
+  var sqlQuery = "SELECT * from tb_orders WHERE DATE(date_registered) BETWEEN DATE(?) AND DATE(?)";
+  var tt = connection.query(sqlQuery,[ date_interval.start_date , date_interval.end_date ], function(err, deliveryRes) {
+    if(err) {
+      logging.logDatabaseQuery(handlerInfo, "getting delivery details by id", err, deliveryRes, tt.sql);
+      return callback("There was some error in fetching data corresponding to this delivery id", null);
+    }
+    if(deliveryRes.length == 0) {
+      return callback("No data found corresponding to this date interval", null);
+    }
+
+   callback(null, deliveryRes);
+    });
+}
+
+
+
+/**
+ * <b>API [POST] /req_book_auth/book_details_by_order_id</b><br>
  * API to fetch delivery details corresponding to a user id,<br>
  * Request body requires the following parameters
  *

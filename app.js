@@ -282,6 +282,11 @@ app.post('/req_book_auth/cart_details'          , utils.logRequest
 app.post('/req_book_auth/cart_details_by_user_id'          , utils.logRequest
    , requests.cartDetailsByUserId
    , error);
+
+app.post('/req_book_auth/cart_details_by_date'          , utils.logRequest
+   , requests.cartDetailsByDate
+   , error);
+
 app.post('/req_book_auth/cart_item_counter'          , utils.logRequest
    , requests.cartItemsCounter
    , error);
