@@ -406,6 +406,10 @@ app.post('/books-auth/set_delivery_status'              , utils.logRequest
     , error);
 
 
+app.post('/books-auth/set_cart_delivery_status'              , utils.logRequest
+    , analytics.setCartDeliveryStatus
+    , error);
+
 app.post('/books-auth/get_requests_by_user_id'              , utils.logRequest
     , analytics.getRequestByUserId
     , error);
