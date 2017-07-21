@@ -362,6 +362,11 @@ app.get('/books-auth/searchUser'               , utils.logRequest
     , users.searchUser
     , error);
 
+app.get('/books-auth/search_user_by_user_id'               , utils.logRequest
+    , users.searchUserByUserId
+    , error);
+
+
 app.get('/books-auth/searchVendor'              , utils.logRequest
     , vendors.searchVendor
     , error);

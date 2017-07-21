@@ -41,7 +41,7 @@ exports.getAllUsersFromDb                 = getAllUsersFromDb;
 exports.countAllUsers                     = countAllUsers;
 //exports.createWebUser                     = createWebUser;
 exports.createWebReq                      = createWebReq;
-
+exports.searchUserByUserId                = searchUserByUserId ;
 
 /**
  *
@@ -120,7 +120,7 @@ function purnhaEmail(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
   });
-  
+
 }
 
 function contestRank(req, res) {
@@ -743,6 +743,58 @@ function verifyUserByPhone(handlerInfo, phoneNo, regAs, callback) {
     callback(null, result);
   });
 }
+
+
+
+/**
+ * <b>API [GET] /books-auth/search_user_by_user_id</b><br>
+ * API to search user by user id
+ * @param req {OBJECT} request body should contain token and key
+ * @param res {OBJECT} response would send results
+ */
+
+function searchUserByUserId(req, res) {
+  var handlerInfo = {
+    "apiModule": "Users",
+    "apiHandler": "searchUserByUserId"
+  };
+
+  var reqParams = req.query;
+  var searchKey = reqParams.key;
+
+  searchUserByUserIdHelper(handlerInfo, searchKey, function(err, result) {
+
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    if(result.length == 0) {
+      return res.send({
+        "log": "Invalid user entered",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log": "Successfully searched user ",
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data": result
+    });
+  });
+
+}
+
+function searchUserByUserIdHelper(handlerInfo, searchKey, callback) {
+  var sqlQuery = "SELECT * FROM tb_users WHERE user_id = ? ";
+  var tt = connection.query(sqlQuery, [searchKey], function(err, result){
+    logging.logDatabaseQuery(handlerInfo, "searching user", err, result, tt.sql);
+    if(err) {
+      console.log(err);
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
 
 /**
  * <b>API [GET] /books-auth/searchUser</b><br>
