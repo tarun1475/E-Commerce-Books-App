@@ -747,7 +747,7 @@ function verifyUserByPhone(handlerInfo, phoneNo, regAs, callback) {
 
 
 /**
- * <b>API [GET] /books-auth/search_user_by_user_id</b><br>
+ * <b>API [POST] /books-auth/search_user_by_user_id</b><br>
  * API to search user by user id
  * @param req {OBJECT} request body should contain token and key
  * @param res {OBJECT} response would send results
@@ -759,10 +759,10 @@ function searchUserByUserId(req, res) {
     "apiHandler": "searchUserByUserId"
   };
 
-  var reqParams = req.query;
-  var searchKey = reqParams.key;
+  var reqParams = req.body;
+  var user_id = reqParams.user_id;
 
-  searchUserByUserIdHelper(handlerInfo, searchKey, function(err, result) {
+  searchUserByUserIdHelper(handlerInfo, user_id, function(err, result) {
 
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -783,9 +783,9 @@ function searchUserByUserId(req, res) {
 
 }
 
-function searchUserByUserIdHelper(handlerInfo, searchKey, callback) {
+function searchUserByUserIdHelper(handlerInfo, user_id, callback) {
   var sqlQuery = "SELECT * FROM tb_users WHERE user_id = ? ";
-  var tt = connection.query(sqlQuery, [searchKey], function(err, result){
+  var tt = connection.query(sqlQuery, [user_id], function(err, result){
     logging.logDatabaseQuery(handlerInfo, "searching user", err, result, tt.sql);
     if(err) {
       console.log(err);

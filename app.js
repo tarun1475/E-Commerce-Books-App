@@ -362,7 +362,7 @@ app.get('/books-auth/searchUser'               , utils.logRequest
     , users.searchUser
     , error);
 
-app.get('/books-auth/search_user_by_user_id'               , utils.logRequest
+app.post('/books-auth/search_user_by_user_id'               , utils.logRequest
     , users.searchUserByUserId
     , error);
 
