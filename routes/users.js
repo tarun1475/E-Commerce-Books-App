@@ -6,6 +6,7 @@
 /*
  * Module dependencies
  */
+var request        = require('request');
 var crypto         = require('crypto');
 var async          = require('async');
 var utils          = require('./commonfunctions');
@@ -16,6 +17,7 @@ var messenger       = require('./messenger');
 
 exports.checkVersion                      = checkVersion;
 exports.purnhaEmail                       = purnhaEmail;
+exports.trookingLocations                 = trookingLocations;
 exports.contestRank                       = contestRank;
 exports.peopleJoined                      = peopleJoined;
 exports.userDetailsVevsaContest           = userDetailsVevsaContest;
@@ -44,6 +46,31 @@ exports.createWebReq                      = createWebReq;
 exports.searchUserByUserId                = searchUserByUserId ;
 
 /**
+ *
+ * [POST] '/books-auth/check_version'<br>
+ * API to check the version, <br>Request body requires following parameters:
+ * @param {string} app_version - version of the app
+ * @return {JSON} Response body contains simple json object that contains version.
+ *
+ */
+function trookingLocations(req, res) {
+  var handlerInfo   = {
+    "apiModule": "users",
+    "apiHandler":"trookingLocations"
+  };
+  
+
+request('http://prelive.viatorapi.viator.com/service/taxonomy/locations?apiKey=9414014446487688', function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    var data = JSON.parse(body);
+    res.send({
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "data":data
+    });// Print the google web page.
+  }
+});
+  
+}/**
  *
  * [POST] '/books-auth/check_version'<br>
  * API to check the version, <br>Request body requires following parameters:
