@@ -1441,7 +1441,7 @@ function getDeliveryDetailsByDateInterval(req, res) {
  * @param callback {FUNCTION} callback function
  */
   function getDeliveryDetailsByDateIntervalHelper(handlerInfo, date_interval, callback) {
-  var sqlQuery = "SELECT * from tb_delivery WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
+  var sqlQuery = "SELECT tb_delivery.delivery_id,tb_delivery.delivery_address,tb_delivery.is_urgent_delivery,tb_delivery.delivery_date,tb_delivery.logged_on,tb_delivery.is_delivered,tb_users.user_name,tb_users.user_phone FROM `tb_delivery` INNER JOIN tb_users  ON tb_delivery.user_id = tb_users.user_id WHERE DATE(logged_on) BETWEEN DATE(?) AND DATE(?)";
   var tt = connection.query(sqlQuery, [date_interval.start_date ,date_interval.end_date], function(err, deliveryRes) {
     if(err) {
       logging.logDatabaseQuery(handlerInfo, "getting delivery details by date interval", err, deliveryRes, tt.sql);
