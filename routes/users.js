@@ -11,6 +11,7 @@ var crypto         = require('crypto');
 var async          = require('async');
 var utils          = require('./commonfunctions');
 var constants      = require('./constants');
+var niveshRequests   = require('./nivesh_requests');
 var bookRequests   = require('./book_requests');
 var logging        = require('./logging');
 var messenger       = require('./messenger');
