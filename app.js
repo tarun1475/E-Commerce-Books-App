@@ -16,6 +16,7 @@ var favicon             = require('serve-favicon');
 var error               = require('./routes/error');
 var users               = require('./routes/users');
 var vendors             = require('./routes/vendors');
+var niveshRequests      = require('./routes/nivesh_requests');
 var requests            = require('./routes/book_requests');
 var utils               = require('./routes/commonfunctions');
 var cron                = require('./routes/cron');
