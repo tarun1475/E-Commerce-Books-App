@@ -81,6 +81,23 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({storage: storage});
+/**
+Nivesh Apis
+**/
+app.post('/req_book_auth/confirm_nivesh_order'          , utils.logRequest
+   , niveshRequests.confirmNiveshOrder
+   , error);
+app.post('/req_book_auth/send_email_on_countdown'          , utils.logRequest
+   , niveshRequests.sendEmailOnCountDown
+   , error);
+app.post('/req_book_auth/fetch_details_by_order_id'          , utils.logRequest
+   , niveshRequests.fetchDetailsByOrderId
+   , error);
+app.get('/req_book_auth/fetch_nivesh_db'          , utils.logRequest
+   , niveshRequests.fetchNiveshDb
+   , error);
+
+
 
 /**
  * Users APIs
