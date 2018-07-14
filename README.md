@@ -4,6 +4,17 @@
 / / /  \ \ / / _ \ \ / / __|/ _` |_____| '_ \ / _ \ / _ \| |/ / __|   \ \ \
 \ \ \   \ V /  __/\ V /\__ \ (_| |_____| |_) | (_) | (_) |   <\__ \   / / /
  \_\_\   \_/ \___| \_/ |___/\__,_|     |_.__/ \___/ \___/|_|\_\___/  /_/_/
+ 
+Vevsa is an online medium for Students to get books. It is a place where customer can easily ask & get which book He/She wants. Vevsa is an E-Reqtal (Request+Portal). 
+
+Features
+1) Vevsa Money wallet
+2) Second Hand books Listing
+3) Request 5 books simultaneously and get instant rates from the vendor.
+4) vevsa vendor app
+5) vevsa customer app
+6) vevsa backend panel
+
 
 This is the back-end https server for vevsa-books application. 
 
