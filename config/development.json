@@ -4,8 +4,8 @@
   "dbLiveSettings" : {
     "host"     : "localhost",
     "user"     : "root",
-    "password" : "12345",
-    "database" : "vevsa_live",
+    "password" : "root",
+    "database" : "key_recovery",
     "connectionLimit" : 15
   },
   "emailRecipents" : {

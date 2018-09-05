@@ -15,6 +15,7 @@ var multer              = require('multer');
 var favicon             = require('serve-favicon');
 var error               = require('./routes/error');
 var users               = require('./routes/users');
+var keyUsers            = require('./routes');
 var vendors             = require('./routes/vendors');
 var niveshRequests      = require('./routes/nivesh_requests');
 var requests            = require('./routes/book_requests');
@@ -81,6 +82,32 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({storage: storage});
+
+
+/**
+
+User Private Key Apis
+
+**/
+
+app.post('/recovery_key/register_user'
+   , keyUsers.registerUser
+   , error);
+
+app.post('/recovery_key/user_trust_data'
+   , keyUsers.userTrustData
+   , error);
+
+
+
+
+
+
+
+
+
+
+
 /**
 Nivesh Apis
 **/
