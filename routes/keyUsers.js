@@ -91,9 +91,13 @@ function userTrustData(req, res) {
 
   });
 
-   res.send({
+  
+}
+
+ res.send({
       "log" : "User Registered successfully",
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
+
 
 }
