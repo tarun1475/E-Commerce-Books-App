@@ -21,6 +21,8 @@ exports.userTrustData                   = userTrustData;
 
 
 
+
+
 function registerUser(req, res) {
   var handlerInfo   = {
     "apiModule": "registerUser",
@@ -35,6 +37,7 @@ function registerUser(req, res) {
       return res.send({
         "log" : "Internal server error",
         "flag": constants.responseFlags.ACTION_FAILED
+        "Error": err
       });
     }
 
