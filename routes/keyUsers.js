@@ -36,7 +36,7 @@ function registerUser(req, res) {
     if(err) {
       return res.send({
         "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
+        "flag": constants.responseFlags.ACTION_FAILED,
         "Error": err
       });
     }
