@@ -81,10 +81,8 @@ function userTrustData(req, res) {
 
 
 
-
-
   for(i = 0 ; i < trustData.length ; i++){
-  var resultData = "";
+  var resultData = [];
 
   var Query = "SELECT * from tb_users_personal_data WHERE user_id = ?";
   var tt = connection.query(Query, [trustData[i].user_id], function(err, result) {
@@ -94,14 +92,16 @@ function userTrustData(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-
-  resultData = result[0].user_trust_data;
+   
+  if(result.length > 0)
+  resultData.push(result[0].user_trust_data);
 
   });
+
+  resultData.push(trustData[i].encrypted_key_data);
   var sqlQuery = "update tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [trustData[i].encrypted_key_data,trustData[i].user_id], function(Err, Result) {
+  var tt = connection.query(sqlQuery, [resultData,trustData[i].user_id], function(Err, Result) {
     
-    console.log(resultData);
 
     if(Err) {
       return res.send({
@@ -111,13 +111,6 @@ function userTrustData(req, res) {
     }
 
   });
-
-    console.log(i);
-
-
-
-  
-
   
 }
 
