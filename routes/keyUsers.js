@@ -23,6 +23,7 @@ exports.userTrustData                   = userTrustData;
 
 
 
+
 function registerUser(req, res) {
   var handlerInfo   = {
     "apiModule": "registerUser",
@@ -56,6 +57,7 @@ function userTrustData(req, res) {
   };
 
 
+
   /**
 
   var trustData = [
@@ -81,6 +83,18 @@ function userTrustData(req, res) {
 
 
   for(i = 0 ; i < trustData.length ; i++){
+
+  var Query = "SELECT user_trust_data from tb_users_personal_data WHERE user_id = ?";
+  var tt = connection.query(Query, [trustData[i].user_id], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+  });
+
+  console.log(result);
 
 
   var sqlQuery = "update  tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
