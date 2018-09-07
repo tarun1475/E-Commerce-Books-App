@@ -95,16 +95,16 @@ function userTrustData(req, res) {
 
   console.log(result);
 
-  var sqlQuery = "update  tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [trustData[i].encrypted_key_data,trustData[i].user_id], function(err, result) {
-    if(err) {
-      return res.send({
-        "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
+  // var sqlQuery = "update  tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
+  // var tt = connection.query(sqlQuery, [trustData[i].encrypted_key_data,trustData[i].user_id], function(err, result) {
+  //   if(err) {
+  //     return res.send({
+  //       "log" : "Internal server error",
+  //       "flag": constants.responseFlags.ACTION_FAILED
+  //     });
+  //   }
 
-  });
+  // });
   });
 
 
