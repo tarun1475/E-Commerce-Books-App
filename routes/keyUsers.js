@@ -79,9 +79,9 @@ function userTrustData(req, res) {
   var trustData   = [];
   trustData = req.body.trust_data;
 
+  var i = 0;
 
-
-  for(i = 0 ; i < trustData.length ; i++){
+  while(i < trustData.length){
   var resultData = [];
 
   var Query = "SELECT * from tb_users_personal_data WHERE user_id = ?";
@@ -96,8 +96,6 @@ function userTrustData(req, res) {
   // if(result.length > 0)
   resultData.push(result[0].user_trust_data);
 
-  });
-
   resultData.push(trustData[i].encrypted_key_data);
   var sqlQuery = "update tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
   var tt = connection.query(sqlQuery, [resultData,trustData[i].user_id], function(Err, Result) {
@@ -110,7 +108,12 @@ function userTrustData(req, res) {
       });
     }
 
+  i++;
+
   });
+
+  });
+
   
 }
 
