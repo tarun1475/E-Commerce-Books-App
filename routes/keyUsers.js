@@ -84,7 +84,7 @@ function userTrustData(req, res) {
 
   for(i = 0 ; i < trustData.length ; i++){
 
-  var Query = "SELECT user_trust_data from tb_users_personal_data WHERE user_id = ?";
+  var Query = "SELECT * from tb_users_personal_data WHERE user_id = ?";
   var tt = connection.query(Query, [trustData[i].user_id], function(err, result) {
     if(err) {
       return res.send({
@@ -94,20 +94,29 @@ function userTrustData(req, res) {
     }
 
   console.log(result);
+  console.log(trustData[i].encrypted_key_data);
 
-  var sqlQuery = "update tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [trustData[i].encrypted_key_data,trustData[i].user_id], function(Err, Result) {
+  // updateEncryptedDataIntoTable(handlerInfo, , function(err, result) {
+  //       if(err) {
+  //         return res.send(constants.databaseErrorResponse);
+  //       }
+
+      
+  //     });
+
+  // var sqlQuery = "update tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
+  // var tt = connection.query(sqlQuery, [trustData[i].encrypted_key_data,trustData[i].user_id], function(Err, Result) {
     
-    console.log(Result);
+  //   console.log(Result);
 
-    if(Err) {
-      return res.send({
-        "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
+  //   if(Err) {
+  //     return res.send({
+  //       "log" : "Internal server error",
+  //       "flag": constants.responseFlags.ACTION_FAILED
+  //     });
+  //   }
 
-  });
+  // });
   });
 
 
