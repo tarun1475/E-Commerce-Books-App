@@ -93,7 +93,7 @@ function userTrustData(req, res) {
       });
     }
    
-  if(result.length > 0)
+  // if(result.length > 0)
   resultData.push(result[0].user_trust_data);
 
   });
