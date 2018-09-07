@@ -76,7 +76,10 @@ function userTrustData(req, res) {
   ];
   **/
 
-  var trustData   = req.body.trust_data;
+  var trustData   = [];
+  trustData = req.body.trust_data;
+
+  console.log(trustData);
 
 
 
@@ -94,7 +97,7 @@ function userTrustData(req, res) {
     }
 
   console.log(result);
-  console.log(trustData[i].encrypted_key_data);
+  console.log(trustData);
 
   // updateEncryptedDataIntoTable(handlerInfo, , function(err, result) {
   //       if(err) {
