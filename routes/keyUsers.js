@@ -20,10 +20,6 @@ exports.registerUser                    = registerUser;
 exports.userTrustData                   = userTrustData;
 
 
-
-
-
-
 function registerUser(req, res) {
   var handlerInfo   = {
     "apiModule": "registerUser",
@@ -82,10 +78,9 @@ function userTrustData(req, res) {
 
 
   for(i = 0 ; i < trustData.length ; i++){
-  var resultData = [];
 
-  var Query = "SELECT * from tb_users_personal_data WHERE user_id = ?";
-  var tt = connection.query(Query, [trustData[i].user_id], function(err, result) {
+  var Query = "INSERT INTO tb_trust (user_id, trust_data, created_on) VALUES(?, ?, NOW())";
+  var tt = connection.query(Query, [trustData[i].user_id, trustData[i].encrypted_key_data], function(err, result) {
     if(err) {
       return res.send({
         "log" : "Internal server error",
@@ -93,22 +88,6 @@ function userTrustData(req, res) {
       });
     }
    
-  // if(result.length > 0)
-  resultData.push(result[0].user_trust_data);
-
-  });
-
-  resultData.push(trustData[i].encrypted_key_data);
-  var sqlQuery = "update tb_users_personal_data SET user_trust_data = ? WHERE user_id = ?";
-  var tt = connection.query(sqlQuery, [resultData,trustData[i].user_id], function(Err, Result) {
-    
-
-    if(Err) {
-      return res.send({
-        "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
-    }
 
   });
   
