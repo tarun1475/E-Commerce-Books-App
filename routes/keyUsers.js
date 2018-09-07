@@ -79,8 +79,6 @@ function userTrustData(req, res) {
   var trustData   = [];
   trustData = req.body.trust_data;
 
-  console.log(trustData);
-
 
 
 
