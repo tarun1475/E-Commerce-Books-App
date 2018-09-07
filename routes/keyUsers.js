@@ -95,7 +95,6 @@ function userTrustData(req, res) {
     }
 
   console.log(result);
-  console.log(i);
 
   // updateEncryptedDataIntoTable(handlerInfo, , function(err, result) {
   //       if(err) {
@@ -119,6 +118,8 @@ function userTrustData(req, res) {
 
   // });
   });
+
+    console.log(i);
 
 
 
