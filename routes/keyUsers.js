@@ -18,6 +18,8 @@ var messenger      = require('./messenger');
 
 exports.registerUser                    = registerUser;
 exports.userTrustData                   = userTrustData;
+exports.searchUser                      = searchUser;
+
 
 
 function registerUser(req, res) {
@@ -98,5 +100,31 @@ function userTrustData(req, res) {
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
 
+
+}
+
+
+
+function searchUser(req, res) {
+  var handlerInfo   = {
+    "apiModule": "searchUser",
+    "apiHandler":"searchUser"
+  };
+  var publicKey        = req.query.user_public_key;
+
+  var sqlQuery = "SELECT * from tb_users WHERE user_public_key = ?";
+  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "fetched successfully",
+      "data": result[0],
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
 
 }

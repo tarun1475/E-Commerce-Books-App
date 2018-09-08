@@ -98,6 +98,11 @@ app.post('/recovery_key/user_trust_data'
    , keyUsers.userTrustData
    , error);
 
+app.get('/recovery_key/fetch_user_public_key'
+   , keyUsers.searchUser
+   , error);
+
+
 
 
 
