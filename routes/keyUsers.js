@@ -14,8 +14,8 @@ var constants      = require('./constants');
 var logging        = require('./logging');
 var messenger      = require('./messenger');
 const nodemailer   = require('nodemailer');
-var sendgrid = require("sendgrid")("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");
-var email = new sendgrid.Email();
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey("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");
 
 
 
@@ -153,12 +153,14 @@ function sendOtpViaEmail(req, res) {
       });
     }
 
-    email.addTo("tarunkumargupta14@gmail.com");
-    email.setFrom("tarun@vevsatechnologies.com");
-    email.setSubject("Sending with SendGrid is Fun");
-    email.setHtml("and easy to do anywhere, even with Node.js");
-
-    sendgrid.send(email);
+  const msg = {
+  to: 'tarunkumargupta14@gmail.com',
+  from: 'tarun@vevsatechnologies.com',
+  subject: 'Sending with SendGrid is Fun',
+  text: 'and easy to do anywhere, even with Node.js',
+  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+};
+sgMail.send(msg);
 
 
     var otp       = Math.floor((Math.random()*1000000)+1);

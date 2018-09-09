@@ -10,6 +10,7 @@
   "author": "Rohan Kumar",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^6.3.1",
     "apn": "^1.7.6",
     "async": "^2.0.0-rc.5",
     "aws-sdk": "^2.4.8",
