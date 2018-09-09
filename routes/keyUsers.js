@@ -203,7 +203,7 @@ function logOtpIntoDb(handlerInfo, oneTimePwd, email, callback) {
 
 
 
-function verifyEmailOtp(req, res) {
+function verifyOtpViaEmail(req, res) {
   var reqParams = req.body;
   var handlerInfo = {
     "apiModule": "commonfunctions",
