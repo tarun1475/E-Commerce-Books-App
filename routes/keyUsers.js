@@ -42,7 +42,8 @@ function registerUser(req, res) {
 
     res.send({
       "log" : "User Registered successfully",
-      "flag": constants.responseFlags.ACTION_COMPLETE
+      "flag": constants.responseFlags.ACTION_COMPLETE,
+      "result": result
     });
   });
 
