@@ -171,7 +171,8 @@ function sendOtpViaEmail(req, res) {
         if(logErr) {
           return res.send({
             "log": "There was some error in generating otp",
-            "flag": constants.responseFlags.ACTION_FAILED
+            "flag": constants.responseFlags.ACTION_FAILED,
+            "err":logErr
           });
         }
         var sessionId = logRes.insertId;
