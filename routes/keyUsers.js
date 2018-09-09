@@ -14,6 +14,8 @@ var constants      = require('./constants');
 var logging        = require('./logging');
 var messenger      = require('./messenger');
 const nodemailer   = require('nodemailer');
+var sendgrid = require("sendgrid")("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");
+var email = new sendgrid.Email();
 
 
 
@@ -150,6 +152,15 @@ function sendOtpViaEmail(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
+
+    email.addTo("tarunkumargupta14@gmail.com");
+    email.setFrom("tarun@vevsatechnologies.com");
+    email.setSubject("Sending with SendGrid is Fun");
+    email.setHtml("and easy to do anywhere, even with Node.js");
+
+    sendgrid.send(email);
+
+
     var otp       = Math.floor((Math.random()*1000000)+1);
     var from      = 'support@vevsa.com';
     var to        = [email];

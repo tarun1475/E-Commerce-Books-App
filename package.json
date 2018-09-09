@@ -15,6 +15,7 @@
     "aws-sdk": "^2.4.8",
     "body-parser": "^1.15.1",
     "config": "^1.20.3",
+    "cors": "~2.7.1",
     "crypto": "0.0.3",
     "docdash": "^0.4.0",
     "express": "^4.13.4",
@@ -26,7 +27,7 @@
     "nodemailer": "^2.4.2",
     "nodemailer-smtp-transport": "^2.5.0",
     "request": "^2.72.0",
-    "serve-favicon": "^2.2.0",
-    "cors": "~2.7.1"
+    "sendgrid": "^1.9.2",
+    "serve-favicon": "^2.2.0"
   }
 }
