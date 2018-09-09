@@ -159,7 +159,8 @@ function sendOtpViaEmail(req, res) {
         to: email,
         from: 'tarun@vevsatechnologies.com',
         subject:  'Email  Verification',
-        text: 'Hello,<br><br>'+
+        text:'',
+        html: 'Hello,<br><br>'+
                     'In order to complete your recovery process, you must fill the following<br>'+
                     'code on your Verification screen: '+otp+'<br><br>'+
                     'Thank you for verifying youself.'
