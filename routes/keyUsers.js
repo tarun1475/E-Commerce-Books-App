@@ -14,7 +14,7 @@ var constants      = require('./constants');
 var logging        = require('./logging');
 var messenger      = require('./messenger');
 const nodemailer   = require('nodemailer');
-var sendgrid  = require('sendgrid')("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");
+var sendgrid       = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 
 
