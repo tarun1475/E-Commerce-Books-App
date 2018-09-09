@@ -233,7 +233,7 @@ function verifyOtpViaEmail(req, res) {
     res.send({
           "log": "User verified",
           "flag": constants.responseFlags.ACTION_COMPLETE
-        });s
+        });
     
   });
 }
