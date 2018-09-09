@@ -81,8 +81,8 @@ function userTrustData(req, res) {
 
   for(i = 0 ; i < trustData.length ; i++){
 
-  var Query = "INSERT INTO tb_trust (user_id, trust_data, created_on) VALUES(?, ?, NOW())";
-  var tt = connection.query(Query, [trustData[i].user_id, trustData[i].encrypted_key_data], function(err, result) {
+  var Query = "INSERT INTO tb_trust (user_public_key, trust_data, created_on) VALUES(?, ?, NOW())";
+  var tt = connection.query(Query, [trustData[i].user_public_key, trustData[i].encrypted_key_data], function(err, result) {
     if(err) {
       return res.send({
         "log" : "Internal server error",
@@ -96,7 +96,7 @@ function userTrustData(req, res) {
 }
 
  res.send({
-      "log" : "User Registered successfully",
+      "log" : "Sent successfully",
       "flag": constants.responseFlags.ACTION_COMPLETE
     });
 
