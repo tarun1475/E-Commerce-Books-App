@@ -163,7 +163,7 @@ function sendOtpViaEmail(req, res) {
     }
     });
 
-    let mailOptions = {};
+    var mailOptions = {};
     mailOptions.from      = 'tarun@vevsatechnologies.com';
     mailOptions.to        = email;
     mailOptions.text      = "";
