@@ -152,8 +152,6 @@ function sendOtpViaEmail(req, res) {
     }
     var otp       = Math.floor((Math.random()*1000000)+1);
 
-  nodemailer.createTestAccount((err, account) => {
-
     const transporter = nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
@@ -202,7 +200,6 @@ function sendOtpViaEmail(req, res) {
           });
       });
     });
-  });
   });
 }
 
