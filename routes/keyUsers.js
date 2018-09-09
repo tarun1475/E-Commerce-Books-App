@@ -151,7 +151,7 @@ function sendOtpViaEmail(req, res) {
       });
     }
     var otp       = Math.floor((Math.random()*1000000)+1);
-    var from      = 'tarun@vevsatechnologies.com';
+    var from      = 'support@vevsa.com';
     var to        = [email];
     var text      = "";
     var subject   = 'Email  Verification';
