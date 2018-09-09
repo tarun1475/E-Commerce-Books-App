@@ -161,7 +161,7 @@ function sendOtpViaEmail(req, res) {
   });
 
     var mailOptions = {};
-    mailOptions.from      = 'tarun@vevsatechnologies.com';
+    mailOptions.from      = 'tarunkumargupta14@gmail.com';
     mailOptions.to        = email;
     mailOptions.text      = "";
     mailOptions.subject   = 'Email  Verification';
