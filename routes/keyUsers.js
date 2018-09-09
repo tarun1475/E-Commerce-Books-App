@@ -153,36 +153,23 @@ function sendOtpViaEmail(req, res) {
       });
     }
 
-
-sendgrid.send({
-to: 'tarunkumargupta14@gmail.com',
-  from: 'tarun@vevsatechnologies.com',
-  subject:  'Hello World',
-  text:     'My first email through SendGrid.'
-}, function(err, json) {
-  if (err) { return console.error(err); }
-  console.log(json);
-});
-
-
     var otp       = Math.floor((Math.random()*1000000)+1);
-    var from      = 'support@vevsa.com';
-    var to        = [email];
-    var text      = "";
-    var subject   = 'Email  Verification';
-    var html      = 'Hello,<br><br>'+
+    sendgrid.send({
+
+        to: email,
+        from: 'tarun@vevsatechnologies.com',
+        subject:  'Email  Verification',
+        text: 'Hello,<br><br>'+
                     'In order to complete your recovery process, you must fill the following<br>'+
                     'code on your Verification screen: '+otp+'<br><br>'+
-                    'Thank you for verifying youself.';
-    messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
-      if(mailErr) {
-        return res.send({
-          "log": "There was some error in sending email",
-          "flag": constants.responseFlags.ACTION_FAILED,
-          "err":mailErr
-        });
-      }
-      logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
+                    'Thank you for verifying youself.'
+      }, 
+
+      function(err, json) {
+        if (err) { return console.error(err); }
+
+
+        logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
         if(logErr) {
           return res.send({
             "log": "There was some error in generating otp",
@@ -204,7 +191,8 @@ to: 'tarunkumargupta14@gmail.com',
             "flag": constants.responseFlags.ACTION_COMPLETE
           });
       });
-    });
+        console.log(json);
+      });
   });
 }
 
