@@ -152,14 +152,13 @@ function sendOtpViaEmail(req, res) {
     }
     var otp       = Math.floor((Math.random()*1000000)+1);
 
-    const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'q3zz6wm3je7dtcnj@ethereal.email',
-        pass: 's8kYkZyT1fvqRCbxsV'
-    }
-    });
+   var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'tarunkumargupta14@gmail.com',
+    pass: '9779855922'
+  }
+  });
 
     var mailOptions = {};
     mailOptions.from      = 'tarun@vevsatechnologies.com';
