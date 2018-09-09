@@ -13,6 +13,7 @@ var utils          = require('./commonfunctions');
 var constants      = require('./constants');
 var logging        = require('./logging');
 var messenger      = require('./messenger');
+const nodemailer   = require('nodemailer');
 
 
 
@@ -150,16 +151,30 @@ function sendOtpViaEmail(req, res) {
       });
     }
     var otp       = Math.floor((Math.random()*1000000)+1);
-    var from      = 'tarun@vevsatechnologies.com';
-    var to        = [email];
-    var text      = "";
-    var subject   = 'Email  Verification';
-    var html      = 'Hello,<br><br>'+
+
+  nodemailer.createTestAccount((err, account) => {
+
+    const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'q3zz6wm3je7dtcnj@ethereal.email',
+        pass: 's8kYkZyT1fvqRCbxsV'
+    }
+    });
+
+    let mailOptions = {};
+    mailOptions.from      = 'tarun@vevsatechnologies.com';
+    mailOptions.to        = email;
+    mailOptions.text      = "";
+    mailOptions.subject   = 'Email  Verification';
+    mailOptions.html      = 'Hello,<br><br>'+
                     'In order to complete your recovery process, you must fill the following<br>'+
                     'code on your Verification screen: '+otp+'<br><br>'+
                     'Thank you for verifying youself.';
-    messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
-      if(mailErr) {
+
+     transporter.sendMail(mailOptions, (error, info) => {
+      if(error) {
         return res.send({
           "log": "There was some error in sending email",
           "flag": constants.responseFlags.ACTION_FAILED
@@ -188,7 +203,9 @@ function sendOtpViaEmail(req, res) {
       });
     });
   });
+  });
 }
+
 
 
 function logOtpIntoDb(handlerInfo, oneTimePwd, email, callback) {
@@ -240,4 +257,6 @@ function verifyOtpInDb(handlerInfo, otp, session_id, callback) {
     callback(null, result);
   });
 }
+
+
 
