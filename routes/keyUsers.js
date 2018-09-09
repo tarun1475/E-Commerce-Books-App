@@ -151,39 +151,20 @@ function sendOtpViaEmail(req, res) {
       });
     }
     var otp       = Math.floor((Math.random()*1000000)+1);
-
-   var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'tarunkumargupta14@gmail.com',
-    pass: '9779855922'
-  }
-  });
-
-    // var mailOptions = {};
-    // mailOptions.from      = 'tarunkumargupta14@gmail.com';
-    // mailOptions.to        = email;
-    // mailOptions.text      = "";
-    // mailOptions.subject   = 'Email  Verification';
-    // mailOptions.html      = 'Hello,<br><br>'+
-    //                 'In order to complete your recovery process, you must fill the following<br>'+
-    //                 'code on your Verification screen: '+otp+'<br><br>'+
-    //                 'Thank you for verifying youself.';
-
-
-var mailOptions = {
-  from: 'tarunkumargupta14@gmail.com',
-  to: 'tarun@vevsatechnologies.com',
-  subject: 'Sending Email using Node.js',
-  text: 'That was easy!'
-};
-
-     transporter.sendMail(mailOptions, (error, info) => {
-      if(error) {
+    var from      = 'tarun@vevsatechnologies.com';
+    var to        = [email];
+    var text      = "";
+    var subject   = 'Email  Verification';
+    var html      = 'Hello,<br><br>'+
+                    'In order to complete your recovery process, you must fill the following<br>'+
+                    'code on your Verification screen: '+otp+'<br><br>'+
+                    'Thank you for verifying youself.';
+    messenger.sendEmailToUser(from, to, subject, text, html, function(mailErr, mailRes) {
+      if(mailErr) {
         return res.send({
           "log": "There was some error in sending email",
           "flag": constants.responseFlags.ACTION_FAILED,
-          "error": error
+          "err":mailErr
         });
       }
       logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
@@ -210,7 +191,6 @@ var mailOptions = {
     });
   });
 }
-
 
 
 function logOtpIntoDb(handlerInfo, oneTimePwd, email, callback) {
@@ -262,6 +242,4 @@ function verifyOtpInDb(handlerInfo, otp, session_id, callback) {
     callback(null, result);
   });
 }
-
-
 
