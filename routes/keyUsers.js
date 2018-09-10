@@ -219,6 +219,7 @@ function verifyOtpViaEmail(req, res) {
 
   var otp = reqParams.otp;
   var session_id = reqParams.session_id;
+  var email = reqParams.email;
   verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
