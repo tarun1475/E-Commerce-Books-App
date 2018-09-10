@@ -230,11 +230,31 @@ function verifyOtpViaEmail(req, res) {
       });
     }
 
-    res.send({
+    fetchUserDetailsFromEmail(handlerInfo, email, function(userErr,userRes){
+      if(userErr)   return res.send(constants.databaseErrorResponse);
+
+
+
+       res.send({
           "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "userDetails":userRes[0]
         });
+
+    });
+
+   
     
+  });
+}
+
+function fetchUserDetailsFromEmail(handlerInfo, email, callback) {
+  var sqlQuery = "SELECT * FROM tb_users WHERE email = ?";
+  var tt = connection.query(sqlQuery, [email], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
   });
 }
 
