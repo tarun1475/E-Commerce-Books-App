@@ -250,8 +250,9 @@ function verifyOtpViaEmail(req, res) {
 }
 
 function updateUserDetailsFromEmail(handlerInfo, email,user_public_key, callback) {
-   var sqlQuery = "update tb_users SET email = ? , status = 0 WHERE user_public_key = ?";
-  var tt = connection.query(sqlQuery, [email,user_public_key], function(err, result) {
+  var status = 1;
+   var sqlQuery = "update tb_users SET email = ? , email_status = ? WHERE user_public_key = ?";
+  var tt = connection.query(sqlQuery, [email,status , user_public_key], function(err, result) {
     if(err) {
       return res.send({
         "log" : "Internal server error",
