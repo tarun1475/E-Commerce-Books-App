@@ -110,7 +110,6 @@ function userTrustData(req, res) {
 }
 
 
-
 function searchUser(req, res) {
   var handlerInfo   = {
     "apiModule": "searchUser",
@@ -220,6 +219,7 @@ function verifyOtpViaEmail(req, res) {
   var otp = reqParams.otp;
   var session_id = reqParams.session_id;
   var email = reqParams.email;
+  var publicKey = reqParams.publicKey;
   verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
@@ -231,7 +231,7 @@ function verifyOtpViaEmail(req, res) {
       });
     }
 
-    fetchUserDetailsFromEmail(handlerInfo, email, function(userErr,userRes){
+    updateUserDetailsFromEmail(handlerInfo, email,publicKey function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
 
@@ -239,13 +239,28 @@ function verifyOtpViaEmail(req, res) {
        res.send({
           "log": "User verified",
           "flag": constants.responseFlags.ACTION_COMPLETE,
-          "userDetails":userRes[0]
+          "userDetails":userRes
         });
 
     });
 
    
     
+  });
+}
+
+function updateUserDetailsFromEmail(handlerInfo, email,user_public_key, callback) {
+   var sqlQuery = "update tb_users SET email = ? WHERE user_public_key = ?";
+  var tt = connection.query(sqlQuery, [email,user_public_key], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     callback(null, result);
+
   });
 }
 
