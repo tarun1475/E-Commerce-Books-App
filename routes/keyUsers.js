@@ -231,7 +231,7 @@ function verifyOtpViaEmail(req, res) {
       });
     }
 
-    updateUserDetailsFromEmail(handlerInfo, email,publicKey function(userErr,userRes){
+    updateUserDetailsFromEmail(handlerInfo, email,publicKey ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
 
