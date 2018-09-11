@@ -109,6 +109,10 @@ app.get('/recovery_key/fetch_user_public_key'
    , keyUsers.searchUser
    , error);
 
+app.post('/recovery_key/login_user'
+   , keyUsers.loginUser
+   , error);
+
 
 
 

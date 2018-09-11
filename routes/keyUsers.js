@@ -24,6 +24,7 @@ exports.userTrustData                   = userTrustData;
 exports.searchUser                      = searchUser;
 exports.sendOtpViaEmail                 = sendOtpViaEmail;
 exports.verifyOtpViaEmail               = verifyOtpViaEmail;
+exports.loginUser                       = loginUser;
 
 
 
@@ -283,5 +284,31 @@ function verifyOtpInDb(handlerInfo, otp, session_id, callback) {
     }
     callback(null, result);
   });
+}
+
+
+function loginUser(req, res) {
+  var handlerInfo   = {
+    "apiModule": "loginUser",
+    "apiHandler":"loginUser"
+  };
+  var publicKey        = req.body.publicKey;
+  var privateKeyHash   = req.body.privateKeyHash;
+
+  var sqlQuery = "SELECT * from tb_users WHERE user_public_key = ? AND user_private_key_hash = ?";
+  var tt = connection.query(sqlQuery, [publicKey,privateKeyHash], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+    res.send({
+      "log" : "fetched successfully",
+      "data": result[0],
+      "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+  });
+
 }
 
