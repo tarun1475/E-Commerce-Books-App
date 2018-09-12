@@ -375,3 +375,43 @@ function sendRecoveryOtpViaEmail(req, res) {
   });
 }
 
+
+function verifyRecoveryOtpViaEmail(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var otp = reqParams.otp;
+  var session_id = reqParams.session_id;
+  var email = reqParams.email;
+  verifyOtpInDb(handlerInfo, otp, session_id, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+    if(result.length == 0) {
+      return res.send({
+        "log" : "Verification failed",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+    fetchUserDetailsFromEmail(handlerInfo, email,function(userErr,userRes){
+      if(userErr)   return res.send(constants.databaseErrorResponse);
+
+
+
+       res.send({
+          "log": "User verified",
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "userDetails":userRes
+        });
+
+    });
+
+   
+    
+  });
+}
+
