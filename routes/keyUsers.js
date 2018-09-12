@@ -27,6 +27,7 @@ exports.sendRecoveryOtpViaEmail         = sendRecoveryOtpViaEmail;
 exports.verifyRecoveryOtpViaEmail       = verifyRecoveryOtpViaEmail;
 exports.verifyOtpViaEmail               = verifyOtpViaEmail;
 exports.loginUser                       = loginUser;
+exports.sendRecoveryTrustData           = sendRecoveryTrustData;
 
 
 
@@ -414,4 +415,71 @@ function verifyRecoveryOtpViaEmail(req, res) {
     
   });
 }
+
+
+function sendRecoveryTrustData(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var publicKey = reqParams.publicKey;
+  var newPublicKey = reqParams.newPublicKey;
+  var trustData = reqParams.trustData;
+
+
+  logRequestIntoDb(handlerInfo, publicKey, newPublicKey, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    var request_id = result.insertId;
+
+
+
+    for(i = 0 , i < trustData.length ; i++){
+
+      logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
+      if(userErr)   return res.send(constants.databaseErrorResponse);
+
+    });
+
+
+    }
+
+
+       res.send({
+          "log": "User verified",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+    
+  });
+}
+
+
+function logRequestIntoDb(handlerInfo, publicKey, newPublicKey, callback) {
+ var sqlQuery = "INSERT INTO tb_recovery_request (from_public_key,new_public_key,logged_on) VALUES( ?, ? , NOW())";
+  var tt = connection.query(sqlQuery, [publicKey,newPublicKey], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+
+function logRequestDetails(handlerInfo, request_id, publicKey, callback) {
+ var sqlQuery = "INSERT INTO tb_recovery_request (request_id,user_public_key,logged_on) VALUES( ?, ? , NOW())";
+  var tt = connection.query(sqlQuery, [request_id,publicKey], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+
+
+
 

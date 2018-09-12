@@ -98,6 +98,10 @@ app.post('/recovery_key/user_trust_data'
    , keyUsers.userTrustData
    , error);
 
+app.post('/recovery_key/user_recovery_trust_data'
+   , keyUsers.sendRecoveryTrustData
+   , error);
+
 app.post('/recovery_key/send_otp'
    , keyUsers.sendOtpViaEmail
    , error);
