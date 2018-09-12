@@ -441,11 +441,16 @@ function sendRecoveryTrustData(req, res) {
 
 
 
-    for(i = 0 ; i < trustData.length ; i++){
+    for(i = 0 ; i < 1 ; i++){
 
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
       console.log(i);
+
+       res.send({
+          "log": "User verified",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
 
     
     });
@@ -453,10 +458,7 @@ function sendRecoveryTrustData(req, res) {
 
     }
 
-      res.send({
-          "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
+     
 
 
        
