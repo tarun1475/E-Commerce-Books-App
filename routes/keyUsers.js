@@ -443,16 +443,19 @@ function sendRecoveryTrustData(req, res) {
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
+      if(i == 2) {
+        res.send({
+          "log": "User verified",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
+      }
     });
 
 
     }
 
 
-       res.send({
-          "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
+       
     
   });
 }
@@ -470,7 +473,7 @@ function logRequestIntoDb(handlerInfo, publicKey, newPublicKey, callback) {
 
 
 function logRequestDetails(handlerInfo, request_id, publicKey, callback) {
- var sqlQuery = "INSERT INTO tb_recovery_request (request_id,user_public_key,logged_on) VALUES( ?, ? , NOW())";
+ var sqlQuery = "INSERT INTO tb_recovery_details (request_id,user_public_key,logged_on) VALUES( ?, ? , NOW())";
   var tt = connection.query(sqlQuery, [request_id,publicKey], function(err, result) {
     if(err) {
       return callback(err, null);
