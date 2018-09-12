@@ -23,6 +23,8 @@ exports.registerUser                    = registerUser;
 exports.userTrustData                   = userTrustData;
 exports.searchUser                      = searchUser;
 exports.sendOtpViaEmail                 = sendOtpViaEmail;
+exports.sendRecoveryOtpViaEmail         = sendRecoveryOtpViaEmail;
+exports.verifyRecoveryOtpViaEmail       = verifyRecoveryOtpViaEmail;
 exports.verifyOtpViaEmail               = verifyOtpViaEmail;
 exports.loginUser                       = loginUser;
 
