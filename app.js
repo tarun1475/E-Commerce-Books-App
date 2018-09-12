@@ -105,6 +105,14 @@ app.post('/recovery_key/send_otp'
 app.post('/recovery_key/verify_otp'
    , keyUsers.verifyOtpViaEmail
    , error);
+
+app.post('/recovery_key/send_recovery_otp'
+   , keyUsers.sendRecoveryOtpViaEmail
+   , error);
+
+app.post('/recovery_key/verify_recovery_otp'
+   , keyUsers.verifyRecoveryOtpViaEmail
+   , error);
 app.get('/recovery_key/fetch_user_public_key'
    , keyUsers.searchUser
    , error);

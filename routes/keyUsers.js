@@ -312,3 +312,64 @@ function loginUser(req, res) {
 
 }
 
+function sendRecoveryOtpViaEmail(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule" : "commonfunctions",
+    "apiHandler": "sendOtpViaEmail"
+  };
+
+  var email     = reqParams.user_email;
+  var getDuplicate = "SELECT * FROM tb_users WHERE email = ?";
+  var tt = connection.query(getDuplicate, [email], function(dupErr, dupRes) {
+    if(dupRes.length == 0) {
+      return res.send({
+        "log": "A user does not exists with this email",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+    var otp       = Math.floor((Math.random()*1000000)+1);
+    sendgrid.send({
+
+        to: email,
+        from: 'tarun@vevsatechnologies.com',
+        subject:  'Email  Verification',
+        text:'',
+        html: 'Hello,<br><br>'+
+                    'In order to complete your recovery process, you must fill the following<br>'+
+                    'code on your Verification screen: '+otp+'<br><br>'+
+                    'Thank you for verifying youself.'
+      }, 
+
+      function(err, json) {
+        if (err) { return console.error(err); }
+
+
+        logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
+        if(logErr) {
+          return res.send({
+            "log": "There was some error in generating otp",
+            "flag": constants.responseFlags.ACTION_FAILED,
+            "err":logErr
+          });
+        }
+        var sessionId = logRes.insertId;
+
+          if(logErr) {
+            return res.send({
+              "log": "Error in creating user",
+              "flag": constants.responseFlags.ACTION_FAILED
+            });
+          }
+          res.send({
+            "log": "Otp sent successfully",
+            "session_id": sessionId,
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
+      });
+        console.log(json);
+      });
+  });
+}
+
