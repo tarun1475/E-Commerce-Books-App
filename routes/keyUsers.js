@@ -437,26 +437,34 @@ function sendRecoveryTrustData(req, res) {
 
     request_id = result.insertId;
 
-   });
-
-
-
-    for(i = 0 ; i < 1 ; i++){
-
-      logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
-      if(userErr)   return res.send(constants.databaseErrorResponse);
-      console.log(i);
-
-       res.send({
+console.log(request_id);
+      res.send({
           "log": "User verified",
           "flag": constants.responseFlags.ACTION_COMPLETE
         });
 
+   });
+
+  
+
+
+
+    // for(i = 0 ; i < 1 ; i++){
+
+    //   logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
+    //   if(userErr)   return res.send(constants.databaseErrorResponse);
+    //   console.log(i);
+
+    //    res.send({
+    //       "log": "User verified",
+    //       "flag": constants.responseFlags.ACTION_COMPLETE
+    //     });
+
     
-    });
+    // });
 
 
-    }
+    // }
 
      
 
