@@ -426,7 +426,7 @@ function sendRecoveryTrustData(req, res) {
 
   var publicKey = reqParams.publicKey;
   var newPublicKey = reqParams.newPublicKey;
-  var trustData = reqParams.trustData;
+  var trustData = reqParams.trust_data;
 
 
   logRequestIntoDb(handlerInfo, publicKey, newPublicKey, function(err, result) {
