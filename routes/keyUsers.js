@@ -437,13 +437,15 @@ function sendRecoveryTrustData(req, res) {
 
     request_id = result.insertId;
 
-console.log(request_id);
-      res.send({
-          "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
+   
+      // res.send({
+      //     "log": "User verified",
+      //     "flag": constants.responseFlags.ACTION_COMPLETE
+      //   });
 
    });
+
+     console.log(request_id);
 
   
 
