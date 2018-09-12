@@ -443,16 +443,16 @@ function sendRecoveryTrustData(req, res) {
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
-      if(i == 2) {
-        res.send({
-          "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
-      }
+    
     });
 
 
     }
+
+      res.send({
+          "log": "User verified",
+          "flag": constants.responseFlags.ACTION_COMPLETE
+        });
 
 
        
