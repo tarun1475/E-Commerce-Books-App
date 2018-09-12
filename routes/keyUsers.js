@@ -424,9 +424,10 @@ function sendRecoveryTrustData(req, res) {
     "apiHandler": "verifyEmailOtp"
   };
 
-  var publicKey = reqParams.publicKey;
-  var newPublicKey = reqParams.newPublicKey;
-  var trustData = reqParams.trust_data;
+  var publicKey     = reqParams.publicKey;
+  var newPublicKey  = reqParams.newPublicKey;
+  var trustData     = reqParams.trust_data;
+  var request_id = "";
 
 
   logRequestIntoDb(handlerInfo, publicKey, newPublicKey, function(err, result) {
@@ -434,7 +435,9 @@ function sendRecoveryTrustData(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    var request_id = result.insertId;
+    request_id = result.insertId;
+
+   });
 
 
 
@@ -442,6 +445,7 @@ function sendRecoveryTrustData(req, res) {
 
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
+      console.log(i);
 
     
     });
@@ -457,7 +461,7 @@ function sendRecoveryTrustData(req, res) {
 
        
     
-  });
+ 
 }
 
 
