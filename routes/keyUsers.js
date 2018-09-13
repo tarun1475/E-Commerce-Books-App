@@ -444,22 +444,10 @@ function sendRecoveryTrustData(req, res) {
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
-
-      
-    
     });
-
-
-
 
     }
 
-     
-
-
-       
-    
- 
 }
 
 
@@ -483,6 +471,82 @@ function logRequestDetails(handlerInfo, request_id, publicKey, callback) {
     callback(null, result);
   });
 }
+
+
+function fetchRecoveryRequests(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var publicKey     = reqParams.publicKey;
+  var requestDetails = [];
+
+  fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    for(var i =0 ; i < result.length ;i++){
+      fetchRecoveryRequestsDetails(handlerInfo,result[i].request_id,function(reqErr , reqRes){
+         if(reqErr) {
+          return res.send(constants.databaseErrorResponse);
+        }
+        requestDetails.push(reqRes[0]);
+
+
+      });
+    }
+   });
+
+  fetchTrustDataFromPublicKey(handlerInfo, publicKey , function(trustErr , trustRes){
+      if(trustErr) {
+          return res.send(constants.databaseErrorResponse);
+        }
+
+      res.send({
+        "result":trustRes,
+        "data": requestDetails
+      });
+
+  });
+
+  
+
+}
+
+
+function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
+ var sqlQuery = "SELECT request_id from tb_recovery_details WHERE user_public_key = ?";;
+  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+function fetchRecoveryRequestsDetails(handlerInfo, request_id, callback) {
+ var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
+  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+function fetchTrustDataFromPublicKey(handlerInfo, publicKey, callback) {
+ var sqlQuery = "SELECT * from tb_trust WHERE user_public_key = ?";;
+  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
 
 
 
