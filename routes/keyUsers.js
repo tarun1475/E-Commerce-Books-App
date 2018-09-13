@@ -489,7 +489,7 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    for(var i =0 ; i < result.length ;i++){
+    for(i =0 ; i < result.length ;i++){
       fetchRecoveryRequestsDetails(handlerInfo,result[i].request_id,function(reqErr , reqRes){
          if(reqErr) {
           return res.send(constants.databaseErrorResponse);
@@ -505,6 +505,8 @@ function fetchRecoveryRequests(req, res) {
       if(trustErr) {
           return res.send(constants.databaseErrorResponse);
         }
+
+      console.log(i);
 
       res.send({
         "result":trustRes,
