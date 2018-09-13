@@ -512,10 +512,10 @@ function fetchRecoveryRequests(req, res) {
 
       
     
-      //   res.send({
-      //   "result":trustRes,
-      //   "data": requestDetails
-      // });
+        res.send({
+        "result":trustRes,
+        "data": requestDetails
+      });
     
      
 
