@@ -438,6 +438,7 @@ function sendRecoveryTrustData(req, res) {
    });
 
     for(var i = 0 ; i < trustData.length ; i++){
+      console.log(request_id);
 
       logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
