@@ -29,6 +29,7 @@
     "nodemailer-smtp-transport": "^2.5.0",
     "request": "^2.72.0",
     "sendgrid": "^1.9.2",
-    "serve-favicon": "^2.2.0"
+    "serve-favicon": "^2.2.0",
+    "shortid": "^2.2.13"
   }
 }

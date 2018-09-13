@@ -15,6 +15,7 @@ var logging        = require('./logging');
 var messenger      = require('./messenger');
 const nodemailer   = require('nodemailer');
 var sendgrid       = require('sendgrid')(process.env.SENDGRID_API_KEY);
+var shortid        = require('shortid');
 
 
 
@@ -427,14 +428,14 @@ function sendRecoveryTrustData(req, res) {
   var publicKey     = reqParams.publicKey;
   var newPublicKey  = reqParams.newPublicKey;
   var trustData     = reqParams.trust_data;
-  var request_id = "";
+  var request_id = shortid.generate();
 
 
-  logRequestIntoDb(handlerInfo, publicKey, newPublicKey, function(err, result) {
+  logRequestIntoDb(handlerInfo,request_id, publicKey, newPublicKey, function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    request_id = result.insertId;
+
    });
 
     for(var i = 0 ; i < trustData.length ; i++){
@@ -448,7 +449,7 @@ function sendRecoveryTrustData(req, res) {
     
     });
 
-      
+
 
 
     }
@@ -462,9 +463,9 @@ function sendRecoveryTrustData(req, res) {
 }
 
 
-function logRequestIntoDb(handlerInfo, publicKey, newPublicKey, callback) {
- var sqlQuery = "INSERT INTO tb_recovery_request (from_public_key,new_public_key,logged_on) VALUES( ?, ? , NOW())";
-  var tt = connection.query(sqlQuery, [publicKey,newPublicKey], function(err, result) {
+function logRequestIntoDb(handlerInfo, request_id,publicKey, newPublicKey, callback) {
+ var sqlQuery = "INSERT INTO tb_recovery_request (request_id,from_public_key,new_public_key,logged_on) VALUES( ? , ?, ? , NOW())";
+  var tt = connection.query(sqlQuery, [request_id,publicKey,newPublicKey], function(err, result) {
     if(err) {
       return callback(err, null);
     }
