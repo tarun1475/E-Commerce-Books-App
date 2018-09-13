@@ -506,12 +506,14 @@ function fetchRecoveryRequests(req, res) {
           return res.send(constants.databaseErrorResponse);
         }
 
-      console.log(i);
-
-      res.send({
+      
+      if(i == 3){
+        res.send({
         "result":trustRes,
         "data": requestDetails
       });
+      }
+     
 
   });
 
