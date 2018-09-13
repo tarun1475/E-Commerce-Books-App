@@ -29,6 +29,7 @@ exports.verifyRecoveryOtpViaEmail       = verifyRecoveryOtpViaEmail;
 exports.verifyOtpViaEmail               = verifyOtpViaEmail;
 exports.loginUser                       = loginUser;
 exports.sendRecoveryTrustData           = sendRecoveryTrustData;
+exports.fetchRecoveryRequests           = fetchRecoveryRequests;
 
 
 
