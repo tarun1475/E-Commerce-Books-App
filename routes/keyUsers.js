@@ -16,6 +16,7 @@ var messenger      = require('./messenger');
 const nodemailer   = require('nodemailer');
 var sendgrid       = require('sendgrid')(process.env.SENDGRID_API_KEY);
 var shortid        = require('shortid');
+var async          = require('async');
 
 
 
@@ -481,50 +482,54 @@ function fetchRecoveryRequests(req, res) {
     "apiHandler": "verifyEmailOtp"
   };
 
-  var publicKey     = reqParams.publicKey;
-  var resultArr   = [];
-  var requestDetails = [];
+  var publicKey       = reqParams.publicKey;
+  var resultArr       = [];
+  var requestDetails  = [];
 
-  fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
+
+
+  function firstArr(callback){
+    fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
-    resultArr = result;
-  });
 
-    for(i =0 ; i < resultArr.length ;i++){
-      fetchRecoveryRequestsDetails(handlerInfo,resultArr[i].request_id,function(reqErr , reqRes){
+
+    for(i =0 ; i < result.length ;i++){
+      fetchRecoveryRequestsDetails(handlerInfo,result[i].request_id,function(reqErr , reqRes){
          if(reqErr) {
           return res.send(constants.databaseErrorResponse);
         }
+
         requestDetails.push(reqRes[0]);
-
-        console.log("value of i is ", i);
-
 
       });
     }
+    
+    callback(null , result);
+  });
+  }
 
-  fetchTrustDataFromPublicKey(handlerInfo, publicKey , function(trustErr , trustRes){
+  function secondArr(callback){
+
+      fetchTrustDataFromPublicKey(handlerInfo, publicKey , function(trustErr , trustRes){
       if(trustErr) {
           return res.send(constants.databaseErrorResponse);
         }
 
-      
-    
-        res.send({
-        "result":trustRes,
-        "data": requestDetails
-      });
-    
-     
-
+      callback(null, trustRes);
   });
-   
 
+  }
 
+  resultArr.push(firstArr,secondArr);
 
-  
+  async.parallel(resultArr, function (err,result){
+    res.send({
+      "result":result
+
+    });
+});
 
 }
 
