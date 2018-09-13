@@ -444,13 +444,11 @@ function sendRecoveryTrustData(req, res) {
       if(userErr)   return res.send(constants.databaseErrorResponse);
 
 
-       res.send({
-          "log": "User verified",
-          "flag": constants.responseFlags.ACTION_COMPLETE
-        });
-
+      
     
     });
+
+      
 
 
     }
