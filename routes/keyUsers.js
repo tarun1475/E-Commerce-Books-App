@@ -499,7 +499,6 @@ function fetchRecoveryRequests(req, res) {
 
       });
     }
-   });
 
   fetchTrustDataFromPublicKey(handlerInfo, publicKey , function(trustErr , trustRes){
       if(trustErr) {
@@ -516,6 +515,9 @@ function fetchRecoveryRequests(req, res) {
      
 
   });
+   });
+
+
 
   
 
