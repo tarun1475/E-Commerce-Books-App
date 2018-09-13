@@ -482,15 +482,18 @@ function fetchRecoveryRequests(req, res) {
   };
 
   var publicKey     = reqParams.publicKey;
+  var resultArr   = [];
   var requestDetails = [];
 
   fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
+    resultArr = result;
+  });
 
-    for(i =0 ; i < result.length ;i++){
-      fetchRecoveryRequestsDetails(handlerInfo,result[i].request_id,function(reqErr , reqRes){
+    for(i =0 ; i < resultArr.length ;i++){
+      fetchRecoveryRequestsDetails(handlerInfo,resultArr[i].request_id,function(reqErr , reqRes){
          if(reqErr) {
           return res.send(constants.databaseErrorResponse);
         }
@@ -517,7 +520,7 @@ function fetchRecoveryRequests(req, res) {
      
 
   });
-   });
+   
 
 
 
