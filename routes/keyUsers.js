@@ -496,6 +496,8 @@ function fetchRecoveryRequests(req, res) {
         }
         requestDetails.push(reqRes[0]);
 
+        console.log("value of i is ", i);
+
 
       });
     }
@@ -506,12 +508,12 @@ function fetchRecoveryRequests(req, res) {
         }
 
       
-      if(i == 3){
-        res.send({
-        "result":trustRes,
-        "data": requestDetails
-      });
-      }
+    
+      //   res.send({
+      //   "result":trustRes,
+      //   "data": requestDetails
+      // });
+    
      
 
   });
