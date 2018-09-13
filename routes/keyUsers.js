@@ -505,6 +505,8 @@ function fetchRecoveryRequests(req, res) {
 
       });
     }
+
+    console.log(i);
     
     callback(null , result);
   });
