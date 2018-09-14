@@ -494,8 +494,19 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
+      var reqArr = [];
+      var asyncTasks = [];
+
+      for(i=0 ; i < result.length ; i++){
+        reqArr.push(result[i].request_id);
+      }
+
+      for(i =0 ; i < reqArr.length ;i++){
+      asyncTasks.push(fetchRecoveryRequestsDetails.bind(null,handlerInfo,reqArr[i].request_id));  
+      }
+
     
-    callback(null , requestDetails);
+    callback(null , asyncTasks);
   });
   }
 
@@ -514,21 +525,9 @@ function fetchRecoveryRequests(req, res) {
   resultArr.push(firstArr,secondArr);
 
   async.parallel(resultArr, function (err,result){
-    var finalArr = result[0];
 
-     for(i =0 ; i < finalArr.length ;i++){
-      fetchRecoveryRequestsDetails(handlerInfo,finalArr[i].request_id,function(reqErr , reqRes){
-         if(reqErr) {
-          return res.send(constants.databaseErrorResponse);
-        }
-
-        requestDetails.push(reqRes[0]);
-
-      });
-    }
     res.send({
-      "result":result[1],
-      "final":requestDetails
+      "result":result
 
     });
 });

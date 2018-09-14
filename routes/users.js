@@ -577,7 +577,7 @@ function getRecentRequestsByUserId(req, res) {
   var user_id = req.query.user_id;
   var start_from = parseInt(req.query.start_from || 0);
   var page_size = parseInt(req.query.page_size || 5);
- var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE user_id = ? AND status = ? ORDER BY generated_on DESC LIMIT ?, ?";
+  var sqlQuery = "SELECT req_id FROM tb_book_requests WHERE user_id = ? AND status = ? ORDER BY generated_on DESC LIMIT ?, ?";
   var tt = connection.query(sqlQuery, [user_id,status, start_from, page_size], function(err, result) {
     logging.logDatabaseQuery(handlerInfo, "getting user requests", err, result, tt.sql);
     if(err) {
