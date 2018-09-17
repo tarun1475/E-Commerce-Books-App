@@ -493,7 +493,7 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    var oka = fetchRecoveryRequestsDetails(result[i].request_id);
+    var oka = fetchRecoveryRequestsDetails(result[0].request_id);
       
       
      
