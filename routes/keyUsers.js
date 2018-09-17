@@ -493,9 +493,9 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-      let promises = [];
+      var promises = [];
       
-      for (let i = 0; i < result.length; i++) {
+      for (var i = 0; i < result.length; i++) {
         promises.push(fetchRecoveryRequestsDetails(items[i]));
       }
       
