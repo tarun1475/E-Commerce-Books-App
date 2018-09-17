@@ -493,11 +493,14 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    var oka = fetchRecoveryRequestsDetails(result[0].request_id);
+    fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
+      console.log(Ress);
+
+    });
       
       
      
-      console.log(oka);
+      
     
 
 
@@ -516,13 +519,13 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
   });
 }
 
-function fetchRecoveryRequestsDetails(request_id) {
+function fetchRecoveryRequestsDetails(request_id,callback) {
  var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
-      return err;
+      return callback(err,null);
     }
-   return result;
+   return callback(null,result);
   });
 }
 
