@@ -496,7 +496,7 @@ function fetchRecoveryRequests(req, res) {
       var promises = [];
       
       for (var i = 0; i < result.length; i++) {
-        promises.push(fetchRecoveryRequestsDetails(items[i]));
+        promises.push(fetchRecoveryRequestsDetails(result[i].request_id));
       }
       
       const results = Promise.all(promises);
