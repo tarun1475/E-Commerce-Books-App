@@ -493,14 +493,11 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-      var promises = [];
+    var oka = fetchRecoveryRequestsDetails(result[i].request_id);
       
-      for (var i = 0; i < result.length; i++) {
-        promises.push(fetchRecoveryRequestsDetails(result[i].request_id));
-      }
       
      
-      console.log(promises);
+      console.log(oka);
     
 
 
@@ -523,7 +520,7 @@ function fetchRecoveryRequestsDetails(request_id) {
  var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
-      return callback(err, null);
+      return err;
     }
    return result;
   });
