@@ -487,50 +487,28 @@ function fetchRecoveryRequests(req, res) {
   var requestDetails  = [];
 
 
-
-  function firstArr(callback){
     fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
+
     if(err) {
       return res.send(constants.databaseErrorResponse);
     }
 
-      var reqArr = [];
-      var asyncTasks = [];
+    async (result) => {
 
-      for(i=0 ; i < result.length ; i++){
-        reqArr.push(result[i].request_id);
+      for (let i = 0; i < result.length; i++) {
+        const result = await fetchRecoveryRequestsDetails(result[i].request_id);
+        console.log(result);
       }
 
-      for(i =0 ; i < reqArr.length ;i++){
-      asyncTasks.push(fetchRecoveryRequestsDetails.bind(null,handlerInfo,reqArr[i].request_id));  
-      }
 
-    
-    callback(null , asyncTasks);
-  });
-  }
+      res.send({
+        "log":"done"
+      });
 
-  function secondArr(callback){
+    }
 
-      fetchTrustDataFromPublicKey(handlerInfo, publicKey , function(trustErr , trustRes){
-      if(trustErr) {
-          return res.send(constants.databaseErrorResponse);
-        }
-
-      callback(null, trustRes);
-  });
-
-  }
-
-  resultArr.push(firstArr,secondArr);
-
-  async.parallel(resultArr, function (err,result){
-
-    res.send({
-      "result":result
 
     });
-});
 
 }
 
@@ -545,13 +523,13 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
   });
 }
 
-function fetchRecoveryRequestsDetails(handlerInfo, request_id, callback) {
+function fetchRecoveryRequestsDetails(request_id) {
  var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
       return callback(err, null);
     }
-    callback(null, result);
+   return result;
   });
 }
 
