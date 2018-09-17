@@ -493,10 +493,14 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
+    for(i=0 ; i < result.length; i++){
+       fetchRecoveryRequestsDetails(result[i].request_id,function(eRR,Ress){
       console.log(Ress);
 
     });
+    }
+
+   
       
       
      
