@@ -493,16 +493,15 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    async function(result) => {
       let promises = [];
       
       for (let i = 0; i < result.length; i++) {
         promises.push(fetchRecoveryRequestsDetails(items[i]));
       }
       
-      const results = await Promise.all(promises);
+      const results = Promise.all(promises);
       console.log(results);
-    }
+    
 
 
     });
