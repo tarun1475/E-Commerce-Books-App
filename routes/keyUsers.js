@@ -525,7 +525,7 @@ function fetchRecoveryRequests(req, res) {
 
       res.send({
         "trustData":trustDetails,
-        "recoveryData":fetchRecovery
+        "recoveryData":recoveryData
       });
     });
 
