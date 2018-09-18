@@ -519,8 +519,10 @@ function fetchRecoveryRequests(req, res) {
     resultArr.push(fetchRecovery,trustDetails);
 
     async.parallel(resultArr,function(newErr , newRes){
+
       res.send({
-        "data":newRes
+        "trustData":trustDetails,
+        "recoveryData":fetchRecovery
       });
     });
 
