@@ -494,7 +494,7 @@ function fetchRecoveryRequests(req, res) {
     }
 
     for(i=0 ; i < 3; i++){
-      fetchRecoveryRequestsDetails(result[i].request_id,function(eRR,Ress){
+      fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
         console.log(Ress);
 
 
