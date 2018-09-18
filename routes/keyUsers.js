@@ -560,7 +560,7 @@ function fetchRecoveryRequestsDetails(result,callback) {
         return callback(err,null);
       }
 
-      requestDetails.push(result);
+      requestDetails.push(result[0]);
         if(0 === --pending){
            return callback(null,requestDetails);
         }
