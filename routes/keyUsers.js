@@ -520,7 +520,7 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
 }
 
 function fetchRecoveryRequestsDetails(result,callback) {
-  var requestDetail= [];
+  var requestDetails = [];
   for(i=0 ;i<result.length;i++){
   var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
   var tt = connection.query(sqlQuery, [result[i].request_id], function(err, result) {
