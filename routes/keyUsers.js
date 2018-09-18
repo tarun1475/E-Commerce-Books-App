@@ -493,10 +493,22 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    for(i=0 ; i < 3; i++){
-     const res = fetchRecoveryRequestsDetails(result[0].request_id);
-     console.log(res);
+
+    function recoveryDetails(callback){
+       for(i=0 ; i < 3; i++){
+        fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
+        requestDetails[i] = Ress;
+      });
+      }
+
+      callback(null,requestDetails);
     }
+
+    resultArr.push(recoveryDetails);
+
+    async.series(resultArr,function(finalErr , finalRes){
+      console.log(finalRes);
+    });
 
     });
 
@@ -513,13 +525,13 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
   });
 }
 
-function fetchRecoveryRequestsDetails(request_id) {
+function fetchRecoveryRequestsDetails(request_id,callback) {
  var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
   var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
-      return err;
+      return callback(err,null);
     }
-   return result;
+   return callback(null,result);
   });
 }
 
