@@ -520,6 +520,9 @@ function fetchRecoveryRequests(req, res) {
 
     async.parallel(resultArr,function(newErr , newRes){
 
+      var trustDetails = newRes[1];
+      var recoveryData = newRes[0];
+
       res.send({
         "trustData":trustDetails,
         "recoveryData":fetchRecovery
