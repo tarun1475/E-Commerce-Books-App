@@ -494,8 +494,8 @@ function fetchRecoveryRequests(req, res) {
     }
 
     for(i=0 ; i < 3; i++){
-      fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
-        console.log(Ress);
+      fetchRecoveryRequestsDetails(result[0].request_id,async function(eRR,Ress){
+        requestDetails[i] = await Ress;
 
 
       });
