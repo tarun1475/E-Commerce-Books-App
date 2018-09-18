@@ -493,16 +493,24 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    fetchRecoveryRequestsDetails(result,function(detailsErr , detailsRes){
-      
-      if(detailsErr) {
-      return res.send(constants.databaseErrorResponse);
-      }
+    for(i=0 ; i < result.length; i++){
+      fetchRecoveryRequestsDetails(result[i].request_id,function(eRR,Ress){
+        
 
-      res.send({
-        "res":detailsRes
+
+
       });
-    });
+    }
+
+    console.log("i is ",i);
+
+   
+      
+      
+     
+      
+    
+
 
     });
 
@@ -519,21 +527,14 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
   });
 }
 
-function fetchRecoveryRequestsDetails(result,callback) {
-  var requestDetails = [];
-  for(i=0 ;i<result.length;i++){
-  var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
-  var tt = connection.query(sqlQuery, [result[i].request_id], function(err, result) {
+function fetchRecoveryRequestsDetails(request_id,callback) {
+ var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ?";;
+  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
       return callback(err,null);
     }
-    requestDetails.push(result);
-
+   return callback(null,result);
   });
-  }
-
-   return callback(null,requestDetails);
-
 }
 
 function fetchTrustDataFromPublicKey(handlerInfo, publicKey, callback) {
