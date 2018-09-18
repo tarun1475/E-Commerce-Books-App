@@ -494,13 +494,41 @@ function fetchRecoveryRequests(req, res) {
     }
 
 
-  
+    function fetchRecovery(callback){
+
       fetchRecoveryRequestsDetails(result,function(eRR,Ress){
-       console.log(Ress);
+        if(eRR){
+           return res.send(constants.databaseErrorResponse);
+        }
+
+        callback(null,Ress);
+      });
+    }
+
+    function trustDetails(callback){
+      fetchTrustDataFromPublicKey(handlerInfo,publicKey,function(trustErr, trustRes){
+        if(trustErr){
+           return res.send(constants.databaseErrorResponse);
+        }
+
+        callback(null,trustRes);
       });
 
+    }
 
-      
+    resultArr.push(fetchRecovery,trustDetails);
+
+    async.parallel(resultArr,function(newErr , newRes){
+      res.send({
+        "data":newRes
+      });
+    });
+
+
+
+
+
+
    
     });
 
