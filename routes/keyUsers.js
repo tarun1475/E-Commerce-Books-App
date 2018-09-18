@@ -484,7 +484,6 @@ function fetchRecoveryRequests(req, res) {
 
   var publicKey       = reqParams.publicKey;
   var resultArr       = [];
-  var requestDetails  = [];
 
 
     fetchNewRequestsFromDb(handlerInfo,publicKey,  function(err, result) {
@@ -495,9 +494,11 @@ function fetchRecoveryRequests(req, res) {
 
 
     function recoveryDetails(callback){
+       var requestDetails  = [];
        for(i=0 ; i < 3; i++){
         fetchRecoveryRequestsDetails(result[0].request_id,function(eRR,Ress){
-        requestDetails[i] = Ress;
+        requestDetails.push(Ress);
+        console.log("arr:  ",requestDetails);
       });
       }
 
