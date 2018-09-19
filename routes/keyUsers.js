@@ -31,6 +31,7 @@ exports.verifyOtpViaEmail               = verifyOtpViaEmail;
 exports.loginUser                       = loginUser;
 exports.sendRecoveryTrustData           = sendRecoveryTrustData;
 exports.fetchRecoveryRequests           = fetchRecoveryRequests;
+exports.updateRecoveryTrustData         = updateRecoveryTrustData;
 
 
 
@@ -576,6 +577,53 @@ function fetchTrustDataFromPublicKey(handlerInfo, publicKey, callback) {
       return callback(err, null);
     }
     callback(null, result);
+  });
+}
+
+
+function updateRecoveryTrustData(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var publicKey     = reqParams.publicKey;
+  var trustData     = reqParams.trust_data;
+  var request_id    = reqParams.request_id;
+
+
+  updateTrustDataIntoDb(handlerInfo,request_id, publicKey, trustData, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send(
+    {
+            "log": "Updated SuccessFully",
+            "result": result,
+            "flag": constants.responseFlags.ACTION_COMPLETE
+    });
+
+
+
+   });
+
+}
+
+function updateTrustDataIntoDb(handlerInfo,request_id,publicKey,trustData, callback) {
+  var status = 1;
+   var sqlQuery = "update tb_recovery_details SET trust_data = ? , trust_status = ? WHERE user_public_key = ? AND request_id = ?";
+  var tt = connection.query(sqlQuery, [trustData, status , publicKey,request_id], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     callback(null, result);
+
   });
 }
 
