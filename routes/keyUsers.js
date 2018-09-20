@@ -32,6 +32,7 @@ exports.loginUser                       = loginUser;
 exports.sendRecoveryTrustData           = sendRecoveryTrustData;
 exports.fetchRecoveryRequests           = fetchRecoveryRequests;
 exports.updateRecoveryTrustData         = updateRecoveryTrustData;
+exports.fetchRecoveryTrustData          = fetchRecoveryTrustData;
 
 
 
@@ -571,7 +572,7 @@ function fetchRecoveryRequestsDetails(result,callback) {
 }
 
 function fetchTrustDataFromPublicKey(handlerInfo, publicKey, callback) {
- var sqlQuery = "SELECT * from tb_trust WHERE user_public_key = ?";;
+ var sqlQuery = "SELECT * from tb_trust WHERE user_public_key = ?";
   var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
     if(err) {
       return callback(err, null);
@@ -626,6 +627,66 @@ function updateTrustDataIntoDb(handlerInfo,request_id,publicKey,trustData, callb
 
   });
 }
+
+
+
+function fetchRecoveryTrustData(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var publicKey     = reqParams.publicKey;
+
+
+  fetchRecoveryTrustDataFromDb(handlerInfo,publicKey, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+      fetchRecoveryTrustDataFromDbDetails(handlerInfo, result[0].request_id,function(detErr ,  detRes){
+      if(detErr) {
+      return res.send(constants.databaseErrorResponse);
+        }
+
+          res.send(
+          {
+            "log": "Fetched SuccessFully",
+            "result": detRes,
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
+
+
+
+      });
+
+   });
+}
+
+
+function fetchRecoveryTrustDataFromDb(handlerInfo,publicKey,callback){
+  var sqlQuery = "SELECT * from tb_recovery_request WHERE from_public_key = ?";
+  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+
+function fetchRecoveryTrustDataFromDbDetails(handlerInfo,request_id,callback){
+ var sqlQuery = "SELECT * from tb_recovery_details WHERE request_id = ?";
+  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
+    if(err) {
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
+
 
 
 

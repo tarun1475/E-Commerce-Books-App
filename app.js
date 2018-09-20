@@ -106,6 +106,10 @@ app.post('/recovery_key/update_recovery_trust_data'
    , keyUsers.updateRecoveryTrustData
    , error);
 
+app.post('/recovery_key/fetch_recovery_trust_data'
+   , keyUsers.fetchRecoveryTrustData
+   , error);
+
 app.post('/recovery_key/fetch_recovery_data'
    , keyUsers.fetchRecoveryRequests
    , error);
