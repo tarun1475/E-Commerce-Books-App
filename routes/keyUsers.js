@@ -615,18 +615,41 @@ function updateRecoveryTrustData(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    res.send(
+    updateRequestTable(handlerInfo,request_id,function(trustErr,trustRes){
+       if(trustErr) {
+      return res.send(constants.databaseErrorResponse);
+      }
+
+       res.send(
     {
             "log": "Updated SuccessFully",
             "result": result,
             "flag": constants.responseFlags.ACTION_COMPLETE
     });
+    });
 
-
-
+  
    });
 
 }
+
+
+function updateRequestTable(handlerInfo,request_id,callback) {
+  var status = 1;
+   var sqlQuery = "update tb_recovery_request SET recovery_status = ? WHERE request_id = ?";
+  var tt = connection.query(sqlQuery, [status , request_id], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     callback(null, result);
+
+  });
+}
+
 
 function updateTrustDataIntoDb(handlerInfo,request_id,publicKey,trustData, callback) {
   var status = 1;
