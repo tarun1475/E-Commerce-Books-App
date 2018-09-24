@@ -440,17 +440,25 @@ function sendRecoveryTrustData(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-   });
-
-    for(var i = 0 ; i < trustData.length ; i++){
-      console.log(request_id);
-
-      logRequestDetails(handlerInfo, request_id ,trustData[i].user_public_key ,function(userErr,userRes){
+    logRequestDetails(request_id ,trustData,function(userErr,userRes){
       if(userErr)   return res.send(constants.databaseErrorResponse);
+
+      res.send({
+          "log": "Request Inserted SuccessFully",
+          "flag": constants.responseFlags.ACTION_COMPLETE,
+          "result":userRes
+        });
+
+      
 
     });
 
-    }
+   });
+
+
+    
+
+  
 
 }
 
@@ -466,14 +474,22 @@ function logRequestIntoDb(handlerInfo, request_id,publicKey, newPublicKey, callb
 }
 
 
-function logRequestDetails(handlerInfo, request_id, publicKey, callback) {
- var sqlQuery = "INSERT INTO tb_recovery_details (request_id,user_public_key,logged_on) VALUES( ?, ? , NOW())";
-  var tt = connection.query(sqlQuery, [request_id,publicKey], function(err, result) {
-    if(err) {
-      return callback(err, null);
-    }
-    callback(null, result);
+function logRequestDetails(request_id, result, callback) {
+  var pending = result.length;
+  var requestDetails =  [];
+  for(var i in result){
+     var sqlQuery = "INSERT INTO tb_recovery_details (request_id,user_public_key,logged_on) VALUES( ?, ? , NOW())";
+      var tt = connection.query(sqlQuery, [request_id,result[i].user_public_key], function(err, result) {
+      if(err) {
+        return callback(err,null);
+      }
+
+      requestDetails.push(result[0]);
+        if(0 === --pending){
+           return callback(null,requestDetails);
+        }
   });
+  }
 }
 
 
