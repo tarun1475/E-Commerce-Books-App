@@ -649,7 +649,7 @@ function updateRequestTable(handlerInfo,request_id,callback) {
       return callback(err, null);
     }
 
-    var status = parseInt(result[0]);
+    var status = result[0];
     console.log(status);
     status++;
 
