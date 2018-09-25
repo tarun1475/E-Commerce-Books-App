@@ -577,10 +577,11 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
 
 function fetchRecoveryRequestsDetails(result,callback) {
   var pending = result.length;
+  var status  = 4;
   var requestDetails =  [];
   for(var i in result){
-     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status = 0";
-      var tt = connection.query(sqlQuery, [result[i].request_id], function(err, result) {
+     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status <= ?";
+      var tt = connection.query(sqlQuery, [result[i].request_id,status], function(err, result) {
       if(err) {
         return callback(err,null);
       }
