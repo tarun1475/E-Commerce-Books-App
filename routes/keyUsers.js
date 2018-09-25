@@ -511,6 +511,11 @@ function fetchRecoveryRequests(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
+    if(result.length == 0) return res.send({
+      "log":"No Requests Found!",
+      "result":result
+    });
+
 
     function fetchRecovery(callback){
 
