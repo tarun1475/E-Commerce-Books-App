@@ -577,7 +577,7 @@ function fetchRecoveryRequestsDetails(result,callback) {
   var pending = result.length;
   var requestDetails =  [];
   for(var i in result){
-     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status = 0";
+     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status <= 4";
       var tt = connection.query(sqlQuery, [result[i].request_id], function(err, result) {
       if(err) {
         return callback(err,null);
@@ -640,23 +640,36 @@ function updateRecoveryTrustData(req, res) {
 
 
 function updateRequestTable(handlerInfo,request_id,callback) {
-  var status = 1;
-   var sqlQuery = "update tb_recovery_request SET recovery_status = ? WHERE request_id = ?";
-  var tt = connection.query(sqlQuery, [status , request_id], function(err, result) {
+
+  var sqlQuery = "SELECT recovery_status from tb_recovery_request WHERE request_id = ?";
+  var tt = connection.query(sqlQuery, [request_id], function(err, result) {
     if(err) {
-      return res.send({
-        "log" : "Internal server error",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
+      return callback(err, null);
     }
 
-     callback(null, result);
+    var status = parseInt(result[0]);
+    status++;
+
+      var Query = "update tb_recovery_request SET recovery_status = ? WHERE request_id = ?";
+      var tt = connection.query(Query, [status , request_id], function(Err, Result) {
+        if(err) {
+          return res.send({
+            "log" : "Internal server error",
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+        }
+
+         callback(null, Result);
+
+      });
 
   });
+
 }
 
 
 function updateTrustDataIntoDb(handlerInfo,request_id,publicKey,trustData, callback) {
+
   var status = 1;
    var sqlQuery = "update tb_recovery_details SET trust_data = ? , trust_status = ? WHERE user_public_key = ? AND request_id = ?";
   var tt = connection.query(sqlQuery, [trustData, status , publicKey,request_id], function(err, result) {
