@@ -566,8 +566,9 @@ function fetchRecoveryRequests(req, res) {
 
 
 function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
- var sqlQuery = "SELECT request_id from tb_recovery_details WHERE user_public_key = ?";;
-  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+  var status = 0;
+ var sqlQuery = "SELECT request_id from tb_recovery_details WHERE user_public_key = ? AND trust_status = ?";
+  var tt = connection.query(sqlQuery, [publicKey,status], function(err, result) {
     if(err) {
       return callback(err, null);
     }
