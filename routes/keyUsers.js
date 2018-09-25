@@ -728,8 +728,9 @@ function fetchRecoveryTrustData(req, res) {
 
 
 function fetchRecoveryTrustDataFromDb(handlerInfo,publicKey,callback){
-  var sqlQuery = "SELECT * from tb_recovery_request WHERE from_public_key = ?";
-  var tt = connection.query(sqlQuery, [publicKey], function(err, result) {
+  var status = 4;
+  var sqlQuery = "SELECT * from tb_recovery_request WHERE from_public_key = ? AND recovery_status <= ?";
+  var tt = connection.query(sqlQuery, [publicKey,status], function(err, result) {
     if(err) {
       return callback(err, null);
     }
