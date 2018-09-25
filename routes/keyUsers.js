@@ -648,6 +648,7 @@ function updateRequestTable(handlerInfo,request_id,callback) {
     }
 
     var status = parseInt(result[0]);
+    console.log(status);
     status++;
 
       var Query = "update tb_recovery_request SET recovery_status = ? WHERE request_id = ?";
