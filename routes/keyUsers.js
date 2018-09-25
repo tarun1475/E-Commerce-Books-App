@@ -577,7 +577,7 @@ function fetchRecoveryRequestsDetails(result,callback) {
   var pending = result.length;
   var requestDetails =  [];
   for(var i in result){
-     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status <= 4";
+     var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status = 0";
       var tt = connection.query(sqlQuery, [result[i].request_id], function(err, result) {
       if(err) {
         return callback(err,null);
