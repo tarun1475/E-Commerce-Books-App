@@ -513,6 +513,7 @@ function fetchRecoveryRequests(req, res) {
 
     if(result.length == 0) return res.send({
       "log":"No Requests Found!",
+      "status":"0",
       "result":result
     });
 
@@ -548,7 +549,8 @@ function fetchRecoveryRequests(req, res) {
 
       res.send({
         "trustData":trustDetails,
-        "recoveryData":recoveryData
+        "recoveryData":recoveryData,
+        "status":"1"
       });
     });
 
