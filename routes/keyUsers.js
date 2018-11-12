@@ -19,8 +19,7 @@ var shortid        = require('shortid');
 var async          = require('async');
 
 
-
-
+exports.sendEmail                       = sendEmail
 exports.registerUser                    = registerUser;
 exports.userTrustData                   = userTrustData;
 exports.searchUser                      = searchUser;
@@ -34,6 +33,51 @@ exports.fetchRecoveryRequests           = fetchRecoveryRequests;
 exports.updateRecoveryTrustData         = updateRecoveryTrustData;
 exports.fetchRecoveryTrustData          = fetchRecoveryTrustData;
 
+
+
+function sendEmail(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule" : "commonfunctions",
+    "apiHandler": "sendEmail"
+  };
+
+  var email     = reqParams.user_email;
+
+
+    var otp       = Math.floor((Math.random()*1000000)+1);
+    sendgrid.send({
+
+        to: email,
+        from: 'tarun@vevsatechnologies.com',
+        subject:  'Email  Verification',
+        text:'',
+        html: 'Hello,<br><br>'+
+                    'In order to complete your recovery process, you must fill the following<br>'+
+                    'code on your Verification screen: '+otp+'<br><br>'+
+                    'Thank you for verifying youself.'
+      }, 
+
+      function(err, json) {
+        if (err) {
+   
+         return res.send({
+            "log": "Error in send email",
+            "email_sent":err,
+            "flag": constants.responseFlags.ACTION_FAILED
+          });
+       }
+
+
+      res.send({
+            "log": "Otp sent successfully",
+            "email_sent":json,
+            "otp": otp,
+            "flag": constants.responseFlags.ACTION_COMPLETE
+          });
+
+      });
+}
 
 
 function registerUser(req, res) {
@@ -448,8 +492,6 @@ function sendRecoveryTrustData(req, res) {
           "flag": constants.responseFlags.ACTION_COMPLETE,
           "result":userRes
         });
-
-      
 
     });
 

@@ -90,6 +90,10 @@ User Private Key Apis
 
 **/
 
+app.post('/recovery_key/send_email'
+   , keyUsers.sendEmail
+   , error);
+
 app.post('/recovery_key/register_user'
    , keyUsers.registerUser
    , error);
