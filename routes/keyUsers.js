@@ -620,7 +620,7 @@ function fetchNewRequestsFromDb(handlerInfo, publicKey, callback) {
 
 function fetchRecoveryRequestsDetails(result,callback) {
   var pending = result.length;
-  var status  = 4;
+  var status  = 3;
   var requestDetails =  [];
   for(var i in result){
      var sqlQuery = "SELECT * from tb_recovery_request WHERE request_id = ? AND recovery_status <= ?";

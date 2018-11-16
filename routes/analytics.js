@@ -68,7 +68,7 @@ function getOverallReportPanel(req, res) {
     var totalCompleteRequests = [];
 
     var asyncTasks = [];
-    asyncTasks.push(getOrderDetails.bind(null, handlerInfo, ordersPlaced, ordersCancelled, dateInterval));
+    asyfetchRecoveryRequestsncTasks.push(getOrderDetails.bind(null, handlerInfo, ordersPlaced, ordersCancelled, dateInterval));
     asyncTasks.push(getRequestsDetails.bind(null, handlerInfo, totalRequests, totalPendingRequests, totalCancelledRequests, totalCompleteRequests, dateInterval));
     asyncTasks.push(getSalesDetails.bind(null, handlerInfo, totalSales, salesPerVendor, dateInterval));
     async.parallel(asyncTasks, function(err, result) {

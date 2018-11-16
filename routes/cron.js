@@ -27,25 +27,39 @@ function processPendingBookRequests(req, res) {
         "apiHandler": "processPendingBookRequests"
     };
     bookRequests.getPendingRequestArr(constants.bookRequestStatus.PENDING, function(err, result) {
+       
+
         if(err) {
             return res.send(constants.databaseErrorResponse);
         }
+
+
+
         var pendingRequests = result;
         var asyncTasks = [];
         var minimumResponse = [];
+
+
         for(var i = 0; i < pendingRequests.length; i++) {
             asyncTasks.push(bookRequests.getMinimumBookResponseWrapper.bind(null, pendingRequests[i], minimumResponse));
         }
+
+
+
         async.series(asyncTasks, function(asyncErr, asyncRes) {
+            
             if(asyncErr) {
                 // No need to handle errors in this case:
                 logging.error(handlerInfo, "Sending push to devices", asyncErr);
             }
+
+
             // Send minimum responses as push notification to users
             var sendNotifications = [];
             for(var i = 0; i < minimumResponse.length; i++) {
                 sendNotifications.push(utils.sendNotification(minimumResponse[i][0].user_id, minimumResponse[i], null, null));
             }
+
             async.parallel(sendNotifications, function(pushErr, pushRes) {
                 if(pushErr) {
                     logging.error(handlerInfo, "sending minimum response to device", pushErr, null);
