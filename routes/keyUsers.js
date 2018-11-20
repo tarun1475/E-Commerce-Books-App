@@ -46,37 +46,37 @@ function sendEmail(req, res) {
 
 
     var otp       = Math.floor((Math.random()*1000000)+1);
-    sendgrid.send({
+    // sendgrid.send({
 
-        to: email,
-        from: 'tarun@vevsatechnologies.com',
-        subject:  'Email  Verification',
-        text:'',
-        html: 'Hello,<br><br>'+
-                    'In order to complete your recovery process, you must fill the following<br>'+
-                    'code on your Verification screen: '+otp+'<br><br>'+
-                    'Thank you for verifying youself.'
-      }, 
+    //     to: email,
+    //     from: 'tarun@vevsatechnologies.com',
+    //     subject:  'Email  Verification',
+    //     text:'',
+    //     html: 'Hello,<br><br>'+
+    //                 'In order to complete your recovery process, you must fill the following<br>'+
+    //                 'code on your Verification screen: '+otp+'<br><br>'+
+    //                 'Thank you for verifying youself.'
+    //   }, 
 
-      function(err, json) {
-        if (err) {
+    //   function(err, json) {
+    //     if (err) {
    
-         return res.send({
-            "log": "Error in send email",
-            "email_sent":err,
-            "flag": constants.responseFlags.ACTION_FAILED
-          });
-       }
+    //      return res.send({
+    //         "log": "Error in send email",
+    //         "email_sent":err,
+    //         "flag": constants.responseFlags.ACTION_FAILED
+    //       });
+    //    }
 
 
       res.send({
             "log": "Otp sent successfully",
-            "email_sent":json,
+            // "email_sent":json,
             "otp": otp,
             "flag": constants.responseFlags.ACTION_COMPLETE
           });
 
-      });
+      // });
 }
 
 
@@ -206,20 +206,20 @@ function sendOtpViaEmail(req, res) {
     }
 
     var otp       = Math.floor((Math.random()*1000000)+1);
-    sendgrid.send({
+    // sendgrid.send({
 
-        to: email,
-        from: 'tarun@vevsatechnologies.com',
-        subject:  'Email  Verification',
-        text:'',
-        html: 'Hello,<br><br>'+
-                    'In order to complete your recovery process, you must fill the following<br>'+
-                    'code on your Verification screen: '+otp+'<br><br>'+
-                    'Thank you for verifying youself.'
-      }, 
+    //     to: email,
+    //     from: 'tarun@vevsatechnologies.com',
+    //     subject:  'Email  Verification',
+    //     text:'',
+    //     html: 'Hello,<br><br>'+
+    //                 'In order to complete your recovery process, you must fill the following<br>'+
+    //                 'code on your Verification screen: '+otp+'<br><br>'+
+    //                 'Thank you for verifying youself.'
+    //   }, 
 
-      function(err, json) {
-        if (err) { return console.error(err); }
+    //   function(err, json) {
+    //     if (err) { return console.error(err); }
 
 
         logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
@@ -240,12 +240,13 @@ function sendOtpViaEmail(req, res) {
           }
           res.send({
             "log": "Otp sent successfully",
+            "otp":otp,
             "session_id": sessionId,
             "flag": constants.responseFlags.ACTION_COMPLETE
           });
       });
-        console.log(json);
-      });
+        // console.log(json);
+      // });
   });
 }
 
@@ -382,20 +383,20 @@ function sendRecoveryOtpViaEmail(req, res) {
     }
 
     var otp       = Math.floor((Math.random()*1000000)+1);
-    sendgrid.send({
+    // sendgrid.send({
 
-        to: email,
-        from: 'tarun@vevsatechnologies.com',
-        subject:  'Email  Verification',
-        text:'',
-        html: 'Hello,<br><br>'+
-                    'In order to complete your recovery process, you must fill the following<br>'+
-                    'code on your Verification screen: '+otp+'<br><br>'+
-                    'Thank you for verifying youself.'
-      }, 
+    //     to: email,
+    //     from: 'tarun@vevsatechnologies.com',
+    //     subject:  'Email  Verification',
+    //     text:'',
+    //     html: 'Hello,<br><br>'+
+    //                 'In order to complete your recovery process, you must fill the following<br>'+
+    //                 'code on your Verification screen: '+otp+'<br><br>'+
+    //                 'Thank you for verifying youself.'
+    //   }, 
 
-      function(err, json) {
-        if (err) { return console.error(err); }
+    //   function(err, json) {
+    //     if (err) { return console.error(err); }
 
 
         logOtpIntoDb(handlerInfo, otp, email, function(logErr, logRes) {
@@ -416,12 +417,13 @@ function sendRecoveryOtpViaEmail(req, res) {
           }
           res.send({
             "log": "Otp sent successfully",
+            "otp":otp,
             "session_id": sessionId,
             "flag": constants.responseFlags.ACTION_COMPLETE
           });
       });
-        console.log(json);
-      });
+      //   console.log(json);
+      // });
   });
 }
 
