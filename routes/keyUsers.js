@@ -491,7 +491,7 @@ function sendRecoveryTrustData(req, res) {
     if(dupRes[0].recovery_status < 4) {
       return res.send({
         "log": "Request already exists from your id.",
-        "flag": constants.responseFlags.ACTION_FAILED
+        "flag": constants.responseFlags.ACTION_COMPLETE
       });
     }
 
