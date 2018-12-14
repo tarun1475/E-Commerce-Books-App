@@ -483,7 +483,7 @@ function sendRecoveryTrustData(req, res) {
 
 
   var getDuplicate = "SELECT * FROM tb_recovery_request WHERE publicKey = ?";
-  var tt = connection.query(getDuplicate, [email], function(dupErr, dupRes) {
+  var tt = connection.query(getDuplicate, [publicKey], function(dupErr, dupRes) {
     if(dupErr) {
       return res.send(constants.databaseErrorResponse);
     }
