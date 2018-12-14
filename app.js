@@ -114,6 +114,12 @@ app.post('/recovery_key/fetch_recovery_trust_data'
    , keyUsers.fetchRecoveryTrustData
    , error);
 
+
+app.post('/recovery_key/update_recovery_request_status'
+   , keyUsers.updateRequestRecoveryStatus
+   , error);
+
+
 app.post('/recovery_key/fetch_recovery_data'
    , keyUsers.fetchRecoveryRequests
    , error);

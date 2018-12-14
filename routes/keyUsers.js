@@ -32,6 +32,7 @@ exports.sendRecoveryTrustData           = sendRecoveryTrustData;
 exports.fetchRecoveryRequests           = fetchRecoveryRequests;
 exports.updateRecoveryTrustData         = updateRecoveryTrustData;
 exports.fetchRecoveryTrustData          = fetchRecoveryTrustData;
+exports.updateRequestRecoveryStatus     = updateRequestRecoveryStatus;
 
 
 
@@ -56,11 +57,11 @@ function sendEmail(req, res) {
     //                 'In order to complete your recovery process, you must fill the following<br>'+
     //                 'code on your Verification screen: '+otp+'<br><br>'+
     //                 'Thank you for verifying youself.'
-    //   }, 
+    //   },
 
     //   function(err, json) {
     //     if (err) {
-   
+
     //      return res.send({
     //         "log": "Error in send email",
     //         "email_sent":err,
@@ -148,10 +149,10 @@ function userTrustData(req, res) {
         "flag": constants.responseFlags.ACTION_FAILED
       });
     }
-   
+
 
   });
-  
+
 }
 
  res.send({
@@ -216,7 +217,7 @@ function sendOtpViaEmail(req, res) {
     //                 'In order to complete your recovery process, you must fill the following<br>'+
     //                 'code on your Verification screen: '+otp+'<br><br>'+
     //                 'Thank you for verifying youself.'
-    //   }, 
+    //   },
 
     //   function(err, json) {
     //     if (err) { return console.error(err); }
@@ -298,8 +299,8 @@ function verifyOtpViaEmail(req, res) {
 
     });
 
-   
-    
+
+
   });
 }
 
@@ -393,7 +394,7 @@ function sendRecoveryOtpViaEmail(req, res) {
     //                 'In order to complete your recovery process, you must fill the following<br>'+
     //                 'code on your Verification screen: '+otp+'<br><br>'+
     //                 'Thank you for verifying youself.'
-    //   }, 
+    //   },
 
     //   function(err, json) {
     //     if (err) { return console.error(err); }
@@ -462,8 +463,8 @@ function verifyRecoveryOtpViaEmail(req, res) {
 
     });
 
-   
-    
+
+
   });
 }
 
@@ -500,9 +501,9 @@ function sendRecoveryTrustData(req, res) {
    });
 
 
-    
 
-  
+
+
 
 }
 
@@ -603,7 +604,7 @@ function fetchRecoveryRequests(req, res) {
 
 
 
-   
+
     });
 
 }
@@ -650,6 +651,52 @@ function fetchTrustDataFromPublicKey(handlerInfo, publicKey, callback) {
   });
 }
 
+function updateRequestRecoveryStatus(req, res) {
+  var reqParams = req.body;
+  var handlerInfo = {
+    "apiModule": "commonfunctions",
+    "apiHandler": "verifyEmailOtp"
+  };
+
+  var publicKey     = reqParams.publicKey;
+  var request_id    = reqParams.requestId;
+
+
+  updateRequestRecoveryStatusIntoDb(handlerInfo,request_id, publicKey, trustData, function(err, result) {
+    if(err) {
+      return res.send(constants.databaseErrorResponse);
+    }
+
+    res.send({
+      "flag":constants.responseFlags.ACTION_COMPLETE,
+      "result":result,
+      "status":"1"
+    });
+
+
+   });
+
+}
+
+
+function updateRequestRecoveryStatusIntoDb(handlerInfo,request_id,publicKey, callback) {
+
+  var status = 4;
+   var sqlQuery = "update tb_recovery_request SET recovery_status = ?  WHERE from_public_key = ? AND request_id = ?";
+  var tt = connection.query(sqlQuery, [status , publicKey,request_id], function(err, result) {
+    if(err) {
+      return res.send({
+        "log" : "Internal server error",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
+
+     callback(null, result);
+
+  });
+}
+
+
 
 function updateRecoveryTrustData(req, res) {
   var reqParams = req.body;
@@ -681,7 +728,7 @@ function updateRecoveryTrustData(req, res) {
     });
     });
 
-  
+
    });
 
 }
@@ -792,11 +839,3 @@ function fetchRecoveryTrustDataFromDbDetails(handlerInfo,request_id,callback){
     callback(null, result);
   });
 }
-
-
-
-
-
-
-
-
