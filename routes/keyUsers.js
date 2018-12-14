@@ -482,7 +482,7 @@ function sendRecoveryTrustData(req, res) {
   var request_id    = shortid.generate();
 
 
-  var getDuplicate = "SELECT * FROM tb_recovery_request WHERE publicKey = ?";
+  var getDuplicate = "SELECT * FROM tb_recovery_request WHERE from_public_key = ?";
   var tt = connection.query(getDuplicate, [publicKey], function(dupErr, dupRes) {
     if(dupErr) {
       return res.send(constants.databaseErrorResponse);
