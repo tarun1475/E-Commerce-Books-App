@@ -482,29 +482,43 @@ function sendRecoveryTrustData(req, res) {
   var request_id    = shortid.generate();
 
 
-  logRequestIntoDb(handlerInfo,request_id, publicKey, newPublicKey, function(err, result) {
-    if(err) {
+  var getDuplicate = "SELECT * FROM tb_recovery_request WHERE publicKey = ?";
+  var tt = connection.query(getDuplicate, [email], function(dupErr, dupRes) {
+    if(dupErr) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    logRequestDetails(request_id ,trustData,function(userErr,userRes){
-      if(userErr)   return res.send(constants.databaseErrorResponse);
+    if(dupRes[0].recovery_status < 4) {
+      return res.send({
+        "log": "Request already exists from your id.",
+        "flag": constants.responseFlags.ACTION_FAILED
+      });
+    }
 
-      res.send({
-          "log": "Request Inserted SuccessFully",
-          "flag": constants.responseFlags.ACTION_COMPLETE,
-          "result":userRes
-        });
-
-    });
-
-   });
-
+    logRequestIntoDb(handlerInfo,request_id, publicKey, newPublicKey, function(err, result) {
+      if(err) {
+        return res.send(constants.databaseErrorResponse);
+      }
 
 
 
+      logRequestDetails(request_id ,trustData,function(userErr,userRes){
+        if(userErr)   return res.send(constants.databaseErrorResponse);
+
+        res.send({
+            "log": "Request Inserted SuccessFully",
+            "flag": constants.responseFlags.ACTION_COMPLETE,
+            "result":userRes
+          });
+
+      });
+
+     });
 
 
+
+
+  });
 }
 
 
