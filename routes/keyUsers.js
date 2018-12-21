@@ -488,11 +488,13 @@ function sendRecoveryTrustData(req, res) {
       return res.send(constants.databaseErrorResponse);
     }
 
-    if(dupRes[0].recovery_status < 4) {
-      return res.send({
-        "log": "Request already exists from your id.",
-        "flag": constants.responseFlags.ACTION_FAILED
-      });
+    if(dupRes.length > 0){
+      if(dupRes[0].recovery_status < 4) {
+        return res.send({
+          "log": "Request already exists from your id.",
+          "flag": constants.responseFlags.ACTION_FAILED
+        });
+      }
     }
 
     logRequestIntoDb(handlerInfo,request_id, publicKey, newPublicKey, function(err, result) {
